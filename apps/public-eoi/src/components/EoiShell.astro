@@ -1,0 +1,834 @@
+---
+import {
+  ADULT_AGE_BANDS,
+  AGE_ELIGIBILITY_OPTIONS,
+  EOI_PART1_STEPS,
+  FUSION_AVAILABILITY,
+  FUSION_FRIDAY_AVAILABILITY,
+  INTRO_ACKS,
+  ONE_TO_ONE_AVAILABILITY,
+  POSTAL_SUBURBS,
+  PRONOUN_OPTIONS,
+  RESIDENTIAL_SUBURBS,
+  SECOND_PREFERENCE_OPTIONS,
+  SEX_AT_BIRTH_OPTIONS,
+  STATE_OPTIONS,
+  TRAINING_TYPE_OPTIONS,
+  UNDER18_AGE_BANDS,
+  WORK_SHIFT_OPTIONS,
+} from '../lib/eoiPart1State.js';
+---
+
+<main id="eoi-part-1" class="eoi-shell" data-eoi-shell>
+  <section class="hero-panel">
+    <p class="eyebrow">Public EOI Part 1</p>
+    <h1>Expression of Interest</h1>
+    <p class="intro">
+      One responsive Astro implementation that mirrors the current public Part 1 desktop/mobile contract, including the age gate, eligibility branches, validation, navigation, and local form state.
+    </p>
+    <div class="hero-badges" aria-label="Current flow summary">
+      <span>6 steps</span>
+      <span>Adult + under-18 branching</span>
+      <span>Local state only</span>
+    </div>
+  </section>
+
+  <section class="wizard-shell" aria-label="EOI Part 1 wizard">
+    <div class="stepper" aria-label="Form progress">
+      {EOI_PART1_STEPS.map((step, index) => (
+        <button class:list={["stepper-item", index === 0 && 'is-active']} type="button" data-jump-step={step.id} aria-current={index === 0 ? 'step' : undefined}>
+          <span class="stepper-index">0{index + 1}</span>
+          <span class="stepper-copy">
+            <strong>{step.label}</strong>
+            <span>{step.title}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+
+    <form class="eoi-form" novalidate data-eoi-form>
+      <section class="wizard-step is-active" data-step="intro" aria-labelledby="intro-title">
+        <div class="card intro-card">
+          <p class="eyebrow purple">Age eligibility</p>
+          <h2 id="intro-title">Before you continue</h2>
+          <fieldset class="choice-group">
+            <legend>Are you 18 years or older?</legend>
+            {AGE_ELIGIBILITY_OPTIONS.map((option) => (
+              <label class="choice-pill">
+                <input type="radio" name="age_eligibility" value={option.value} />
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </fieldset>
+        </div>
+
+        <div class="card under18-card" data-under18-panel hidden>
+          <p class="eyebrow purple">Age eligibility</p>
+          <h2>Thanks for your interest in GYMFUSION</h2>
+          <p>Our current services are specifically designed for people aged 18 years and over, so you can't continue with an Expression of Interest at this time.</p>
+          <p>We'd still like to understand interest from younger people in our community. If you'd like, you can tell us your age group below. This information will only be used to help inform future service planning.</p>
+          <fieldset class="choice-group">
+            <legend>Age group (optional)</legend>
+            {UNDER18_AGE_BANDS.map((band) => (
+              <label class="choice-pill">
+                <input type="radio" name="under18_age_band" value={band} />
+                <span>{band}</span>
+              </label>
+            ))}
+          </fieldset>
+        </div>
+
+        <div class="card intro-body">
+          <div class="intro-copy-grid">
+            <article>
+              <h3>ABOUT THIS APPLICATION</h3>
+              <p>This form is Part 1 of 4 of your Expression of Interest (EOI). An EOI is a preliminary application where you indicate your interest in becoming a member of GYMFUSION.</p>
+              <p>This initial form collects your basic details, preferences, and availability. Additional forms will be required to assess your health history, fitness background, and overall suitability for our services.</p>
+            </article>
+            <article>
+              <h3>IMPORTANT</h3>
+              <p>Submission of this form <strong>does not</strong> guarantee placement. Participation is subject to program availability and individual factors, including suitability, risk assessments, required level of support, pre-existing health conditions, and scope of practice. Where appropriate, you may be placed on a waitlist.</p>
+              <p>If you require assistance or experience any issues with this form, please contact us at: <a href="mailto:support@gymfusion.com.au">support@gymfusion.com.au</a></p>
+            </article>
+            <article class="span-full">
+              <h3>THE EOI PROCESS</h3>
+              <p>Upon submission of this form, you will receive an email inviting you to activate and set up your GYMFUSION Portal account.</p>
+              <ul>
+                <li>Access and complete Part 2, the remaining three Expression of Interest forms.</li>
+                <li>All remaining forms must be completed within <strong>14 days</strong> of submitting Part 1 (this form).</li>
+                <li>If additional information is requested beyond Part 2, extra time will be provided to allow for the completion of additional forms and the gathering and/or uploading of supporting evidence.</li>
+                <li><strong>If all required forms and/or supporting evidence are not received within this timeframe,</strong> your Expression of Interest and associated GYMFUSION Portal account will be securely archived pending lawful destruction in accordance with our Privacy Policy. <strong>A new Expression of Interest will need to be submitted to reapply.</strong></li>
+                <li>Manage your personal details, including email, mobile number, and address.</li>
+                <li>Communicate with and receive notifications from GYMFUSION regarding your EOI.</li>
+                <li>Review program placement offers and confirm or decline proposed time-slot allocations.</li>
+                <li>Sign waivers, member agreements, and other relevant forms as required.</li>
+              </ul>
+            </article>
+          </div>
+
+          <article class="ack-list">
+            <label class="ack-item">
+              <span>{INTRO_ACKS[0].label}</span>
+              <span class="ack-control"><input type="checkbox" name="acknowledge_intro" required /></span>
+            </label>
+            <label class="ack-item">
+              <span>{INTRO_ACKS[1].label}</span>
+              <span class="ack-control"><input type="checkbox" name="acknowledge_intro_part2" required /></span>
+            </label>
+          </article>
+        </div>
+      </section>
+
+      <section class="wizard-step" data-step="privacy" aria-labelledby="privacy-title" hidden>
+        <div class="card">
+          <p class="eyebrow purple">Privacy Collection Notice</p>
+          <h2 id="privacy-title">Privacy Collection Notice</h2>
+          <div class="notice-copy">
+            <p>GYMFUSION collects the personal information you provide in this form (including, where applicable, health information) for the following purposes:</p>
+            <ol type="a">
+              <li>to verify your identity and maintain accurate records;</li>
+              <li>to assess and respond to your enquiry;</li>
+              <li>to determine your eligibility for our services;</li>
+              <li>to contact you regarding next steps; and</li>
+              <li>to support the provision of safe and appropriate coaching should you proceed with our services.</li>
+            </ol>
+            <p>This collection is undertaken in accordance with the Privacy Act 1988 (Cth), including the Australian Privacy Principles (APPs), and, where applicable, the Health Records Act 2001 (Vic).</p>
+            <h3>Collection of Information and Consequences of Non-Disclosure</h3>
+            <p>GYMFUSION collects personal and, where relevant, sensitive information (including health information) directly from you.</p>
+            <p>This information is necessary to enable us to assess your eligibility, ensure your safety, and deliver appropriate services in a manner consistent with our duty of care and legal obligations.</p>
+            <p>While some questions in our screening are optional, missing required information, including relevant health or safety details, may limit our ability to adequately assess your application, determine suitability for services, or respond to your needs.</p>
+            <h3>Use and Disclosure of Information</h3>
+            <p>GYMFUSION may use and disclose your personal information for the purposes outlined above and in accordance with applicable privacy laws. This may include disclosure to third-party service providers engaged to support our business operations, such as providers of booking systems, billing services, form processing platforms, communication tools, and IT or data storage services.</p>
+            <p>All such disclosures are limited to what is reasonably necessary for the administration and delivery of our services and are managed in accordance with applicable privacy and data protection obligations.</p>
+            <p>Some of these service providers may be located overseas. Where this occurs, GYMFUSION takes reasonable steps to ensure that overseas recipients handle personal information in a manner consistent with Australian privacy laws. Further details are available in our <a href="https://gymfusion.com.au/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.</p>
+            <h3>Data Security and Handling of Health Information</h3>
+            <p>GYMFUSION takes reasonable steps to protect personal and health information from misuse, interference, loss, unauthorised access, modification, or disclosure. Health information is handled in accordance with applicable legal requirements, including the Health Records Act 2001 (Vic), and is only used or disclosed for purposes directly related to your health, safety, and the provision of services, unless otherwise permitted or required by law.</p>
+            <h3>Access, Correction, and Complaints</h3>
+            <p>GYMFUSION encourages individuals to keep their personal information accurate and up to date. Where available, you may update certain details directly, or notify us of changes such as updated contact information or relevant health or injury information.</p>
+            <p>GYMFUSION is committed to openness and transparency. You may request access to your personal information in accordance with Australian Privacy Principle 12; however, access may be subject to exceptions permitted under applicable privacy laws.</p>
+            <p>To make a privacy-related request, please submit a request via our <a href="https://gymfusion.com.au/privacy-policy#get-in-touch" target="_blank" rel="noreferrer">Privacy &amp; Data Protection</a> webpage. Alternatively, email us at <a href="mailto:privacy@gymfusion.com.au">privacy@gymfusion.com.au</a>.</p>
+          </div>
+          <label class="ack-item privacy-ack-item">
+            <span>By proceeding, you acknowledge that you have read and understood this Privacy Collection Notice and consent to GYMFUSION collecting, using, storing, and disclosing your personal information (including health information, where applicable) in accordance with this Notice, our Privacy Policy, the Privacy Act 1988 (Cth), and the Health Records Act 2001 (Vic).</span>
+            <span class="ack-control"><input type="checkbox" name="privacy_consent" required /></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="wizard-step" data-step="personal" aria-labelledby="details-title" hidden>
+        <div class="card">
+          <p class="eyebrow purple">Personal details</p>
+          <h2 id="details-title">Tell us a bit about yourself</h2>
+          <div class="field-grid two-up">
+            <label class="field">
+              <span>First Name <strong>*</strong></span>
+              <input name="first_name" type="text" autocomplete="given-name" required />
+            </label>
+            <label class="field">
+              <span>Preferred Name <span class="hint">(If different)</span></span>
+              <input name="preferred_name" type="text" autocomplete="nickname" />
+            </label>
+            <label class="field">
+              <span>Last Name <strong>*</strong></span>
+              <input name="last_name" type="text" autocomplete="family-name" required />
+            </label>
+            <label class="field">
+              <span>Pronouns <span class="hint">(Optional)</span></span>
+              <select name="pronouns">
+                <option value="">Select one</option>
+                {PRONOUN_OPTIONS.map((item) => <option>{item}</option>)}
+              </select>
+            </label>
+            <label class="field is-conditional" data-field="pronouns_other" hidden>
+              <span>What are your pronouns? <span class="hint">(Optional)</span></span>
+              <input name="pronouns_other" type="text" placeholder="Self-describe" />
+            </label>
+          </div>
+
+          <div class="field-stack">
+            <h3>Select your age demographic: <strong>*</strong></h3>
+            <label class="field">
+              <select name="age_band" required>
+                <option value=""></option>
+                {ADULT_AGE_BANDS.map((band) => <option>{band}</option>)}
+              </select>
+            </label>
+            <h3>What is your sex recorded as at birth? <strong>*</strong></h3>
+            <p class="helper-copy">Sex recorded at birth helps guide the interpretation of certain pre-exercise screening questions, as some sex-based physiological differences can influence how training is safely and appropriately scaled — including strength capacity, joint and tendon loading, and injury-risk patterns.</p>
+            <label class="field">
+              <select name="sex_at_birth" required>
+                <option value=""></option>
+                {SEX_AT_BIRTH_OPTIONS.map((item) => <option>{item}</option>)}
+              </select>
+            </label>
+            <label class="field is-conditional" data-field="sex_at_birth_other" hidden>
+              <span>Another term <strong>*</strong></span>
+              <input name="sex_at_birth_other" type="text" placeholder="Please specify" />
+            </label>
+          </div>
+
+          <div class="field-stack">
+            <div class="field is-transport-bridge" data-field="address_lookup" hidden>
+              <span>Address lookup</span>
+              <input name="address_lookup" type="text" autocomplete="off" placeholder="742 Evergreen Terrace" />
+            </div>
+            <h3>Where do you live?</h3>
+            <label class="field">
+              <span>Residential Street Address <strong>*</strong></span>
+              <input name="res_address" type="text" autocomplete="street-address" placeholder="742 Evergreen Terrace" required />
+            </label>
+            <div class="inline-grid three-up">
+              <label class="field">
+                <span>Residential Suburb <strong>*</strong></span>
+                <select name="res_suburb" required>
+                  <option value="" disabled selected hidden>Shepparton</option>
+                  {RESIDENTIAL_SUBURBS.map((item) => <option>{item}</option>)}
+                </select>
+              </label>
+              <label class="field is-conditional" data-field="res_suburb_other" hidden>
+                <span>Other (Please specify) <strong>*</strong></span>
+                <input name="res_suburb_other" type="text" placeholder="Please specify" />
+              </label>
+              <label class="field">
+                <span>Residential State <strong>*</strong></span>
+                <select name="res_state" required>
+                  {STATE_OPTIONS.map((item) => <option selected={item === 'VIC'}>{item}</option>)}
+                </select>
+              </label>
+              <label class="field">
+                <span>Residential Postcode <strong>*</strong></span>
+                <input name="res_postcode" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="postal-code" required />
+              </label>
+            </div>
+
+            <h3>Is your postal address the same as your residential address? <strong>*</strong></h3>
+            <div class="choice-row" role="group" aria-label="Postal address same as residential">
+              <label class="choice-pill">
+                <input type="radio" name="postal_same" value="Yes" />
+                <span>Yes, they are the same</span>
+              </label>
+              <label class="choice-pill">
+                <input type="radio" name="postal_same" value="No" />
+                <span>No, they are different</span>
+              </label>
+            </div>
+
+            <div class="postal-fields is-hidden" data-postal-fields hidden>
+              <div class="field is-transport-bridge" data-field="postal_address_lookup" hidden>
+                <span>Postal address lookup</span>
+                <input name="postal_address_lookup" type="text" autocomplete="off" placeholder="742 Evergreen Terrace" />
+              </div>
+              <label class="field">
+                <span>Postal Street Address <strong>*</strong></span>
+                <input name="postal_address" type="text" autocomplete="street-address" placeholder="742 Evergreen Terrace" />
+              </label>
+              <div class="inline-grid three-up">
+                <label class="field">
+                  <span>Postal Suburb <strong>*</strong></span>
+                  <select name="postal_suburb">
+                    <option value="" disabled selected hidden>Shepparton</option>
+                    {POSTAL_SUBURBS.map((item) => <option>{item}</option>)}
+                  </select>
+                </label>
+                <label class="field is-conditional" data-field="postal_suburb_other" hidden>
+                  <span>Other (Please specify) <strong>*</strong></span>
+                  <input name="postal_suburb_other" type="text" placeholder="Please specify" />
+                </label>
+                <label class="field">
+                  <span>Postal State <strong>*</strong></span>
+                  <select name="postal_state">
+                    {STATE_OPTIONS.map((item) => <option selected={item === 'VIC'}>{item}</option>)}
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Postal Postcode <strong>*</strong></span>
+                  <input name="postal_postcode" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="postal-code" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-grid two-up contact-grid">
+            <h3 class="contact-title">How should we reach you?</h3>
+            <label class="field">
+              <span>Email <strong>*</strong></span>
+              <input name="email" type="email" autocomplete="email" required />
+            </label>
+            <label class="field">
+              <span>Confirm Email <strong>*</strong></span>
+              <input name="confirm_email" type="email" autocomplete="email" required />
+            </label>
+            <label class="field">
+              <span>Mobile <strong>*</strong></span>
+              <input name="mobile" type="tel" inputmode="numeric" pattern="\d{10}" maxlength="10" placeholder="04XXXXXXXX" required />
+            </label>
+            <label class="field">
+              <span>Confirm Mobile <strong>*</strong></span>
+              <input name="confirm_mobile" type="tel" inputmode="numeric" pattern="\d{10}" maxlength="10" placeholder="04XXXXXXXX" required />
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="wizard-step" data-step="preferences" aria-labelledby="preferences-title" hidden>
+        <div class="card">
+          <p class="eyebrow purple">Preferences</p>
+          <h2 id="preferences-title">Select the option that best describes your interest <strong>*</strong></h2>
+          <fieldset class="choice-group choice-grid three-col">
+            <legend>What type of training are you interested in? <strong>*</strong></legend>
+            {TRAINING_TYPE_OPTIONS.map((item) => (
+              <label class="choice-pill">
+                <input type="radio" name="training_type" value={item} />
+                <span>{item}</span>
+              </label>
+            ))}
+          </fieldset>
+
+          <section class="sub-card" data-second-preference-panel hidden>
+            <p class="eyebrow">Second preference</p>
+            <h3>Would Fusion Classes be a suitable second preference if 1:1 Coaching isn’t available? <strong>*</strong></h3>
+            <p>We’ll always do our best to consider your preferences and keep you informed about any openings that match your availability as they come up.</p>
+            <fieldset class="choice-group">
+              <legend>Second preference</legend>
+              {SECOND_PREFERENCE_OPTIONS.map((item) => (
+                <label class="choice-pill">
+                  <input type="radio" name="second_preference" value={item} />
+                  <span>{item}</span>
+                </label>
+              ))}
+            </fieldset>
+          </section>
+
+          <section class="sub-card">
+            <p class="eyebrow blue">Work patterns</p>
+            <h3>If you’re employed, do your work shifts stay at the same times each week, or do the times change? <strong>*</strong></h3>
+            <p>Our programs run on fixed weekly time-slots for the full 10-week term, so understanding whether your work shift times change helps us match you with a session you can attend consistently.</p>
+            <fieldset class="choice-group choice-grid two-col">
+              <legend>Work shifts</legend>
+              {WORK_SHIFT_OPTIONS.map((item) => (
+                <label class="choice-pill">
+                  <input type="radio" name="work_shift" value={item} />
+                  <span>{item}</span>
+                </label>
+              ))}
+            </fieldset>
+          </section>
+        </div>
+      </section>
+
+      <section class="wizard-step" data-step="availability" aria-labelledby="availability-title" hidden>
+        <div class="card">
+          <p class="eyebrow purple">Availability</p>
+          <h2 id="availability-title">Please select all days &amp; times you are usually available</h2>
+          <p class="availability-intro">To ensure consistent attendance, please choose days and times that align with your regular routine, as our programs run on fixed weekly time slots for the full 10-week term. While we cannot guarantee schedule changes mid-term, we always try to accommodate you where possible. Providing multiple options gives us the best chance of finding an open slot. If we are fully booked, we will keep you on our waiting list and notify you as soon as a space matches your availability.</p>
+
+          <section class="availability-card" data-availability-card="one_to_one">
+            <p class="eyebrow">1:1 Fitness Coaching</p>
+            <h3>Our 1:1 Fitness Coaching Timetable</h3>
+            <p>Our 1:1 Fitness Coaching sessions run exclusively in the mornings from Monday to Thursday, with three structured time slots offered each day. Choose any times that suit your normal weekly routine.</p>
+            <div class="availability-grid four-cols" aria-label="1:1 availability matrix" role="grid">
+              <div class="availability-head is-blank"></div>
+              <div class="availability-head">Mon</div>
+              <div class="availability-head">Tue</div>
+              <div class="availability-head">Wed</div>
+              <div class="availability-head">Thur</div>
+            </div>
+            <div class="availability-matrix">
+              {ONE_TO_ONE_AVAILABILITY.map((row) => (
+                <div class="availability-row" data-row={row.slots.join('|')}>
+                  <div class="availability-row-label">{row.slots[0]}</div>
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday'].map((day, index) => {
+                    const slot = row.slots[index];
+                    return (
+                      <button class="availability-slot" type="button" data-bucket="one_to_one" data-day={day} data-time={slot} aria-pressed="false" aria-label={`Select ${day}, ${slot}`}></button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            <h3 class="selection-summary-title is-hidden" data-summary-title="one_to_one">Selected Time-Slots</h3>
+            <div class="selection-summary is-hidden" data-summary="one_to_one"></div>
+          </section>
+
+          <section class="availability-card" data-availability-card="fusion">
+            <p class="eyebrow">FUSION Classes</p>
+            <h3>Since you’re also open to FUSION Classes, please let us know any additional times you may be able to attend.</h3>
+            <p>Our Classes run Monday to Thursday in the afternoon, with extra morning sessions available on Fridays. By telling us the time slots that match your usual availability, you’ll benefit from greater flexibility with scheduling, as Classes run more frequently. This may also allow you to start sooner.</p>
+            <div class="availability-grid four-cols" aria-label="Fusion classes availability" role="grid">
+              <div class="availability-head is-blank"></div>
+              <div class="availability-head">Mon</div>
+              <div class="availability-head">Tue</div>
+              <div class="availability-head">Wed</div>
+              <div class="availability-head">Thur</div>
+            </div>
+            <div class="availability-matrix">
+              {FUSION_AVAILABILITY.map((row) => (
+                <div class="availability-row">
+                  <div class="availability-row-label">{row.slots[0]}</div>
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday'].map((day, index) => {
+                    const slot = row.slots[index];
+                    return (
+                      <button class="availability-slot" type="button" data-bucket="fusion" data-day={day} data-time={slot} aria-pressed="false" aria-label={`Select ${day}, ${slot}`}></button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            <div class="availability-grid one-col" aria-label="Fusion Friday morning availability" role="grid">
+              <div class="availability-head is-blank"></div>
+              <div class="availability-head">Fri</div>
+              {FUSION_FRIDAY_AVAILABILITY.map((slot) => (
+                <button class="availability-slot friday-slot" type="button" data-bucket="friday" data-day="Friday" data-time={slot} aria-pressed="false" aria-label={`Select Friday, ${slot}`}></button>
+              ))}
+            </div>
+            <h3 class="selection-summary-title is-hidden" data-summary-title="fusion">Selected Time-Slots</h3>
+            <div class="selection-summary is-hidden" data-summary="fusion"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="wizard-step submitted-step" data-step="submitted" aria-labelledby="submitted-title" hidden>
+        <div class="card">
+          <p class="eyebrow purple">Submitted</p>
+          <h2 id="submitted-title">Thanks – you're off to a great start!</h2>
+          <p>Your Part 1 expression of interest has been captured locally in this Astro migration stage.</p>
+          <p>Next steps, portal activation, and backend submission remain in a later phase.</p>
+        </div>
+      </section>
+
+      <div class="wizard-actions">
+        <button class="btn secondary" type="button" data-action="back">Back</button>
+        <button class="btn primary" type="button" data-action="next">Continue</button>
+        <button class="btn primary is-hidden" type="button" data-action="submit">Submit</button>
+      </div>
+
+      <p class="status" aria-live="polite" data-status></p>
+      <div class="errors" aria-live="polite" data-errors></div>
+    </form>
+
+    <aside class="utility-panel" aria-label="Form utilities">
+      <button class="utility-trigger" type="button" data-modal-open="menuWarning">Open site menu</button>
+      <button class="utility-trigger" type="button" data-modal-open="emailWarning">Email this address?</button>
+      <button class="utility-trigger" type="button" data-modal-open="submittedModal">Submitted</button>
+
+      <section class="accessibility-panel" aria-label="Accessibility controls" data-a11y-panel>
+        <h3>Accessibility</h3>
+        <div class="a11y-row">
+          <label><input type="range" min="0" max="4" step="1" value="2" data-a11y="scale" /> Text size</label>
+        </div>
+        <div class="a11y-pills">
+          <button class="a11y-chip" type="button" data-a11y-toggle="contrast">High contrast</button>
+          <button class="a11y-chip" type="button" data-a11y-toggle="spacing">More spacing</button>
+          <button class="a11y-chip" type="button" data-a11y-toggle="font">Dyslexia font</button>
+          <button class="a11y-chip" type="button" data-a11y-toggle="motion">Reduce motion</button>
+        </div>
+        <p class="a11y-note">These settings only change this form and only save your display preferences. They do not save form answers.</p>
+      </section>
+    </aside>
+
+    <section class="modal-layer" aria-live="polite">
+      <div class="modal" data-modal="menuWarning" hidden>
+        <h3>Are you sure?</h3>
+        <p>Opening the site menu will leave the current form step visible while this local Astro migration remains in progress.</p>
+        <button type="button" data-modal-close>Close</button>
+      </div>
+      <div class="modal" data-modal="emailWarning" hidden>
+        <h3>Email this address?</h3>
+        <p>This local migration keeps email entry in the form only. No email is sent in Phase 2.</p>
+        <button type="button" data-modal-close>Close</button>
+      </div>
+      <div class="modal" data-modal="submittedModal" hidden>
+        <h3>Submitted</h3>
+        <p>This is the local submitted state for the Phase 2 migration.</p>
+        <button type="button" data-modal-close>Close</button>
+      </div>
+    </section>
+  </section>
+</main>
+
+<script is:inline type="module">
+  import {
+    createEoiPart1State,
+    getStepIndex,
+    getVisibleAvailability,
+    getVisiblePostalFields,
+    getVisibleSecondPreference,
+    setAccessibility,
+    setEligibility,
+    setField,
+    setModal,
+    setUnder18AgeBand,
+    toggleAvailability,
+    validateStep,
+    EOI_PART1_STEPS,
+    UNDER18_AGE_BANDS,
+  } from '../lib/eoiPart1State.js';
+
+  const shell = document.querySelector('[data-eoi-shell]');
+  const form = document.querySelector('[data-eoi-form]');
+  if (!shell || !form) {
+    throw new Error('EOI shell failed to initialise.');
+  }
+
+  let state = createEoiPart1State();
+  const stepIds = EOI_PART1_STEPS.map((step) => step.id);
+  const stepNodes = Object.fromEntries(stepIds.map((id) => [id, form.querySelector(`[data-step="${id}"]`)]));
+  const status = form.querySelector('[data-status]');
+  const errors = form.querySelector('[data-errors]');
+  const backButton = form.querySelector('[data-action="back"]');
+  const nextButton = form.querySelector('[data-action="next"]');
+  const submitButton = form.querySelector('[data-action="submit"]');
+  const introBody = form.querySelector('.intro-body');
+  const under18Panel = form.querySelector('[data-under18-panel]');
+  const secondPreferencePanel = form.querySelector('[data-second-preference-panel]');
+  const postalFields = form.querySelector('[data-postal-fields]');
+
+  const setCurrentStep = (step) => {
+    state.currentStep = step;
+    stepIds.forEach((id) => {
+      const node = stepNodes[id];
+      if (!node) return;
+      node.hidden = id !== step;
+      node.classList.toggle('is-active', id === step);
+    });
+    form.querySelectorAll('[data-jump-step]').forEach((button) => {
+      const active = button.getAttribute('data-jump-step') === step;
+      button.classList.toggle('is-active', active);
+      if (active) button.setAttribute('aria-current', 'step');
+      else button.removeAttribute('aria-current');
+    });
+    const under18Mode = state.eligible === 'under18';
+    backButton.hidden = step === 'intro' || step === 'submitted';
+    nextButton.hidden = step === 'availability' || step === 'submitted' || under18Mode;
+    submitButton.hidden = !(step === 'availability' || (step === 'intro' && under18Mode));
+    if (status) status.textContent = '';
+    if (errors) errors.textContent = '';
+  };
+
+  const syncConditionalFields = () => {
+    const pronounsOther = form.querySelector('[data-field="pronouns_other"]');
+    const sexOther = form.querySelector('[data-field="sex_at_birth_other"]');
+    const resSuburbOther = form.querySelector('[data-field="res_suburb_other"]');
+    const postalSuburbOther = form.querySelector('[data-field="postal_suburb_other"]');
+    const pronouns = form.querySelector('[name="pronouns"]');
+    const sex = form.querySelector('[name="sex_at_birth"]');
+    const resSuburb = form.querySelector('[name="res_suburb"]');
+    const postalSuburb = form.querySelector('[name="postal_suburb"]');
+
+    const showPronounsOther = pronouns?.value === 'Other (Self-Describe)';
+    const showSexOther = sex?.value === 'Another term';
+    const showResOther = resSuburb?.value === 'Other (Please specify)';
+    const showPostalOther = postalSuburb?.value === 'Other (Please specify)';
+
+    if (pronounsOther) pronounsOther.hidden = !showPronounsOther;
+    if (sexOther) sexOther.hidden = !showSexOther;
+    if (resSuburbOther) resSuburbOther.hidden = !showResOther;
+    if (postalSuburbOther) postalSuburbOther.hidden = !showPostalOther;
+    if (introBody) introBody.hidden = state.eligible === 'under18';
+
+    const showPostal = getVisiblePostalFields(state);
+    if (postalFields) {
+      postalFields.hidden = !showPostal;
+      postalFields.classList.toggle('is-hidden', !showPostal);
+    }
+
+    if (secondPreferencePanel) secondPreferencePanel.hidden = !getVisibleSecondPreference(state);
+    if (under18Panel) under18Panel.hidden = state.eligible !== 'under18';
+
+    const visibility = getVisibleAvailability(state);
+    const oneToOne = form.querySelector('[data-availability-card="one_to_one"]');
+    const fusion = form.querySelector('[data-availability-card="fusion"]');
+    if (oneToOne) oneToOne.hidden = !visibility.oneToOne;
+    if (fusion) fusion.hidden = !visibility.fusion;
+  };
+
+  const setModalOpen = (name, open) => {
+    state = setModal(state, name, open);
+    const node = form.querySelector(`[data-modal="${name}"]`);
+    if (node) node.hidden = !open;
+  };
+
+  const renderAvailabilityState = () => {
+    form.querySelectorAll('[data-bucket]').forEach((button) => {
+      const bucket = button.getAttribute('data-bucket');
+      const slot = button.getAttribute('data-time') || '';
+      const isSelected = (state.availability[bucket === 'one_to_one' ? 'one_to_one' : bucket === 'fusion' ? 'fusion' : 'friday'] || []).includes(slot);
+      button.classList.toggle('is-selected', isSelected);
+      button.setAttribute('aria-pressed', String(isSelected));
+      const action = isSelected ? 'Deselect' : 'Select';
+      button.setAttribute('aria-label', `${action} ${button.getAttribute('data-day')}, ${slot}`);
+    });
+
+    form.querySelectorAll('[data-summary]').forEach((summary) => {
+      const group = summary.getAttribute('data-summary');
+      const items =
+        group === 'one_to_one' ? state.availability.one_to_one : [...state.availability.fusion, ...state.availability.friday];
+      if (!items.length) {
+        summary.hidden = true;
+        summary.innerHTML = '';
+        return;
+      }
+      summary.hidden = false;
+      summary.innerHTML = items.map((item) => `<div>${item}</div>`).join('');
+    });
+
+    form.querySelectorAll('[data-summary-title]').forEach((title) => {
+      const group = title.getAttribute('data-summary-title');
+      const items =
+        group === 'one_to_one' ? state.availability.one_to_one : [...state.availability.fusion, ...state.availability.friday];
+      title.hidden = !items.length;
+    });
+  };
+
+  const applyFieldState = () => {
+    syncConditionalFields();
+    renderAvailabilityState();
+    const menuModal = form.querySelector('[data-modal="menuWarning"]');
+    const emailModal = form.querySelector('[data-modal="emailWarning"]');
+    const submittedModal = form.querySelector('[data-modal="submittedModal"]');
+    if (menuModal) menuModal.hidden = !state.modals.menuWarning;
+    if (emailModal) emailModal.hidden = !state.modals.emailWarning;
+    if (submittedModal) submittedModal.hidden = !state.modals.submitted;
+
+    document.documentElement.dataset.contrast = String(state.accessibility.contrast);
+    document.documentElement.dataset.spacing = String(state.accessibility.spacing);
+    document.documentElement.dataset.font = String(state.accessibility.font);
+    document.documentElement.dataset.motion = String(state.accessibility.motion);
+    document.documentElement.style.setProperty('--text-scale', String(state.accessibility.scale));
+  };
+
+  const setStatus = (message, isError = false) => {
+    if (!status) return;
+    status.textContent = message;
+    status.dataset.state = isError ? 'error' : 'ok';
+  };
+
+  const submitStep = (step) => {
+    const invalid = validateStep(state, step);
+    if (invalid.length) {
+      if (errors) errors.textContent = `Please complete: ${invalid.join(', ')}`;
+      setStatus('Some required fields are still incomplete.', true);
+      return false;
+    }
+    return true;
+  };
+
+  form.addEventListener('change', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement)) return;
+
+    if (target.name === 'age_eligibility') {
+      state = setEligibility(state, target.value);
+      applyFieldState();
+      setCurrentStep(target.value === 'UNDER_18' ? 'under18' : 'intro');
+      return;
+    }
+    if (target.name === 'under18_age_band') {
+      state = setUnder18AgeBand(state, target.value);
+      applyFieldState();
+      return;
+    }
+    if (target.name) {
+      state = setField(state, target.name, target.type === 'checkbox' ? target.checked : target.value);
+      applyFieldState();
+      return;
+    }
+    if (target.dataset?.a11y) {
+      const scaleMap = ['Small', 'Slightly small', 'Default', 'Slightly large', 'Large'];
+      state = setAccessibility(state, 'scale', Number(target.value));
+      target.setAttribute('aria-valuetext', scaleMap[Number(target.value)] || 'Default');
+      applyFieldState();
+    }
+  });
+
+  form.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return;
+
+    const modalClose = target.closest('[data-modal-close]');
+    if (modalClose) {
+      const modal = modalClose.closest('[data-modal]');
+      if (modal) setModalOpen(modal.getAttribute('data-modal'), false);
+      return;
+    }
+
+    const modalOpen = target.closest('[data-modal-open]');
+    if (modalOpen) {
+      const name = modalOpen.getAttribute('data-modal-open');
+      if (name) setModalOpen(name, true);
+      return;
+    }
+
+    const jump = target.closest('[data-jump-step]');
+    if (jump && target instanceof HTMLElement) {
+      const id = jump.getAttribute('data-jump-step');
+      if (id === 'under18' && state.eligible !== 'under18') return;
+      if (id && (id === 'intro' || adultStepOrder.includes(id) || id === 'under18')) setCurrentStep(id);
+      return;
+    }
+
+    const slot = target.closest('[data-bucket]');
+    if (slot && target instanceof HTMLElement) {
+      const bucket = slot.getAttribute('data-bucket');
+      const time = slot.getAttribute('data-time') || '';
+      state = toggleAvailability(state, bucket === 'one_to_one' ? 'one_to_one' : bucket === 'fusion' ? 'fusion' : 'friday', time);
+      applyFieldState();
+      return;
+    }
+
+    const back = target.closest('[data-action="back"]');
+    if (back) {
+      const index = Math.max(0, getStepIndex(state.currentStep) - 1);
+      setCurrentStep(stepIds[index]);
+      return;
+    }
+
+    const next = target.closest('[data-action="next"]');
+    if (next) {
+      if (state.currentStep === 'intro') {
+        if (!submitStep('intro')) return;
+        setCurrentStep('privacy');
+        return;
+      }
+      if (state.currentStep === 'privacy') {
+        if (!submitStep('privacy')) return;
+        setCurrentStep('personal');
+        return;
+      }
+      if (state.currentStep === 'personal') {
+        if (!submitStep('personal')) return;
+        setCurrentStep('preferences');
+        return;
+      }
+      if (state.currentStep === 'preferences') {
+        if (!submitStep('preferences')) return;
+        setCurrentStep('availability');
+        return;
+      }
+      return;
+    }
+
+    const submit = target.closest('[data-action="submit"]');
+    if (submit) {
+      if (state.eligible === 'under18' && state.currentStep === 'intro') {
+        state = setModal(state, 'submitted', true);
+        applyFieldState();
+        setCurrentStep('submitted');
+        setStatus(`Development-only: under-18 soft exit captured locally (${state.under18AgeBand || 'no optional age band supplied'}).`);
+        return;
+      }
+      if (!submitStep('availability')) return;
+      state = setModal(state, 'submitted', true);
+      applyFieldState();
+      setCurrentStep('submitted');
+      setStatus('Development-only: local submitted state captured.');
+      return;
+    }
+
+    if (target.closest('[data-age-eligibility-change]')) {
+      state = setEligibility(state, '');
+      state = setUnder18AgeBand(state, '');
+      applyFieldState();
+      setCurrentStep('intro');
+      return;
+    }
+    if (target.closest('[data-under18-clear]')) {
+      state = setUnder18AgeBand(state, '');
+      applyFieldState();
+      return;
+    }
+    if (target.closest('[data-under18-submit]')) {
+      state = setModal(state, 'submitted', true);
+      applyFieldState();
+      setCurrentStep('submitted');
+      setStatus(`Development-only: under-18 soft exit captured locally (${state.under18AgeBand || 'no optional age band supplied'}).`);
+    }
+  });
+
+  form.querySelectorAll('[name="pronouns"]').forEach((input) => {
+    input.addEventListener('change', syncConditionalFields);
+  });
+  form.querySelectorAll('[name="sex_at_birth"]').forEach((input) => {
+    input.addEventListener('change', syncConditionalFields);
+  });
+  form.querySelectorAll('[name="res_suburb"]').forEach((input) => {
+    input.addEventListener('change', syncConditionalFields);
+  });
+  form.querySelectorAll('[name="postal_suburb"]').forEach((input) => {
+    input.addEventListener('change', syncConditionalFields);
+  });
+
+  form.querySelectorAll('[data-a11y-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const key = button.getAttribute('data-a11y-toggle');
+      state = setAccessibility(state, key, !state.accessibility[key]);
+      button.classList.toggle('is-active', state.accessibility[key]);
+      button.setAttribute('aria-pressed', String(state.accessibility[key]));
+      button.setAttribute('aria-checked', String(state.accessibility[key]));
+      applyFieldState();
+    });
+  });
+
+  const scaleInput = form.querySelector('[data-a11y="scale"]');
+  scaleInput?.addEventListener('input', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    state = setAccessibility(state, 'scale', Number(target.value));
+    applyFieldState();
+  });
+
+  applyFieldState();
+  setCurrentStep('intro');
+
+  window.__GYMFUSION_EOI_PHASE2__ = {
+    getState: () => JSON.parse(JSON.stringify(state)),
+    steps: EOI_PART1_STEPS,
+    adultBands: ADULT_AGE_BANDS,
+    under18Bands: UNDER18_AGE_BANDS,
+    availability: {
+      oneToOne: ONE_TO_ONE_AVAILABILITY,
+      fusion: FUSION_AVAILABILITY,
+      friday: FUSION_FRIDAY_AVAILABILITY,
+    },
+  };
+</script>

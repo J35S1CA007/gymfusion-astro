@@ -1,0 +1,22 @@
+---
+const navItems = [
+  { label: 'EOI', href: '#eoi-part-1' },
+  { label: 'Members Portal', href: 'https://portal.gymfusion.com.au/members' },
+];
+---
+
+<header class="site-header">
+  <div class="site-brand">
+    <span class="site-mark" aria-hidden="true">G</span>
+    <div>
+      <p class="site-kicker">GYMFUSION</p>
+      <p class="site-title">Public EOI</p>
+    </div>
+  </div>
+
+  <nav aria-label="Primary" class="site-nav">
+    {navItems.map((item) => (
+      <a href={item.href}>{item.label}</a>
+    ))}
+  </nav>
+</header>
