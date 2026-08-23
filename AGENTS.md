@@ -50,8 +50,13 @@ Public, member, and staff applications do not have to use identical integration 
 - Treat Astro 7.2.4 as the current baseline only if the repository has not been upgraded.
 
 ## Third-Party Tooling
-- Third-party skills, plugins, and UI libraries are optional accelerators, not architecture authority.
-- Review provenance, licensing, security, and maintenance before adoption.
+- Official Astro Docs / Astro Docs MCP are the preferred authority for current Astro framework behaviour.
+- Use the installed `review-agent` skill for material independent/adversarial review as defined elsewhere in this guide.
+- Selected Astro workflow skills may be used as execution accelerators where they are reputable, maintained, compatible, and materially useful.
+- Third-party skills must remain subordinate to the Technical Specification, this `AGENTS.md`, and official Astro documentation.
+- A skill may guide implementation technique; it may not redefine GYMFUSION architecture, approved UX, security boundaries, repository structure, or product decisions.
+- Do not adopt generic standards packs wholesale where they conflict with GYMFUSION-specific governance.
+- Review provenance, licensing, security, permissions, maintenance, and instruction overlap before installing or approving a new skill/tool.
 - Do not use unofficial redistributions of licensed or commercial assets/packages.
 - Use official licensed sources for approved commercial assets.
 

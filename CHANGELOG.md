@@ -8,3 +8,7 @@
 
 ## v0.1.1
 - Added the initial repository-level AI-agent governance baseline in `AGENTS.md`, covering Technical Specification authority, C0 freeze, repository trust boundaries, security rules, Astro Docs MCP/framework governance, visual and responsive design preservation, functional versus visual migration scope, verification and manual-review requirements, `review-agent` usage, and Git/changelog safety.
+
+## v0.1.2
+- Added `docs/governance/AI-TOOLING-REGISTER.md` to track approved, installed, candidate, deferred, reference-only, and rejected AI/development tooling.
+- Refined `AGENTS.md` third-party tooling governance so optional skills and plugins remain subordinate to the Technical Specification, GYMFUSION agent rules, and official Astro documentation.
