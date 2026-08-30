@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg data-bbox="47.984 -396 416.033 384" viewBox="31.34 -412.64 449.32 417.28" xmlns="http://www.w3.org/2000/svg" data-type="ugc">
+    <g>
+        <defs fill="none">
+            <linearGradient y2="50%" x2="100%" y1="50%" x1="0%" id="75462cea-b885-4c4f-ba6b-a7a5dc4312bb">
+                <stop stop-color="#9d0aff" offset="0%"/>
+                <stop stop-color="#de0796" offset="31%"/>
+                <stop stop-color="#fd1d1d" offset="68%"/>
+                <stop stop-color="#fc9e19" offset="100%"/>
+            </linearGradient>
+        </defs>
+        <path transform="scale(1 -1)" fill="url(#75462cea-b885-4c4f-ba6b-a7a5dc4312bb)" d="M238 18q-88 59-131 112-60 73-59 153 0 47 33 80t78 33q53 0 92-46 2-2 5-2t5 2q39 46 92 46 45 0 78-33t33-80q1-80-59-153-43-53-131-112-8-6-18-6t-18 6"/>
+    </g>
+</svg>

@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+
+<!--
+GYMFUSION EOI PART 1
+Version: v15 Lifecycle Hardened
+Last Updated: 2026-06-04
+
+Protected Architecture:
+- /_functions/eoi_part1_submit
+- part1SubmitEndpoint
+- episodeId lifecycle handling
+- sessionStorage.gymfusion_eoi_episode_id
+- getPersistedEpisodeId()
+- warning modal architecture
+- mailto warning architecture
+- external link interception
+- Wix postMessage bridge
+
+Do not modify protected architecture without explicit instruction.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>GYMFUSION EOI | Wix Native</title>
+<link href="./mobile.css" rel="stylesheet"/>
+</head>
+<body>
+<main class="page" data-deck-state="cover">
+<div class="site-menu-layer" hidden="" id="site-menu-layer"></div>
+<section class="deck" data-deck-state="cover" id="preview-deck" style="--slide-index: 0;">
+<div class="accessibility-tools" id="accessibility-tools">
+<button aria-controls="accessibility-panel" aria-expanded="false" aria-label="Open accessibility settings" class="accessibility-toggle" id="accessibility-toggle" type="button">
+<span aria-hidden="true" class="accessibility-trigger-icon icon-host" data-icon-key="accessibility-support-outline" id="accessibility-trigger-icon"><span class="icon-dot"></span></span>
+<span class="sr-only">Accessibility</span>
+</button>
+<div aria-label="Form accessibility controls" class="accessibility-panel" hidden="" id="accessibility-panel" role="region">
+<div class="a11y-section">
+<div class="a11y-section-label">Text size</div>
+<div aria-label="Text size controls" class="text-scale-control" role="group">
+<div class="text-scale-row">
+<span aria-hidden="true" class="text-scale-label">A-</span>
+<input aria-describedby="text-scale-value" aria-label="Text size" class="text-scale-slider" id="text-scale-slider" max="2" min="0" step="1" type="range" value="0"/>
+<span aria-hidden="true" class="text-scale-label">A+</span>
+</div>
+<output class="text-scale-value" for="text-scale-slider" id="text-scale-value">Default</output>
+</div>
+</div>
+<div class="a11y-section">
+<div class="a11y-section-label">Display</div>
+<div class="a11y-option-row">
+<button aria-checked="false" aria-label="Toggle high contrast" class="a11y-chip" data-a11y-toggle="contrast" role="switch" type="button">High contrast</button>
+<button aria-checked="false" aria-label="Toggle wider spacing" class="a11y-chip" data-a11y-toggle="spacing" role="switch" type="button">More spacing</button>
+<button aria-checked="false" aria-label="Toggle dyslexia-friendly font" class="a11y-chip" data-a11y-toggle="font" role="switch" type="button">Dyslexia font</button>
+<button aria-checked="false" aria-label="Toggle reduced motion" class="a11y-chip" data-a11y-toggle="motion" role="switch" type="button">Reduce motion</button>
+</div>
+</div>
+<p class="a11y-note">These settings only change this form and only save your display preferences. They do not save form answers.</p>
+<button aria-label="Reset accessibility Settings" class="a11y-reset" id="a11y-reset" type="button">Reset Settings</button>
+</div>
+</div>
+<div class="deck-track">
+<section aria-label="Start screen" class="deck-page cover-page">
+<main aria-label="Auto-scrolling gym gallery behind GYMFUSION cover frame" class="eoi-cover-widget cover-image">
+<section aria-label="Auto-scrolling gym gallery" class="carousel">
+<img alt="Gym gallery photo 1" class="slide photo-1 is-active" data-fallback-src="https://i.ibb.co/SDVH6dBJ/cam-tay.avif" decoding="async" fetchpriority="high" src="https://static.wixstatic.com/media/f190ff_afa7b84c64174917b70ed44797a6a2dd~mv2.png/v1/fill/w_900,h_900,al_c,q_85,enc_auto/f190ff_afa7b84c64174917b70ed44797a6a2dd~mv2.png"/>
+<img alt="Gym gallery photo 5" class="slide photo-5" data-fallback-src="https://i.ibb.co/21q3WT5z/gymfusion-skills1-png.png" decoding="async" loading="lazy" src="https://static.wixstatic.com/media/f190ff_fa1e69dffd214c02827d38f125e9f88c~mv2.png/v1/fill/w_900,h_900,al_c,q_85,enc_auto/gymfusion-skills1.png"/>
+<img alt="Gym gallery photo 3" class="slide photo-3" data-fallback-src="https://i.ibb.co/XryP7JKJ/p-bars.avif" decoding="async" loading="lazy" src="https://static.wixstatic.com/media/f190ff_05e1c9cd8a1c4e5791b1a8ccb07e5d77~mv2.png/v1/fill/w_900,h_900,al_c,q_85,enc_auto/f190ff_05e1c9cd8a1c4e5791b1a8ccb07e5d77~mv2.png"/>
+<img alt="Gym gallery photo 6" class="slide photo-6" data-fallback-src="https://i.ibb.co/67dfNSGH/gymfusion-skills-02-png.png" decoding="async" loading="lazy" src="https://static.wixstatic.com/media/f190ff_4f99d8dec4fe4a0693669d19c0c527b4~mv2.png/v1/fill/w_900,h_900,al_c,q_85,enc_auto/gymfusion-skills2.png"/>
+<img alt="Gym gallery photo 2" class="slide photo-2" data-fallback-src="https://i.ibb.co/JWHbtt7Z/Gym-gallery-photo-2.avif" decoding="async" loading="lazy" src="https://static.wixstatic.com/media/f190ff_eae553c651074e20aaff3a16fbca78f1~mv2.png/v1/fill/w_900,h_900,al_c,q_85,enc_auto/f190ff_eae553c651074e20aaff3a16fbca78f1~mv2.png"/>
+<img alt="Gym gallery photo 4" class="slide photo-4" data-fallback-src="https://i.ibb.co/hx6qNxdg/handstand-guy.avif" decoding="async" loading="lazy" src="https://static.wixstatic.com/media/f190ff_a37c46ff1dde455bbf687a1a039f91cb~mv2.jpg/v1/fill/w_900,h_900,al_c,q_85,enc_auto/f190ff_a37c46ff1dde455bbf687a1a039f91cb~mv2.jpg"/>
+<div aria-hidden="true" class="fade-black-layer" id="fade-black-layer"></div>
+</section>
+</main>
+<img alt="" aria-hidden="true" class="cover-static-frame" src="https://static.wixstatic.com/media/f190ff_dec4ffc61bee4c32b60ba349a03e4f97~mv2.png"/>
+<button aria-controls="site-menu-cover" aria-expanded="false" aria-label="Open site menu" class="cover-menu-icon" data-site-menu-toggle="" type="button">
+<span aria-hidden="true" class="icon-host" data-icon-key="menu-gradient" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+</button>
+<nav aria-label="Site menu" class="site-menu" hidden="" id="site-menu-cover">
+<a class="site-menu-link" href="https://www.gymfusion.com.au" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 19v-8.5a1 1 0 0 0-.4-.8l-7-5.25a1 1 0 0 0-1.2 0l-7 5.25a1 1 0 0 0-.4.8V19a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HOME</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/our-services" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 10.1c.1-.5-.3-1.1-.8-1.1l-5.7-.8L12.9 3c-.1-.2-.2-.3-.4-.4c-.5-.3-1.1-.1-1.4.4L8.6 8.2L2.9 9q-.45 0-.6.3c-.4.4-.4 1 0 1.4l4.1 4l-1 5.7c0 .2 0 .4.1.6c.3.5.9.7 1.4.4l5.1-2.7l5.1 2.7c.1.1.3.1.5.1h.2c.5-.1.9-.6.8-1.2l-1-5.7l4.1-4.2c.2-.1.3-.3.3-.5" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">OUR SERVICES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/policies/" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 4v2h10V7H7zm0 4v2h10v-2H7zm0 4v2h7v-2H7z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">POLICIES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://gymfusion.com.au/faq" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.05 6.56a.84.84 0 0 0-.84.84v4.78a.84.84 0 1 0 1.68 0V7.4a.85.85 0 0 0-.84-.84m-6.37 0a.85.85 0 0 0-.84.84v2.43h1.68V7.4a.85.85 0 0 0-.84-.84" fill="currentColor"></path>
+<path d="M22.88 1.94H1.12A1.12 1.12 0 0 0 0 3.06v14.5a1.12 1.12 0 0 0 1.12 1.13h2.6a8.3 8.3 0 0 1-1.48 3.37c3.26.05 5.32-1.21 6.55-3.37h14.09A1.12 1.12 0 0 0 24 17.56V3.06a1.12 1.12 0 0 0-1.12-1.12M7.54 6.56H6a.85.85 0 0 0-.84.84v2.43h1.59a.75.75 0 0 1 0 1.5H5.11v2.44a.75.75 0 1 1-1.5 0V7.4A2.34 2.34 0 0 1 6 5.06h1.54a.75.75 0 1 1 0 1.5M14 13.77a.75.75 0 0 1-1.5 0v-2.44h-1.66v2.44a.75.75 0 0 1-1.5 0V7.4a2.34 2.34 0 1 1 4.66 0Zm6.37-1.59a2.37 2.37 0 0 1-1 1.9l.75.75a.75.75 0 0 1 0 1.06a.75.75 0 0 1-1.06 0l-1.4-1.4a2.34 2.34 0 0 1-2-2.31V7.4a2.34 2.34 0 1 1 4.68 0Z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">FREQUENTLY ASKED QUESTIONS</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/website-accessibility-form" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.1 21.213q-1.825-.788-3.175-2.138T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22t-3.9-.788m1-1.762l1.2-2.75q-1.05-.375-1.812-1.162T7.3 13.7l-2.75 1.15q.575 1.6 1.775 2.8t2.775 1.8M7.3 10.3q.425-1.05 1.188-1.837T10.3 7.3L9.15 4.55q-1.6.6-2.8 1.8t-1.8 2.8zm6.825 3.825Q15 13.25 15 12t-.875-2.125T12 9t-2.125.875T9 12t.875 2.125T12 15t2.125-.875m.775 5.325q1.575-.6 2.763-1.787T19.45 14.9l-2.75-1.2q-.375 1.05-1.15 1.813t-1.8 1.187zm1.8-9.2l2.75-1.15q-.6-1.575-1.787-2.762T14.9 4.55l-1.15 2.8q1.025.375 1.775 1.138T16.7 10.25" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HELP</span>
+<span class="site-menu-subtext">Need help with this form? Let us know!</span>
+</span>
+</a>
+</nav>
+<div class="cover-overlay">
+<button class="cyber-cta" data-action="start" type="button">START NOW</button>
+</div>
+</section>
+<section aria-label="Acknowledgement" class="deck-page content-page">
+<div class="toolbar">
+<button aria-controls="site-menu-step-1" aria-expanded="false" aria-label="Open site menu" class="toolbar-menu-button" data-site-menu-toggle="" type="button">
+<span aria-hidden="true" class="icon-host" data-icon-key="menu-gradient" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+</button>
+<nav aria-label="Site menu" class="site-menu" hidden="" id="site-menu-step-1">
+<a class="site-menu-link" href="https://www.gymfusion.com.au" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 19v-8.5a1 1 0 0 0-.4-.8l-7-5.25a1 1 0 0 0-1.2 0l-7 5.25a1 1 0 0 0-.4.8V19a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HOME</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/our-services" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 10.1c.1-.5-.3-1.1-.8-1.1l-5.7-.8L12.9 3c-.1-.2-.2-.3-.4-.4c-.5-.3-1.1-.1-1.4.4L8.6 8.2L2.9 9q-.45 0-.6.3c-.4.4-.4 1 0 1.4l4.1 4l-1 5.7c0 .2 0 .4.1.6c.3.5.9.7 1.4.4l5.1-2.7l5.1 2.7c.1.1.3.1.5.1h.2c.5-.1.9-.6.8-1.2l-1-5.7l4.1-4.2c.2-.1.3-.3.3-.5" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">OUR SERVICES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/policies/" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 4v2h10V7H7zm0 4v2h10v-2H7zm0 4v2h7v-2H7z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">POLICIES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://gymfusion.com.au/faq" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.05 6.56a.84.84 0 0 0-.84.84v4.78a.84.84 0 1 0 1.68 0V7.4a.85.85 0 0 0-.84-.84m-6.37 0a.85.85 0 0 0-.84.84v2.43h1.68V7.4a.85.85 0 0 0-.84-.84" fill="currentColor"></path>
+<path d="M22.88 1.94H1.12A1.12 1.12 0 0 0 0 3.06v14.5a1.12 1.12 0 0 0 1.12 1.13h2.6a8.3 8.3 0 0 1-1.48 3.37c3.26.05 5.32-1.21 6.55-3.37h14.09A1.12 1.12 0 0 0 24 17.56V3.06a1.12 1.12 0 0 0-1.12-1.12M7.54 6.56H6a.85.85 0 0 0-.84.84v2.43h1.59a.75.75 0 0 1 0 1.5H5.11v2.44a.75.75 0 1 1-1.5 0V7.4A2.34 2.34 0 0 1 6 5.06h1.54a.75.75 0 1 1 0 1.5M14 13.77a.75.75 0 0 1-1.5 0v-2.44h-1.66v2.44a.75.75 0 0 1-1.5 0V7.4a2.34 2.34 0 1 1 4.66 0Zm6.37-1.59a2.37 2.37 0 0 1-1 1.9l.75.75a.75.75 0 0 1 0 1.06a.75.75 0 0 1-1.06 0l-1.4-1.4a2.34 2.34 0 0 1-2-2.31V7.4a2.34 2.34 0 1 1 4.68 0Z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">FREQUENTLY ASKED QUESTIONS</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/website-accessibility-form" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.1 21.213q-1.825-.788-3.175-2.138T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22t-3.9-.788m1-1.762l1.2-2.75q-1.05-.375-1.812-1.162T7.3 13.7l-2.75 1.15q.575 1.6 1.775 2.8t2.775 1.8M7.3 10.3q.425-1.05 1.188-1.837T10.3 7.3L9.15 4.55q-1.6.6-2.8 1.8t-1.8 2.8zm6.825 3.825Q15 13.25 15 12t-.875-2.125T12 9t-2.125.875T9 12t.875 2.125T12 15t2.125-.875m.775 5.325q1.575-.6 2.763-1.787T19.45 14.9l-2.75-1.2q-.375 1.05-1.15 1.813t-1.8 1.187zm1.8-9.2l2.75-1.15q-.6-1.575-1.787-2.762T14.9 4.55l-1.15 2.8q1.025.375 1.775 1.138T16.7 10.25" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HELP</span>
+<span class="site-menu-subtext">Need help with this form? Let us know!</span>
+</span>
+</a>
+</nav>
+<div class="brand">
+<span aria-hidden="true" class="brand-icon" data-brand-icon="">
+<img alt="" class="brand-icon-image" data-brand-icon-img=""/>
+<span class="brand-icon-dot"></span>
+</span>
+<span>WELCOME</span>
+</div>
+<span class="toolbar-chip">1 / 6</span>
+</div>
+<div class="content-scroll">
+<div aria-label="Form progress" class="preview-stepper">
+<div class="preview-step is-active">
+<strong>01 Introduction</strong>
+<span>Read through our introduction and confirm you understand the Expression of Interest process.</span>
+</div>
+<div class="preview-step is-future">
+<strong>02 Privacy</strong>
+<span>Review our Privacy Collection Notice and provide your consent.</span>
+</div>
+<div class="preview-step is-future">
+<strong>03 Details</strong>
+<span>Provide some basic details, such as your name, address, and contact information.</span>
+</div>
+<div class="preview-step is-future">
+<strong>04 Preferences</strong>
+<span>Help us understand which of our services you’re interested in and when you’re available to train.</span>
+</div>
+<div class="preview-step is-future">
+<strong>05 Availability</strong>
+<span>Select the days and times that usually work for your training schedule.</span>
+</div>
+<div class="preview-step is-future">
+<strong>06 Submitted</strong>
+<span>Review your submission confirmation and next steps.</span>
+</div>
+</div>
+<div class="page-shell">
+<div class="form-stack">
+<article class="card start-hero">
+<div class="eyebrow purple intro-eyebrow">Expression of Interest Form</div>
+<h3 class="page-title">
+<span class="line-break">We’re excited to</span>
+<span class="line-break">have you here</span>
+<span class="line-break">&amp; can't wait</span>
+<span class="line-break">to hear about</span>
+<span class="line-break">your fitness goals!</span>
+</h3>
+<p class="preview-copy intro-pyramid-copy">
+<span class="line-break">Before you begin, please take a few</span>
+<span class="line-break">moments to read the information below</span>
+<span class="line-break">Once you’ve read and understood it,</span>
+<span class="line-break">tick the checkbox to confirm your</span>
+<span class="line-break">of next steps!</span>
+</p>
+</article>
+<div aria-label="Introductory information" class="info-tiles">
+<article class="card info-tile tile-purple">
+<h4>ABOUT THIS APPLICATION</h4>
+<p>This form is Part 1 of 4 of your Expression of Interest (EOI). An EOI is a preliminary application where you indicate your interest in becoming a member of GYMFUSION.</p>
+<p>This initial form collects your basic details, preferences, and availability. Additional forms will be required to assess your health history, fitness background, and overall suitability for our services.</p>
+</article>
+<article class="card info-tile tile-gold">
+<h4>IMPORTANT</h4>
+<p>Submission of this form <strong>does not</strong> guarantee placement. Participation is subject to program availability and individual factors, including suitability, risk assessments, required level of support, pre-existing health conditions, and scope of practice. Where appropriate, you may be placed on a waitlist.</p>
+<p>If you require assistance or experience any issues with this form, please contact us at: <a href="mailto:support@gymfusion.com.au">support@gymfusion.com.au</a></p>
+</article>
+<article class="card info-tile tile-blue span-full">
+<h4>THE EOI PROCESS</h4>
+<p>Upon submission of this form, you will receive an email inviting you to activate and set up your GYMFUSION Portal account.</p>
+<p><strong>Inside the Portal:</strong></p>
+<ul>
+<li>Access and complete Part 2, the remaining three Expression of Interest forms.</li>
+<li>All remaining forms must be completed within <strong>14 days</strong> of submitting Part 1 (this form).</li>
+<li>
+                        The process is delivered in structured, manageable stages to reduce the need to complete a lengthy assessment in one sitting.
+                        <ul>
+<li>If additional information is requested beyond Part 2, extra time will be provided to allow for the completion of additional forms and the gathering and/or uploading of supporting evidence.</li>
+<li><strong>If all required forms and/or supporting evidence are not received within this timeframe,</strong> your Expression of Interest and associated GYMFUSION Portal account will be securely archived pending lawful destruction in accordance with our Privacy Policy.<span class="line-break"><strong>A new Expression of Interest will need to be submitted to reapply.</strong></span></li>
+</ul>
+</li>
+<li>Manage your personal details, including email, mobile number, and address.</li>
+<li>Communicate with and receive notifications from GYMFUSION regarding your EOI.</li>
+<li>Review program placement offers and confirm or decline proposed time-slot allocations.</li>
+<li>Sign waivers, member agreements, and other relevant forms as required.</li>
+</ul>
+</article>
+</div>
+<article class="card acknowledge-card">
+<div class="eyebrow">Acknowledgement<span class="required">*</span></div>
+<label class="gradient-check" style="cursor: pointer;">
+<div class="check-copy">
+                      I confirm that this submission represents preliminary interest only (Part 1 of the EOI) and reflects my desire to become a member of GYMFUSION, with further steps required.
+                    </div>
+<div class="yes-no">
+<span aria-hidden="true" class="gradient-check-box">
+<input data-intro-ack="" name="acknowledge_intro" required="" type="checkbox"/>
+<span class="check-mark"></span>
+</span>
+</div>
+</label>
+<label class="gradient-check" style="cursor: pointer;">
+<div class="check-copy">
+                      I understand that submission does not guarantee placement, and that my EOI will be invalid unless Part 2 is completed within 14 days, including any required supporting evidence. If additional information is requested, extended timeframes will be provided.
+                    </div>
+<div class="yes-no">
+<span aria-hidden="true" class="gradient-check-box">
+<input data-intro-ack="" name="acknowledge_intro_part2" required="" type="checkbox"/>
+<span class="check-mark"></span>
+</span>
+</div>
+</label>
+</article>
+<div class="footer-actions intro-actions">
+<button class="btn primary is-hidden" data-action="next" data-intro-confirm="" type="button">Confirm</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section aria-label="Privacy notice" class="deck-page content-page step-page" data-step-page="1">
+<div class="toolbar">
+<button aria-controls="site-menu-step-2" aria-expanded="false" aria-label="Open site menu" class="toolbar-menu-button" data-site-menu-toggle="" type="button">
+<span aria-hidden="true" class="icon-host" data-icon-key="menu-gradient" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+</button>
+<nav aria-label="Site menu" class="site-menu" hidden="" id="site-menu-step-2">
+<a class="site-menu-link" href="https://www.gymfusion.com.au" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 19v-8.5a1 1 0 0 0-.4-.8l-7-5.25a1 1 0 0 0-1.2 0l-7 5.25a1 1 0 0 0-.4.8V19a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HOME</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/our-services" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 10.1c.1-.5-.3-1.1-.8-1.1l-5.7-.8L12.9 3c-.1-.2-.2-.3-.4-.4c-.5-.3-1.1-.1-1.4.4L8.6 8.2L2.9 9q-.45 0-.6.3c-.4.4-.4 1 0 1.4l4.1 4l-1 5.7c0 .2 0 .4.1.6c.3.5.9.7 1.4.4l5.1-2.7l5.1 2.7c.1.1.3.1.5.1h.2c.5-.1.9-.6.8-1.2l-1-5.7l4.1-4.2c.2-.1.3-.3.3-.5" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">OUR SERVICES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/policies/" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 4v2h10V7H7zm0 4v2h10v-2H7zm0 4v2h7v-2H7z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">POLICIES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://gymfusion.com.au/faq" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.05 6.56a.84.84 0 0 0-.84.84v4.78a.84.84 0 1 0 1.68 0V7.4a.85.85 0 0 0-.84-.84m-6.37 0a.85.85 0 0 0-.84.84v2.43h1.68V7.4a.85.85 0 0 0-.84-.84" fill="currentColor"></path>
+<path d="M22.88 1.94H1.12A1.12 1.12 0 0 0 0 3.06v14.5a1.12 1.12 0 0 0 1.12 1.13h2.6a8.3 8.3 0 0 1-1.48 3.37c3.26.05 5.32-1.21 6.55-3.37h14.09A1.12 1.12 0 0 0 24 17.56V3.06a1.12 1.12 0 0 0-1.12-1.12M7.54 6.56H6a.85.85 0 0 0-.84.84v2.43h1.59a.75.75 0 0 1 0 1.5H5.11v2.44a.75.75 0 1 1-1.5 0V7.4A2.34 2.34 0 0 1 6 5.06h1.54a.75.75 0 1 1 0 1.5M14 13.77a.75.75 0 0 1-1.5 0v-2.44h-1.66v2.44a.75.75 0 0 1-1.5 0V7.4a2.34 2.34 0 1 1 4.66 0Zm6.37-1.59a2.37 2.37 0 0 1-1 1.9l.75.75a.75.75 0 0 1 0 1.06a.75.75 0 0 1-1.06 0l-1.4-1.4a2.34 2.34 0 0 1-2-2.31V7.4a2.34 2.34 0 1 1 4.68 0Z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">FREQUENTLY ASKED QUESTIONS</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/website-accessibility-form" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.1 21.213q-1.825-.788-3.175-2.138T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22t-3.9-.788m1-1.762l1.2-2.75q-1.05-.375-1.812-1.162T7.3 13.7l-2.75 1.15q.575 1.6 1.775 2.8t2.775 1.8M7.3 10.3q.425-1.05 1.188-1.837T10.3 7.3L9.15 4.55q-1.6.6-2.8 1.8t-1.8 2.8zm6.825 3.825Q15 13.25 15 12t-.875-2.125T12 9t-2.125.875T9 12t.875 2.125T12 15t2.125-.875m.775 5.325q1.575-.6 2.763-1.787T19.45 14.9l-2.75-1.2q-.375 1.05-1.15 1.813t-1.8 1.187zm1.8-9.2l2.75-1.15q-.6-1.575-1.787-2.762T14.9 4.55l-1.15 2.8q1.025.375 1.775 1.138T16.7 10.25" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HELP</span>
+<span class="site-menu-subtext">Need help with this form? Let us know!</span>
+</span>
+</a>
+</nav>
+<div class="brand">
+<span aria-hidden="true" class="brand-icon icon-host" data-icon-key="privacy-shield" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+<span>PRIVACY</span>
+</div>
+<span class="toolbar-chip">2 / 6</span>
+</div>
+<div class="content-scroll">
+<div aria-label="Form progress" class="preview-stepper">
+<div class="preview-step is-complete">
+<strong>01 Introduction</strong>
+<span>Read through our introduction and confirm you understand the Expression of Interest process.</span>
+</div>
+<div class="preview-step is-active">
+<strong>02 Privacy</strong>
+<span>Review our Privacy Collection Notice and provide your consent.</span>
+</div>
+<div class="preview-step is-future">
+<strong>03 Details</strong>
+<span>Provide some basic details, such as your name, address, and contact information.</span>
+</div>
+<div class="preview-step is-future">
+<strong>04 Preferences</strong>
+<span>Help us understand which of our services you’re interested in and when you’re available to train.</span>
+</div>
+<div class="preview-step is-future">
+<strong>05 Availability</strong>
+<span>Select the days and times that usually work for your training schedule.</span>
+</div>
+<div class="preview-step is-future">
+<strong>06 Submitted</strong>
+<span>Review your submission confirmation and next steps.</span>
+</div>
+</div>
+<div class="page-shell">
+<div class="form-stack">
+<article class="card privacy-card">
+<div class="eyebrow purple">Privacy Collection Notice</div>
+<div class="helper-copy" style="margin-top: 0;">
+                    GYMFUSION collects the personal information you provide in this form (including, where applicable, health information) for the following purposes:
+                  </div>
+<ol class="alpha-list">
+<li><span class="alpha-label">(a)</span>to verify your identity and maintain accurate records;</li>
+<li><span class="alpha-label">(b)</span>to assess and respond to your enquiry;</li>
+<li><span class="alpha-label">(c)</span>to determine your eligibility for our services;</li>
+<li><span class="alpha-label">(d)</span>to contact you regarding next steps; and</li>
+<li><span class="alpha-label">(e)</span>to support the provision of safe and appropriate coaching should you proceed with our services.</li>
+</ol>
+<div class="helper-copy">
+                    This collection is undertaken in accordance with the Privacy Act 1988 (Cth), including the Australian Privacy Principles (APPs), and, where applicable, the Health Records Act 2001 (Vic).
+                  </div>
+<h3 class="section-title" style="margin-top: 20px;">Collection of Information and Consequences of Non-Disclosure</h3>
+<div class="helper-copy" style="margin-top: 0;">
+                    GYMFUSION collects personal and, where relevant, sensitive information (including health information) directly from you.
+                  </div>
+<div class="helper-copy">
+                    This information is necessary to enable us to assess your eligibility, ensure your safety, and deliver appropriate services in a manner consistent with our duty of care and legal obligations.
+                  </div>
+<div class="helper-copy">
+                    While some questions in our screening are optional, missing required information, including relevant health or safety details, may limit our ability to adequately assess your application, determine suitability for services, or respond to your needs.
+                  </div>
+<h3 class="section-title" style="margin-top: 20px;">Use and Disclosure of Information</h3>
+<div class="helper-copy" style="margin-top: 0;">
+                    GYMFUSION may use and disclose your personal information for the purposes outlined above and in accordance with applicable privacy laws. This may include disclosure to third-party service providers engaged to support our business operations, such as providers of booking systems, billing services, form processing platforms, communication tools, and IT or data storage services.
+                  </div>
+<div class="helper-copy">
+                    All such disclosures are limited to what is reasonably necessary for the administration and delivery of our services and are managed in accordance with applicable privacy and data protection obligations.
+                  </div>
+<div class="helper-copy">
+                    Some of these service providers may be located overseas. Where this occurs, GYMFUSION takes reasonable steps to ensure that overseas recipients handle personal information in a manner consistent with Australian privacy laws. Further details are available in our <a class="notice-link" href="https://gymfusion.com.au/privacy" rel="noreferrer" target="_blank">Privacy Policy</a>.
+                  </div>
+<h3 class="section-title" style="margin-top: 20px;">Data Security and Handling of Health Information</h3>
+<div class="helper-copy" style="margin-top: 0;">
+                    GYMFUSION takes reasonable steps to protect personal and health information from misuse, interference, loss, unauthorised access, modification, or disclosure. Health information is handled in accordance with applicable legal requirements, including the Health Records Act 2001 (Vic), and is only used or disclosed for purposes directly related to your health, safety, and the provision of services, unless otherwise permitted or required by law.
+                  </div>
+<h3 class="section-title" style="margin-top: 20px;">Access, Correction, and Complaints</h3>
+<div class="helper-copy" style="margin-top: 0;">
+                    GYMFUSION encourages individuals to keep their personal information accurate and up to date. Where available, you may update certain details directly, or notify us of changes such as updated contact information or relevant health or injury information.
+                  </div>
+<div class="helper-copy">
+                    GYMFUSION is committed to openness and transparency. You may request access to your personal information in accordance with Australian Privacy Principle 12; however, access may be subject to exceptions permitted under applicable privacy laws.
+                  </div>
+<div class="helper-copy">
+                    Requests for access to or correction of personal and health information can be made via:
+                  </div>
+<div class="helper-copy" style="margin-top: 6px;">
+                    To make a privacy-related request, please submit a request via our <a class="notice-link" href="https://gymfusion.com.au/privacy-policy#get-in-touch" rel="noreferrer" target="_blank">Privacy &amp; Data Protection</a> webpage. Alternatively, email us at <a class="notice-link" href="mailto:privacy@gymfusion.com.au">privacy@gymfusion.com.au.</a>
+</div>
+</article>
+<article class="card acknowledge-card privacy-ack-card">
+<div class="eyebrow">Privacy Acknowledgement<span class="required">*</span></div>
+<label class="gradient-check" style="cursor: pointer;">
+<div class="check-copy">
+                      By proceeding, you acknowledge that you have read and understood this Privacy Collection Notice and consent to GYMFUSION collecting, using, storing, and disclosing your personal information (including health information, where applicable) in accordance with this Notice, our Privacy Policy, the Privacy Act 1988 (Cth), and the Health Records Act 2001 (Vic).
+                    </div>
+<div class="yes-no">
+<span aria-hidden="true" class="gradient-check-box">
+<input name="privacy_consent" required="" type="checkbox"/>
+<span class="check-mark"></span>
+</span>
+</div>
+</label>
+</article>
+<div class="footer-actions privacy-actions">
+<button class="btn secondary" data-action="back" type="button">Back</button>
+<button class="btn primary is-hidden" data-action="next" data-privacy-confirm="" type="button">Confirm</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section aria-label="Personal details" class="deck-page content-page step-page" data-step-page="2">
+<div class="toolbar">
+<button aria-controls="site-menu-step-3" aria-expanded="false" aria-label="Open site menu" class="toolbar-menu-button" data-site-menu-toggle="" type="button">
+<span aria-hidden="true" class="icon-host" data-icon-key="menu-gradient" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+</button>
+<nav aria-label="Site menu" class="site-menu" hidden="" id="site-menu-step-3">
+<a class="site-menu-link" href="https://www.gymfusion.com.au" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 19v-8.5a1 1 0 0 0-.4-.8l-7-5.25a1 1 0 0 0-1.2 0l-7 5.25a1 1 0 0 0-.4.8V19a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HOME</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/our-services" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 10.1c.1-.5-.3-1.1-.8-1.1l-5.7-.8L12.9 3c-.1-.2-.2-.3-.4-.4c-.5-.3-1.1-.1-1.4.4L8.6 8.2L2.9 9q-.45 0-.6.3c-.4.4-.4 1 0 1.4l4.1 4l-1 5.7c0 .2 0 .4.1.6c.3.5.9.7 1.4.4l5.1-2.7l5.1 2.7c.1.1.3.1.5.1h.2c.5-.1.9-.6.8-1.2l-1-5.7l4.1-4.2c.2-.1.3-.3.3-.5" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">OUR SERVICES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/policies/" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 4v2h10V7H7zm0 4v2h10v-2H7zm0 4v2h7v-2H7z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">POLICIES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://gymfusion.com.au/faq" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.05 6.56a.84.84 0 0 0-.84.84v4.78a.84.84 0 1 0 1.68 0V7.4a.85.85 0 0 0-.84-.84m-6.37 0a.85.85 0 0 0-.84.84v2.43h1.68V7.4a.85.85 0 0 0-.84-.84" fill="currentColor"></path>
+<path d="M22.88 1.94H1.12A1.12 1.12 0 0 0 0 3.06v14.5a1.12 1.12 0 0 0 1.12 1.13h2.6a8.3 8.3 0 0 1-1.48 3.37c3.26.05 5.32-1.21 6.55-3.37h14.09A1.12 1.12 0 0 0 24 17.56V3.06a1.12 1.12 0 0 0-1.12-1.12M7.54 6.56H6a.85.85 0 0 0-.84.84v2.43h1.59a.75.75 0 0 1 0 1.5H5.11v2.44a.75.75 0 1 1-1.5 0V7.4A2.34 2.34 0 0 1 6 5.06h1.54a.75.75 0 1 1 0 1.5M14 13.77a.75.75 0 0 1-1.5 0v-2.44h-1.66v2.44a.75.75 0 0 1-1.5 0V7.4a2.34 2.34 0 1 1 4.66 0Zm6.37-1.59a2.37 2.37 0 0 1-1 1.9l.75.75a.75.75 0 0 1 0 1.06a.75.75 0 0 1-1.06 0l-1.4-1.4a2.34 2.34 0 0 1-2-2.31V7.4a2.34 2.34 0 1 1 4.68 0Z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">FREQUENTLY ASKED QUESTIONS</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/website-accessibility-form" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.1 21.213q-1.825-.788-3.175-2.138T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22t-3.9-.788m1-1.762l1.2-2.75q-1.05-.375-1.812-1.162T7.3 13.7l-2.75 1.15q.575 1.6 1.775 2.8t2.775 1.8M7.3 10.3q.425-1.05 1.188-1.837T10.3 7.3L9.15 4.55q-1.6.6-2.8 1.8t-1.8 2.8zm6.825 3.825Q15 13.25 15 12t-.875-2.125T12 9t-2.125.875T9 12t.875 2.125T12 15t2.125-.875m.775 5.325q1.575-.6 2.763-1.787T19.45 14.9l-2.75-1.2q-.375 1.05-1.15 1.813t-1.8 1.187zm1.8-9.2l2.75-1.15q-.6-1.575-1.787-2.762T14.9 4.55l-1.15 2.8q1.025.375 1.775 1.138T16.7 10.25" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HELP</span>
+<span class="site-menu-subtext">Need help with this form? Let us know!</span>
+</span>
+</a>
+</nav>
+<div class="brand">
+<span aria-hidden="true" class="brand-icon icon-host" data-icon-key="details-person" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+<span>DETAILS</span>
+</div>
+<span class="toolbar-chip">3 / 6</span>
+</div>
+<div class="content-scroll">
+<div aria-label="Form progress" class="preview-stepper">
+<div class="preview-step is-complete">
+<strong>01 Introduction</strong>
+<span>Read through our introduction and confirm you understand the Expression of Interest process.</span>
+</div>
+<div class="preview-step is-complete">
+<strong>02 Privacy</strong>
+<span>Review our Privacy Collection Notice and provide your consent.</span>
+</div>
+<div class="preview-step is-active">
+<strong>03 Details</strong>
+<span style="left: -1px; top: -11px;">Provide some basic details, such as your name, address, and contact information.</span>
+</div>
+<div class="preview-step is-future">
+<strong>04 Preferences</strong>
+<span>Help us understand which of our services you’re interested in and when you’re available to train.</span>
+</div>
+<div class="preview-step is-future">
+<strong>05 Availability</strong>
+<span>Select the days and times that usually work for your training schedule.</span>
+</div>
+<div class="preview-step is-future">
+<strong>06 Submitted</strong>
+<span>Review your submission confirmation and next steps.</span>
+</div>
+</div>
+<div class="page-shell">
+<div class="form-stack">
+<article class="card">
+<div class="eyebrow purple detail-eyebrow">Personal details</div>
+<h3>Tell us a bit about yourself</h3>
+<div class="field-grid" style="margin-top: 16px;">
+<div class="field" data-field="first_name">
+<label>First Name <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" name="first_name" placeholder="Legal Given Name" required="" type="text"/></div>
+<div class="form-error">First name is required.</div>
+</div>
+<div class="field">
+<label>Preferred Name <span class="label-note">(If different)</span></label>
+<div class="field-box"><input class="field-input" name="preferred_name" type="text"/></div>
+</div>
+<div class="field" data-field="last_name">
+<label>Last Name <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" name="last_name" placeholder="Legal Surname" required="" type="text"/></div>
+<div class="form-error">Last name is required.</div>
+</div>
+<div class="field" data-field="pronouns">
+<label>Pronouns <span class="label-note">(Optional)</span></label>
+<select aria-label="Pronouns" class="select-field" name="pronouns">
+<option selected="" value=""></option>
+<option>She/Her</option>
+<option>He/Him</option>
+<option>They/Them</option>
+<option>Prefer not to say</option>
+<option>Other (Self-Describe)</option>
+</select>
+</div>
+<div class="field" data-field="pronouns_other" style="grid-column: 1 / -1; display: none;">
+<label>Other (Self-Describe) <span class="label-note">(Optional)</span></label>
+<div class="field-box"><input class="field-input" disabled="" name="pronouns_other" placeholder="Please specify" type="text"/></div>
+</div>
+</div>
+<h3 class="section-title" style="margin-top: 18px;">Select your age demographic: <span class="required">*</span></h3>
+<select aria-label="Age band" class="select-field" name="age_band" required="">
+<option selected="" value=""></option>
+<option>18–24</option>
+<option>25–34</option>
+<option>35–44</option>
+<option>45–54</option>
+<option>55–64</option>
+<option>64+</option>
+</select>
+<h3 class="section-title" style="margin-top: 18px;">What is your sex recorded as at birth? <span class="required">*</span></h3>
+<div class="helper-copy">
+                    Sex recorded at birth helps guide the interpretation of certain pre‑exercise screening questions, as some sex‑based physiological differences can influence how training is safely and appropriately scaled — including strength capacity, joint and tendon loading, and injury‑risk patterns. This question is optional, and you may select ‘Prefer not to say.’ All responses are kept private and are accessible only to staff who require this information to ensure safe programming and coaching.
+                  </div>
+<select aria-label="Sex recorded as at birth" class="select-field" data-other-target="sex_at_birth" name="sex_at_birth" required="">
+<option selected="" value=""></option>
+<option>Female</option>
+<option>Male</option>
+<option>Another term</option>
+<option>Prefer not to say</option>
+</select>
+<div class="field" data-field="sex_at_birth_other" data-other-field="sex_at_birth" style="margin-top: 14px; display: none;">
+<label>Another term <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" disabled="" name="sex_at_birth_other" placeholder="Please specify" type="text"/></div>
+</div>
+</article>
+<article class="card">
+<div class="eyebrow">Residential Address</div>
+<h3>Where do you live?</h3>
+<div class="field-grid" style="margin-top: 16px;">
+<div class="field address-lookup-field" style="grid-column: 1 / -1;">
+<label>Address <span class="required">*</span></label>
+<div class="field-box address-lookup-box">
+<input aria-autocomplete="list" aria-controls="address-lookup-results" autocomplete="off" class="field-input" id="address-lookup" name="address_lookup" placeholder="742 Evergreen Terrace" required="" type="text"/>
+<ul class="address-lookup-dropdown" hidden="" id="address-lookup-results" role="listbox"></ul>
+</div>
+</div>
+<input id="form-street" name="res_address" type="hidden"/>
+<div class="field" data-address-manual="residential" style="display: none;">
+<label>Suburb <span class="required">*</span></label>
+<select class="select-field" data-other-target="res_suburb" id="form-suburb" name="res_suburb">
+<option disabled="" hidden="" selected="" value="">Shepparton</option>
+<option>Shepparton</option>
+<option>Shepparton North</option>
+<option>Shepparton East</option>
+<option>Kialla</option>
+<option>Kialla Central</option>
+<option>Kialla West</option>
+<option>Kialla East</option>
+<option>Mooroopna</option>
+<option>Mooroopna North</option>
+<option>Tatura</option>
+<option>Tatura East</option>
+<option>Tallygaroopna</option>
+<option>Grahamvale</option>
+<option>Orrvale</option>
+<option>Lemnos</option>
+<option>Dookie</option>
+<option>Congupna</option>
+<option>Arcadia</option>
+<option>Pine Lodge</option>
+<option>Merrigum</option>
+<option>Toolamba</option>
+<option>Toolamba West</option>
+<option>Murchison</option>
+<option>Murchison North</option>
+<option>Murchison East</option>
+<option>Katandra</option>
+<option>Katandra West</option>
+<option>Wunghnu</option>
+<option>Numurkah</option>
+<option>Cobram</option>
+<option>Euroa</option>
+<option>Nagambie</option>
+<option>Other (Please specify)</option>
+</select>
+</div>
+<div class="field" data-field="res_suburb_other" data-other-field="res_suburb" style="grid-column: 1 / -1; display: none;">
+<label>Other (Please specify) <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" disabled="" name="res_suburb_other" placeholder="Please specify" type="text"/></div>
+</div>
+<div class="field" data-address-manual="residential" style="display: none;">
+<label>State <span class="required">*</span></label>
+<select class="select-field" data-other-target="res_state" id="form-state" name="res_state">
+<option selected="">VIC</option>
+<option>Other (Please Specify)</option>
+</select>
+</div>
+<div class="field" data-field="res_state_other" data-other-field="res_state" style="grid-column: 1 / -1; display: none;">
+<label>Other (Please Specify) <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" disabled="" name="res_state_other" placeholder="Please specify" type="text"/></div>
+</div>
+<div class="field" data-address-manual="residential" style="display: none;">
+<label>Post Code <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" id="form-postcode" inputmode="numeric" name="res_postcode" type="number"/></div>
+</div>
+</div>
+<h3 class="section-title" style="margin-top: 18px;">Is your postal address the same as your residential address? <span class="required">*</span></h3>
+<div aria-label="Postal address same as residential" class="option-grid" role="group">
+<button aria-pressed="false" class="option-choice" data-choice-group="postal_same" data-value="Yes" type="button">Yes, they are the same</button>
+<button aria-pressed="false" class="option-choice" data-choice-group="postal_same" data-value="No" type="button">No, they are different</button>
+</div>
+<div id="postal-address-fields" style="display: none; margin-top: 18px;">
+<div class="field-grid">
+<div class="field address-lookup-field" style="grid-column: 1 / -1;">
+<label>Address <span class="required">*</span></label>
+<div class="field-box address-lookup-box">
+<input aria-autocomplete="list" aria-controls="postal-address-lookup-results" autocomplete="off" class="field-input" id="postal-address-lookup" name="postal_address_lookup" placeholder="P.O. Box 9911" required="" type="text"/>
+<ul class="address-lookup-dropdown" hidden="" id="postal-address-lookup-results" role="listbox"></ul>
+</div>
+</div>
+<input id="form-postal-street" name="postal_address" type="hidden"/>
+<div class="field" data-address-manual="postal" style="display: none;">
+<label>Suburb <span class="required">*</span></label>
+<select class="select-field" data-other-target="postal_suburb" id="form-postal-suburb" name="postal_suburb">
+<option disabled="" hidden="" selected="" value="">Shepparton</option>
+<option>Shepparton</option>
+<option>Shepparton North</option>
+<option>Shepparton East</option>
+<option>Kialla</option>
+<option>Kialla Central</option>
+<option>Kialla West</option>
+<option>Kialla East</option>
+<option>Mooroopna</option>
+<option>Mooroopna North</option>
+<option>Tatura</option>
+<option>Tatura East</option>
+<option>Tallygaroopna</option>
+<option>Grahamvale</option>
+<option>Orrvale</option>
+<option>Lemnos</option>
+<option>Dookie</option>
+<option>Congupna</option>
+<option>Arcadia</option>
+<option>Pine Lodge</option>
+<option>Merrigum</option>
+<option>Toolamba</option>
+<option>Toolamba West</option>
+<option>Murchison</option>
+<option>Murchison North</option>
+<option>Murchison East</option>
+<option>Katandra</option>
+<option>Katandra West</option>
+<option>Wunghnu</option>
+<option>Numurkah</option>
+<option>Cobram</option>
+<option>Euroa</option>
+<option>Nagambie</option>
+<option>Other (Please specify)</option>
+</select>
+</div>
+<div class="field" data-field="postal_suburb_other" data-other-field="postal_suburb" style="grid-column: 1 / -1; display: none;">
+<label>Other (Please specify) <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" disabled="" name="postal_suburb_other" placeholder="Please specify" type="text"/></div>
+</div>
+<div class="field" data-address-manual="postal" style="display: none;">
+<label>State <span class="required">*</span></label>
+<select class="select-field" data-other-target="postal_state" id="form-postal-state" name="postal_state">
+<option selected="">VIC</option>
+<option>Other (Please Specify)</option>
+</select>
+</div>
+<div class="field" data-field="postal_state_other" data-other-field="postal_state" style="grid-column: 1 / -1; display: none;">
+<label>Other (Please Specify) <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" disabled="" name="postal_state_other" placeholder="Please specify" type="text"/></div>
+</div>
+<div class="field" data-address-manual="postal" style="display: none;">
+<label>Post Code <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" id="form-postal-postcode" inputmode="numeric" name="postal_postcode" type="number"/></div>
+</div>
+</div>
+</div>
+</article>
+<article class="card">
+<div class="eyebrow blue">Contact Details</div>
+<h3>How should we reach you?</h3>
+<div class="field-grid" style="margin-top: 16px;">
+<div class="field" data-field="email">
+<label>Email <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" name="email" required="" type="email"/></div>
+<div class="form-error">A valid email address is required.</div>
+</div>
+<div class="field" data-field="confirm_email">
+<label>Confirm Email <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" name="confirm_email" required="" type="email"/></div>
+<div class="form-error">Email addresses must match.</div>
+</div>
+<div class="field" data-field="mobile">
+<label>Mobile <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" inputmode="numeric" maxlength="10" name="mobile" pattern="\\d{10}" placeholder="04XXXXXXXX" required="" type="tel"/></div>
+<div class="form-error">Enter a 10-digit mobile number.</div>
+</div>
+<div class="field" data-field="confirm_mobile">
+<label>Confirm Mobile <span class="required">*</span></label>
+<div class="field-box"><input class="field-input" inputmode="numeric" maxlength="10" name="confirm_mobile" pattern="\\d{10}" placeholder="04XXXXXXXX" required="" type="tel"/></div>
+<div class="form-error">Mobile numbers must match.</div>
+</div>
+</div>
+</article>
+<div class="footer-actions" style="margin-top: 8px;">
+<button class="btn secondary" data-action="back" type="button">Back</button>
+<button class="btn primary" data-action="next" type="button">Continue</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section aria-label="Training preferences" class="deck-page content-page step-page" data-step-page="3">
+<div class="toolbar">
+<button aria-controls="site-menu-step-4" aria-expanded="false" aria-label="Open site menu" class="toolbar-menu-button" data-site-menu-toggle="" type="button">
+<span aria-hidden="true" class="icon-host" data-icon-key="menu-gradient" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+</button>
+<nav aria-label="Site menu" class="site-menu" hidden="" id="site-menu-step-4">
+<a class="site-menu-link" href="https://www.gymfusion.com.au" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 19v-8.5a1 1 0 0 0-.4-.8l-7-5.25a1 1 0 0 0-1.2 0l-7 5.25a1 1 0 0 0-.4.8V19a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HOME</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/our-services" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 10.1c.1-.5-.3-1.1-.8-1.1l-5.7-.8L12.9 3c-.1-.2-.2-.3-.4-.4c-.5-.3-1.1-.1-1.4.4L8.6 8.2L2.9 9q-.45 0-.6.3c-.4.4-.4 1 0 1.4l4.1 4l-1 5.7c0 .2 0 .4.1.6c.3.5.9.7 1.4.4l5.1-2.7l5.1 2.7c.1.1.3.1.5.1h.2c.5-.1.9-.6.8-1.2l-1-5.7l4.1-4.2c.2-.1.3-.3.3-.5" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">OUR SERVICES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/policies/" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 4v2h10V7H7zm0 4v2h10v-2H7zm0 4v2h7v-2H7z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">POLICIES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://gymfusion.com.au/faq" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.05 6.56a.84.84 0 0 0-.84.84v4.78a.84.84 0 1 0 1.68 0V7.4a.85.85 0 0 0-.84-.84m-6.37 0a.85.85 0 0 0-.84.84v2.43h1.68V7.4a.85.85 0 0 0-.84-.84" fill="currentColor"></path>
+<path d="M22.88 1.94H1.12A1.12 1.12 0 0 0 0 3.06v14.5a1.12 1.12 0 0 0 1.12 1.13h2.6a8.3 8.3 0 0 1-1.48 3.37c3.26.05 5.32-1.21 6.55-3.37h14.09A1.12 1.12 0 0 0 24 17.56V3.06a1.12 1.12 0 0 0-1.12-1.12M7.54 6.56H6a.85.85 0 0 0-.84.84v2.43h1.59a.75.75 0 0 1 0 1.5H5.11v2.44a.75.75 0 1 1-1.5 0V7.4A2.34 2.34 0 0 1 6 5.06h1.54a.75.75 0 1 1 0 1.5M14 13.77a.75.75 0 0 1-1.5 0v-2.44h-1.66v2.44a.75.75 0 0 1-1.5 0V7.4a2.34 2.34 0 1 1 4.66 0Zm6.37-1.59a2.37 2.37 0 0 1-1 1.9l.75.75a.75.75 0 0 1 0 1.06a.75.75 0 0 1-1.06 0l-1.4-1.4a2.34 2.34 0 0 1-2-2.31V7.4a2.34 2.34 0 1 1 4.68 0Z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">FREQUENTLY ASKED QUESTIONS</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/website-accessibility-form" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.1 21.213q-1.825-.788-3.175-2.138T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22t-3.9-.788m1-1.762l1.2-2.75q-1.05-.375-1.812-1.162T7.3 13.7l-2.75 1.15q.575 1.6 1.775 2.8t2.775 1.8M7.3 10.3q.425-1.05 1.188-1.837T10.3 7.3L9.15 4.55q-1.6.6-2.8 1.8t-1.8 2.8zm6.825 3.825Q15 13.25 15 12t-.875-2.125T12 9t-2.125.875T9 12t.875 2.125T12 15t2.125-.875m.775 5.325q1.575-.6 2.763-1.787T19.45 14.9l-2.75-1.2q-.375 1.05-1.15 1.813t-1.8 1.187zm1.8-9.2l2.75-1.15q-.6-1.575-1.787-2.762T14.9 4.55l-1.15 2.8q1.025.375 1.775 1.138T16.7 10.25" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HELP</span>
+<span class="site-menu-subtext">Need help with this form? Let us know!</span>
+</span>
+</a>
+</nav>
+<div class="brand">
+<span aria-hidden="true" class="brand-icon icon-host" data-icon-key="preferences-icon" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+<span>PREFERENCES</span>
+</div>
+<span class="toolbar-chip">4 / 6</span>
+</div>
+<div class="content-scroll">
+<div aria-label="Form progress" class="preview-stepper">
+<div class="preview-step is-complete">
+<strong>01 Introduction</strong>
+<span>Read through our introduction and confirm you understand the Expression of Interest process.</span>
+</div>
+<div class="preview-step is-complete">
+<strong>02 Privacy</strong>
+<span>Review our Privacy Collection Notice and provide your consent.</span>
+</div>
+<div class="preview-step is-complete">
+<strong>03 Details</strong>
+<span>Provide some basic details, such as your name, address, and contact information.</span>
+</div>
+<div class="preview-step is-active">
+<strong>04 Preferences</strong>
+<span>Help us understand which of our services you’re interested in and when you’re available to train.</span>
+</div>
+<div class="preview-step is-future">
+<strong>05 Availability</strong>
+<span>Select the days and times that usually work for your training schedule.</span>
+</div>
+<div class="preview-step is-future">
+<strong>06 Submitted</strong>
+<span>Review your submission confirmation and next steps.</span>
+</div>
+</div>
+<div class="page-shell">
+<div class="form-stack">
+<article class="card">
+<div class="eyebrow purple">What type of training are you interested in?</div>
+<h3>Select the option that best describes your interest <span class="required">*</span></h3>
+<div aria-label="Training type" class="option-grid" role="group" style="margin-top: 16px;">
+<button aria-pressed="false" class="option-choice" data-option-group="training-type" data-value="1:1 Fitness Coaching" type="button">1:1 Fitness Coaching</button>
+<button aria-pressed="false" class="option-choice" data-option-group="training-type" data-value="FUSION Classes" type="button">FUSION Classes</button>
+<button aria-pressed="false" class="option-choice" data-option-group="training-type" data-value="Both" type="button">Both</button>
+</div>
+</article>
+<article class="card" data-conditional-card="second-preference" style="display: none;">
+<div class="eyebrow">Second preference</div>
+<h3>Would Fusion Classes be a suitable second preference if 1:1 Coaching isn’t available? <span class="required">*</span></h3>
+<div class="helper-copy" style="margin-top: 14px;">
+                    We’ll always do our best to consider your preferences and keep you informed about any openings that match your availability as they come up.
+                  </div>
+<div aria-label="Second preference" class="option-grid" role="group" style="margin-top: 16px;">
+<button aria-pressed="false" class="option-choice" data-choice-group="second_preference" data-value="Yes" type="button">Yes, I’m open to Fusion Classes as my second preference.</button>
+<button aria-pressed="false" class="option-choice" data-choice-group="second_preference" data-value="No" type="button">No — I prefer to wait for 1:1 Coaching</button>
+<button aria-pressed="false" class="option-choice" data-choice-group="second_preference" data-value="Not sure" type="button">I’m not sure yet — please recontact me with estimated wait times and I’ll decide later</button>
+</div>
+</article>
+<article class="card">
+<div class="eyebrow blue">Work patterns</div>
+<h3>If you’re employed, do your work shifts stay at the same times each week, or do the times change? <span class="required">*</span></h3>
+<div class="helper-copy" style="margin-top: 14px;">
+                    Our programs run on fixed weekly time-slots for the full 10-week term, so understanding whether your work shift times change helps us match you with a session you can attend consistently.
+                  </div>
+<div aria-label="Work shifts" class="option-grid" role="group" style="margin-top: 16px;">
+<button aria-pressed="false" class="option-choice" data-choice-group="work_shift" data-value="consistent" type="button">My shift times are consistent each week</button>
+<button aria-pressed="false" class="option-choice" data-choice-group="work_shift" data-value="rotating" type="button">My shift times change on a rotating roster</button>
+<button aria-pressed="false" class="option-choice" data-choice-group="work_shift" data-value="vary" type="button">My shifts vary week to week</button>
+<button aria-pressed="false" class="option-choice" data-choice-group="work_shift" data-value="casual" type="button">I work casually and my shifts change frequently</button>
+<button aria-pressed="false" class="option-choice" data-choice-group="work_shift" data-value="not_employed" type="button">I am not currently employed</button>
+<button aria-pressed="false" class="option-choice" data-choice-group="work_shift" data-value="prefer_not" type="button">Prefer not to say</button>
+</div>
+</article>
+<div class="footer-actions">
+<button class="btn secondary" data-action="back" type="button">Back</button>
+<button class="btn primary" data-action="next" type="button">Continue</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section aria-label="Availability" class="deck-page content-page step-page availability-page" data-step-page="4">
+<div class="toolbar">
+<button aria-controls="site-menu-step-5" aria-expanded="false" aria-label="Open site menu" class="toolbar-menu-button" data-site-menu-toggle="" type="button">
+<span aria-hidden="true" class="icon-host" data-icon-key="menu-gradient" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+</button>
+<nav aria-label="Site menu" class="site-menu" hidden="" id="site-menu-step-5">
+<a class="site-menu-link" href="https://www.gymfusion.com.au" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 19v-8.5a1 1 0 0 0-.4-.8l-7-5.25a1 1 0 0 0-1.2 0l-7 5.25a1 1 0 0 0-.4.8V19a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HOME</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/our-services" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 10.1c.1-.5-.3-1.1-.8-1.1l-5.7-.8L12.9 3c-.1-.2-.2-.3-.4-.4c-.5-.3-1.1-.1-1.4.4L8.6 8.2L2.9 9q-.45 0-.6.3c-.4.4-.4 1 0 1.4l4.1 4l-1 5.7c0 .2 0 .4.1.6c.3.5.9.7 1.4.4l5.1-2.7l5.1 2.7c.1.1.3.1.5.1h.2c.5-.1.9-.6.8-1.2l-1-5.7l4.1-4.2c.2-.1.3-.3.3-.5" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">OUR SERVICES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/policies/" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 4v2h10V7H7zm0 4v2h10v-2H7zm0 4v2h7v-2H7z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">POLICIES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://gymfusion.com.au/faq" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.05 6.56a.84.84 0 0 0-.84.84v4.78a.84.84 0 1 0 1.68 0V7.4a.85.85 0 0 0-.84-.84m-6.37 0a.85.85 0 0 0-.84.84v2.43h1.68V7.4a.85.85 0 0 0-.84-.84" fill="currentColor"></path>
+<path d="M22.88 1.94H1.12A1.12 1.12 0 0 0 0 3.06v14.5a1.12 1.12 0 0 0 1.12 1.13h2.6a8.3 8.3 0 0 1-1.48 3.37c3.26.05 5.32-1.21 6.55-3.37h14.09A1.12 1.12 0 0 0 24 17.56V3.06a1.12 1.12 0 0 0-1.12-1.12M7.54 6.56H6a.85.85 0 0 0-.84.84v2.43h1.59a.75.75 0 0 1 0 1.5H5.11v2.44a.75.75 0 1 1-1.5 0V7.4A2.34 2.34 0 0 1 6 5.06h1.54a.75.75 0 1 1 0 1.5M14 13.77a.75.75 0 0 1-1.5 0v-2.44h-1.66v2.44a.75.75 0 0 1-1.5 0V7.4a2.34 2.34 0 1 1 4.66 0Zm6.37-1.59a2.37 2.37 0 0 1-1 1.9l.75.75a.75.75 0 0 1 0 1.06a.75.75 0 0 1-1.06 0l-1.4-1.4a2.34 2.34 0 0 1-2-2.31V7.4a2.34 2.34 0 1 1 4.68 0Z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">FREQUENTLY ASKED QUESTIONS</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/website-accessibility-form" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.1 21.213q-1.825-.788-3.175-2.138T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22t-3.9-.788m1-1.762l1.2-2.75q-1.05-.375-1.812-1.162T7.3 13.7l-2.75 1.15q.575 1.6 1.775 2.8t2.775 1.8M7.3 10.3q.425-1.05 1.188-1.837T10.3 7.3L9.15 4.55q-1.6.6-2.8 1.8t-1.8 2.8zm6.825 3.825Q15 13.25 15 12t-.875-2.125T12 9t-2.125.875T9 12t.875 2.125T12 15t2.125-.875m.775 5.325q1.575-.6 2.763-1.787T19.45 14.9l-2.75-1.2q-.375 1.05-1.15 1.813t-1.8 1.187zm1.8-9.2l2.75-1.15q-.6-1.575-1.787-2.762T14.9 4.55l-1.15 2.8q1.025.375 1.775 1.138T16.7 10.25" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HELP</span>
+<span class="site-menu-subtext">Need help with this form? Let us know!</span>
+</span>
+</a>
+</nav>
+<div class="brand">
+<span aria-hidden="true" class="brand-icon icon-host" data-icon-key="availability-calendar" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+<span>AVAILABILITY</span>
+</div>
+<span class="toolbar-chip">5 / 6</span>
+</div>
+<div class="content-scroll">
+<div aria-label="Form progress" class="preview-stepper">
+<div class="preview-step is-complete">
+<strong>01 Introduction</strong>
+<span>Read through our introduction and confirm you understand the Expression of Interest process.</span>
+</div>
+<div class="preview-step is-complete">
+<strong>02 Privacy</strong>
+<span>Review our Privacy Collection Notice and provide your consent.</span>
+</div>
+<div class="preview-step is-complete">
+<strong>03 Details</strong>
+<span>Provide some basic details, such as your name, address, and contact information.</span>
+</div>
+<div class="preview-step is-active">
+<strong>04 Preferences</strong>
+<span>Help us understand which of our services you’re interested in and when you’re available to train.</span>
+</div>
+<div class="preview-step is-future">
+<strong>05 Availability</strong>
+<span>Select the days and times that usually work for your training schedule.</span>
+</div>
+<div class="preview-step is-future">
+<strong>06 Submitted</strong>
+<span>Review your submission confirmation and next steps.</span>
+</div>
+</div>
+<div class="page-shell">
+<div class="form-stack">
+<h3 class="availability-section-title">Please select all days &amp; times you are usually available</h3>
+<div class="helper-copy availability-intro-copy" style="margin-top: 2px;">
+<p>To ensure consistent attendance, please choose days and times that align with your regular routine, as our programs run on fixed weekly time slots for the full 10-week term.</p>
+<p>While we cannot guarantee schedule changes mid-term, we always try to accommodate you where possible.</p>
+<p>Providing multiple options gives us the best chance of finding an open slot.</p>
+<p>If we are fully booked, we will keep you on our waiting list and notify you as soon as a space matches your availability.</p>
+</div>
+<article class="card" data-availability-card="one_to_one">
+<div class="eyebrow purple">1:1 FITNESS COACHING</div>
+<h3>Our 1:1 Fitness Coaching Timetable</h3>
+<div class="helper-copy">
+                    Our 1:1 Fitness Coaching sessions run exclusively in the mornings from Monday to Thursday, with three structured time slots offered each day.  Choose any times that suit your normal weekly routine.
+                  </div>
+<div aria-label="1:1 availability matrix" class="availability-grid four-cols" role="grid">
+<div class="availability-head is-blank"></div>
+<div class="availability-head">Mon</div>
+<div class="availability-head">Tue</div>
+<div class="availability-head">Wed</div>
+<div class="availability-head">Thur</div>
+<div class="availability-row-label">9:00 AM - 10:00 AM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Monday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="9:00 AM to 10:00 AM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Tuesday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="9:00 AM to 10:00 AM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Wednesday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="9:00 AM to 10:00 AM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Thursday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="9:00 AM to 10:00 AM" type="button"></button>
+<div class="availability-row-label">10:10 AM - 11:10 AM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Monday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="10:10 AM to 11:10 AM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Tuesday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="10:10 AM to 11:10 AM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Wednesday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="10:10 AM to 11:10 AM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Thursday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="10:10 AM to 11:10 AM" type="button"></button>
+<div class="availability-row-label">11:20 AM - 12:20 PM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Monday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="11:20 AM to 12:20 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Tuesday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="11:20 AM to 12:20 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Wednesday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="11:20 AM to 12:20 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Thursday" data-matrix-group="one_to_one_morning" data-summary-group="one_to_one" data-time="11:20 AM to 12:20 PM" type="button"></button>
+</div>
+<h3 class="selection-summary-title is-hidden" data-summary-title="one_to_one">Selected Time-Slots</h3>
+<div class="selection-summary is-hidden" data-summary="one_to_one"></div>
+</article>
+<article class="card" data-availability-card="fusion">
+<div class="eyebrow">FUSION Classes</div>
+<h3>Since you’re also open to FUSION Classes, please let us know any additional times you may be able to attend.</h3>
+<div class="helper-copy">
+                    Our Classes run Monday to Thursday in the afternoon, with extra morning sessions available on Fridays. By telling us the time slots that match your usual availability, you’ll benefit from greater flexibility with scheduling, as Classes run more frequently. This may also allow you to start sooner.
+                  </div>
+<div aria-label="Fusion classes availability" class="availability-grid four-cols" role="grid">
+<div class="availability-head is-blank"></div>
+<div class="availability-head">Mon</div>
+<div class="availability-head">Tue</div>
+<div class="availability-head">Wed</div>
+<div class="availability-head">Thur</div>
+<div class="availability-row-label">1:00 PM - 2:00 PM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Monday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="1:00 PM to 2:00 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Tuesday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="1:00 PM to 2:00 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Wednesday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="1:00 PM to 2:00 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Thursday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="1:00 PM to 2:00 PM" type="button"></button>
+<div class="availability-row-label">2:10 PM - 3:10 PM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Monday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="2:10 PM to 3:10 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Tuesday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="2:10 PM to 3:10 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Wednesday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="2:10 PM to 3:10 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Thursday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="2:10 PM to 3:10 PM" type="button"></button>
+<div class="availability-row-label">3:20 PM - 4:20 PM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Monday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="3:20 PM to 4:20 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Tuesday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="3:20 PM to 4:20 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Wednesday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="3:20 PM to 4:20 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Thursday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="3:20 PM to 4:20 PM" type="button"></button>
+<div class="availability-row-label">4:30 PM - 5:30 PM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Monday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="4:30 PM to 5:30 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Tuesday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="4:30 PM to 5:30 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Wednesday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="4:30 PM to 5:30 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Thursday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="4:30 PM to 5:30 PM" type="button"></button>
+<div class="availability-row-label">5:40 PM - 6:40 PM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Monday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="5:40 PM to 6:40 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Tuesday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="5:40 PM to 6:40 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Wednesday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="5:40 PM to 6:40 PM" type="button"></button>
+<button aria-pressed="false" class="availability-slot" data-day="Thursday" data-matrix-group="fusion_afternoon" data-summary-group="fusion" data-time="5:40 PM to 6:40 PM" type="button"></button>
+</div>
+<div aria-label="Fusion Friday morning availability" class="availability-grid one-col" role="grid" style="margin-top: 18px;">
+<div class="availability-head is-blank"></div>
+<div class="availability-head">Fri</div>
+<div class="availability-row-label">9:00 AM - 10:00 AM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Friday" data-matrix-group="fusion_friday" data-summary-group="fusion" data-time="9:00 AM to 10:00 AM" type="button"></button>
+<div class="availability-row-label">10:10 AM - 11:10 AM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Friday" data-matrix-group="fusion_friday" data-summary-group="fusion" data-time="10:10 AM to 11:10 AM" type="button"></button>
+<div class="availability-row-label">11:20 AM - 12:20 PM</div>
+<button aria-pressed="false" class="availability-slot" data-day="Friday" data-matrix-group="fusion_friday" data-summary-group="fusion" data-time="11:20 AM to 12:20 PM" type="button"></button>
+</div>
+<h3 class="selection-summary-title is-hidden" data-summary-title="fusion">Selected Time-Slots</h3>
+<div class="selection-summary is-hidden" data-summary="fusion"></div>
+</article>
+<div class="footer-actions">
+<button class="btn secondary" data-action="back" type="button">Back</button>
+<button class="btn primary is-hidden" data-action="next" data-availability-submit="" type="button">Submit</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section aria-label="Submitted" class="deck-page content-page step-page" data-step-page="5">
+<div class="toolbar">
+<button aria-controls="site-menu-step-6" aria-expanded="false" aria-label="Open site menu" class="toolbar-menu-button" data-site-menu-toggle="" type="button">
+<span aria-hidden="true" class="icon-host" data-icon-key="menu-gradient" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+</button>
+<nav aria-label="Site menu" class="site-menu" hidden="" id="site-menu-step-6">
+<a class="site-menu-link" href="https://www.gymfusion.com.au" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 19v-8.5a1 1 0 0 0-.4-.8l-7-5.25a1 1 0 0 0-1.2 0l-7 5.25a1 1 0 0 0-.4.8V19a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HOME</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/our-services" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 10.1c.1-.5-.3-1.1-.8-1.1l-5.7-.8L12.9 3c-.1-.2-.2-.3-.4-.4c-.5-.3-1.1-.1-1.4.4L8.6 8.2L2.9 9q-.45 0-.6.3c-.4.4-.4 1 0 1.4l4.1 4l-1 5.7c0 .2 0 .4.1.6c.3.5.9.7 1.4.4l5.1-2.7l5.1 2.7c.1.1.3.1.5.1h.2c.5-.1.9-.6.8-1.2l-1-5.7l4.1-4.2c.2-.1.3-.3.3-.5" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">OUR SERVICES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/policies/" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 4v2h10V7H7zm0 4v2h10v-2H7zm0 4v2h7v-2H7z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">POLICIES</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://gymfusion.com.au/faq" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.05 6.56a.84.84 0 0 0-.84.84v4.78a.84.84 0 1 0 1.68 0V7.4a.85.85 0 0 0-.84-.84m-6.37 0a.85.85 0 0 0-.84.84v2.43h1.68V7.4a.85.85 0 0 0-.84-.84" fill="currentColor"></path>
+<path d="M22.88 1.94H1.12A1.12 1.12 0 0 0 0 3.06v14.5a1.12 1.12 0 0 0 1.12 1.13h2.6a8.3 8.3 0 0 1-1.48 3.37c3.26.05 5.32-1.21 6.55-3.37h14.09A1.12 1.12 0 0 0 24 17.56V3.06a1.12 1.12 0 0 0-1.12-1.12M7.54 6.56H6a.85.85 0 0 0-.84.84v2.43h1.59a.75.75 0 0 1 0 1.5H5.11v2.44a.75.75 0 1 1-1.5 0V7.4A2.34 2.34 0 0 1 6 5.06h1.54a.75.75 0 1 1 0 1.5M14 13.77a.75.75 0 0 1-1.5 0v-2.44h-1.66v2.44a.75.75 0 0 1-1.5 0V7.4a2.34 2.34 0 1 1 4.66 0Zm6.37-1.59a2.37 2.37 0 0 1-1 1.9l.75.75a.75.75 0 0 1 0 1.06a.75.75 0 0 1-1.06 0l-1.4-1.4a2.34 2.34 0 0 1-2-2.31V7.4a2.34 2.34 0 1 1 4.68 0Z" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">FREQUENTLY ASKED QUESTIONS</span>
+</span>
+</a>
+<a class="site-menu-link" href="https://www.gymfusion.com.au/website-accessibility-form" target="_blank">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.1 21.213q-1.825-.788-3.175-2.138T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22t-3.9-.788m1-1.762l1.2-2.75q-1.05-.375-1.812-1.162T7.3 13.7l-2.75 1.15q.575 1.6 1.775 2.8t2.775 1.8M7.3 10.3q.425-1.05 1.188-1.837T10.3 7.3L9.15 4.55q-1.6.6-2.8 1.8t-1.8 2.8zm6.825 3.825Q15 13.25 15 12t-.875-2.125T12 9t-2.125.875T9 12t.875 2.125T12 15t2.125-.875m.775 5.325q1.575-.6 2.763-1.787T19.45 14.9l-2.75-1.2q-.375 1.05-1.15 1.813t-1.8 1.187zm1.8-9.2l2.75-1.15q-.6-1.575-1.787-2.762T14.9 4.55l-1.15 2.8q1.025.375 1.775 1.138T16.7 10.25" fill="currentColor"></path>
+</svg>
+<span class="site-menu-text">
+<span class="site-menu-label">HELP</span>
+<span class="site-menu-subtext">Need help with this form? Let us know!</span>
+</span>
+</a>
+</nav>
+<div class="brand">
+<span aria-hidden="true" class="brand-icon icon-host" data-icon-key="thank-you" data-icon-state="dot">
+<span class="icon-dot"></span>
+</span>
+<span>THANK-YOU</span>
+</div>
+<span class="toolbar-chip">6 / 6</span>
+</div>
+<div class="content-scroll">
+<div class="page-shell">
+<div class="form-stack">
+<article class="card start-hero">
+<div style="height: 10px;"></div>
+<h3 class="page-title">Thanks – you're off to a great start!</h3>
+<div class="preview-copy" style="text-align: left; max-width: 62ch; margin-inline: auto; display: grid; gap: 14px;">
+<p style="text-align: center;">Your initial Expression of Interest submission (Part 1) has been received.</p>
+<article class="card info-tile tile-purple">
+<h4>UP NEXT</h4>
+<p>You will now receive an email with instructions to set up your GYMFUSION Portal account and continue the remaining stages of the EOI process.</p>
+<p>Once your account is activated, you’ll be guided through the remaining forms, which together make up our <strong>Ready for Movement Pre-Exercise Screening</strong>:</p>
+<ul>
+<li><strong>Part 2:</strong> Health &amp; Safety</li>
+<li><strong>Part 3:</strong> Your Movement, Comfort &amp; Support Needs</li>
+<li><strong>Part 4:</strong> Current Fitness &amp; Activity Background</li>
+</ul>
+</article>
+<article class="card info-tile tile-gold">
+<h4>DEADLINE</h4>
+<p>You don’t need to complete these all in one sitting. You’ll have up to <strong>14 days from today</strong> to complete the remaining steps and finalise your Expression of Interest application.</p>
+</article>
+<article class="card info-tile tile-blue">
+<h4>Having trouble receiving the email?</h4>
+<ul>
+<li>Please allow up to 10 minutes for it to arrive</li>
+<li>Check your spam/junk folders</li>
+<li>If you still can’t find it, contact us at <strong>support@gymfusion.com.au</strong> and we’ll help you with next steps.</li>
+</ul>
+</article>
+</div>
+<div class="start-actions">
+<button class="btn primary" data-action="close-form" type="button">CLOSE FORM</button>
+</div>
+</article>
+</div>
+</div>
+</div>
+</section>
+</div>
+</section>
+</main>
+<div aria-labelledby="menu-warning-title" aria-modal="true" class="modal-overlay" hidden="" id="menu-warning-modal" role="dialog">
+<div class="warning-box">
+<svg aria-hidden="true" class="warning-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+<line x1="12" x2="12" y1="9" y2="13"></line>
+<line x1="12" x2="12.01" y1="17" y2="17"></line>
+</svg>
+<h3 class="warning-title" id="menu-warning-title">Are you sure?</h3>
+<p class="warning-message">Opening another page may interrupt form progress. You can stay here or open <span id="menu-warning-destination">Destination</span> in a new tab.</p>
+<div class="button-group">
+<button class="btn-choice btn-green" data-menu-warning-stay="" type="button">Stay on form</button>
+<button class="btn-choice btn-red" data-menu-warning-leave="" type="button">Open in new tab</button>
+</div>
+</div>
+</div>
+<div aria-labelledby="email-warning-title" aria-modal="true" class="modal-overlay" hidden="" id="email-warning-modal" role="dialog">
+<div class="warning-box">
+<svg aria-hidden="true" class="warning-icon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<rect height="14" rx="2" width="18" x="3" y="5"></rect>
+<path d="m3 7 9 6 9-6"></path>
+</svg>
+<h3 class="warning-title" id="email-warning-title">Email this address?</h3>
+<p class="warning-message">Opening your email app may interrupt form progress. You can stay here, copy the address, or open your email app when ready.</p>
+<p class="warning-message" id="email-warning-address" style="word-break: break-word;"></p>
+<div class="button-group">
+<button class="btn-choice btn-green" data-email-warning-stay="" type="button">Stay on form</button>
+<button class="btn-choice btn-red" data-email-warning-copy="" type="button">Copy email for later</button>
+<button class="btn-choice btn-red" data-email-warning-open="" type="button">Open email app</button>
+</div>
+</div>
+</div>
+<script src="./mobile.js"></script>
+</body>
+</html>

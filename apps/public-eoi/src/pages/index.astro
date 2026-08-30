@@ -1,15 +1,1155 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import SiteHeader from '../components/SiteHeader.astro';
-import SiteFooter from '../components/SiteFooter.astro';
-import EoiShell from '../components/EoiShell.astro';
+
+const spiralLogoSrc = 'https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@2df01ea/loaders/logos/vibrant_spiral_transparent.png';
 ---
 
 <Layout
-	title="GYMFUSION Expression of Interest"
-	description="Public EOI Part 1 foundation for the GYMFUSION Astro migration."
+  title="GYMFUSION Expression of Interest"
+  description="Public EOI Part 1 landing page for the GYMFUSION Astro migration."
 >
-	<SiteHeader />
-	<EoiShell />
-	<SiteFooter />
+  <main class="eoi-landing" aria-label="GYMFUSION Expression of Interest">
+    <div class="top-strip" data-site-header>
+      <div class="brand-slot" aria-hidden="true">
+        <img
+          class="brand-logo"
+          src={spiralLogoSrc}
+          alt=""
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+      <div class="nav-slot">
+        <gf-public-member-nav
+          class="gf-member-nav-host"
+          member-state='{"authenticated":false,"displayName":"","loading":false,"ready":true,"dropdownOpen":false,"notice":""}'
+          portal-url="https://portal.gymfusion.com.au"
+          login-lightbox-name="Login"
+        ></gf-public-member-nav>
+      </div>
+      <div class="menu-slot">
+        <button class="menu-pill" id="gfMenuButton" type="button" aria-label="Open menu" aria-expanded="false">
+          <svg class="menu-icon" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+            <path class="line line-top" d="M5 8h18"></path>
+            <path class="line line-middle" d="M5 14h18"></path>
+            <path class="line line-bottom" d="M5 20h18"></path>
+          </svg>
+          <span class="menu-label">Menu</span>
+        </button>
+        <div class="desktop-menu-overlay" data-desktop-menu-overlay hidden>
+          <nav class="desktop-site-menu" id="desktop-site-menu" aria-label="Desktop navigation" hidden>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/"><span class="site-menu-link__label">Home</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/our-services"><span class="site-menu-link__label">Our Services</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/privacy-policy"><span class="site-menu-link__label">Privacy Policy</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/accessibility-inclusion-statement"><span class="site-menu-link__label">Accessibility &amp; Inclusion</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/our-policies/"><span class="site-menu-link__label">Our Policies</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/terms-and-conditions"><span class="site-menu-link__label">T&amp;Cs</span></a>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <div class="desktop-chrome desktop-chrome--top" aria-label="Site navigation and promotion">
+      <div class="desktop-marquee is-left is-solid" aria-label="GYMFUSION introductory offer marquee">
+        <div class="desktop-marquee__track" aria-hidden="true">
+          <div class="desktop-marquee__group">
+            <span class="desktop-marquee__text">Intro Offer: 2 visits over 2 weeks • No ongoing commitment • Continue only if you love it! T&amp;Cs apply.</span>
+            <img class="desktop-marquee__divider" src="https://static.wixstatic.com/shapes/f190ff_6c507730a3e04f8dab48924ba8e8c8f6.svg" alt="">
+            <span class="desktop-marquee__text">Intro Offer: 2 visits over 2 weeks • No ongoing commitment • Continue only if you love it! T&amp;Cs apply.</span>
+            <img class="desktop-marquee__divider" src="https://static.wixstatic.com/shapes/f190ff_6c507730a3e04f8dab48924ba8e8c8f6.svg" alt="">
+          </div>
+          <div class="desktop-marquee__group" aria-hidden="true">
+            <span class="desktop-marquee__text">Intro Offer: 2 visits over 2 weeks • No ongoing commitment • Continue only if you love it! T&amp;Cs apply.</span>
+            <img class="desktop-marquee__divider" src="https://static.wixstatic.com/shapes/f190ff_6c507730a3e04f8dab48924ba8e8c8f6.svg" alt="">
+            <span class="desktop-marquee__text">Intro Offer: 2 visits over 2 weeks • No ongoing commitment • Continue only if you love it! T&amp;Cs apply.</span>
+            <img class="desktop-marquee__divider" src="https://static.wixstatic.com/shapes/f190ff_6c507730a3e04f8dab48924ba8e8c8f6.svg" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="content-shell" aria-label="EOI page window">
+      <div class="middle-stage">
+        <iframe
+          class="eoi-embed"
+          data-eoi-embed
+          title="GYMFUSION Expression of Interest Part 1"
+          loading="eager"
+          referrerpolicy="no-referrer"
+        ></iframe>
+      </div>
+    </section>
+
+    <footer class="desktop-chrome desktop-chrome--bottom" aria-label="Desktop page footer">
+      <div class="desktop-marquee is-right is-transparent" aria-label="GYMFUSION introductory offer marquee">
+        <div class="desktop-marquee__track" aria-hidden="true">
+          <div class="desktop-marquee__group">
+            <span class="desktop-marquee__text">Intro Offer: 2 visits over 2 weeks • No ongoing commitment • Continue only if you love it! T&amp;Cs apply.</span>
+            <img class="desktop-marquee__divider" src="https://static.wixstatic.com/shapes/f190ff_6c507730a3e04f8dab48924ba8e8c8f6.svg" alt="">
+            <span class="desktop-marquee__text">Intro Offer: 2 visits over 2 weeks • No ongoing commitment • Continue only if you love it! T&amp;Cs apply.</span>
+            <img class="desktop-marquee__divider" src="https://static.wixstatic.com/shapes/f190ff_6c507730a3e04f8dab48924ba8e8c8f6.svg" alt="">
+          </div>
+          <div class="desktop-marquee__group" aria-hidden="true">
+            <span class="desktop-marquee__text">Intro Offer: 2 visits over 2 weeks • No ongoing commitment • Continue only if you love it! T&amp;Cs apply.</span>
+            <img class="desktop-marquee__divider" src="https://static.wixstatic.com/shapes/f190ff_6c507730a3e04f8dab48924ba8e8c8f6.svg" alt="">
+            <span class="desktop-marquee__text">Intro Offer: 2 visits over 2 weeks • No ongoing commitment • Continue only if you love it! T&amp;Cs apply.</span>
+            <img class="desktop-marquee__divider" src="https://static.wixstatic.com/shapes/f190ff_6c507730a3e04f8dab48924ba8e8c8f6.svg" alt="">
+          </div>
+        </div>
+      </div>
+
+      <section class="country-acknowledgement">
+        <p>
+          <span class="country-acknowledgement__text">
+            We respectfully acknowledge the Yorta Yorta Nation as the First Peoples of the land on which we live and<br>
+            work. We pay our respects to Elders past, present, and emerging, and honour their continuing culture<br>
+            and connection to land and waters.
+          </span>
+        </p>
+      </section>
+
+      <div class="desktop-footer">
+        <nav class="desktop-footer__links footer-links" aria-label="Footer links">
+          <a href="https://www.gymfusion.com.au/eoi" target="_top">EOI</a>
+          <a href="https://www.gymfusion.com.au/our-services" target="_top">Our Services</a>
+          <a href="https://www.gymfusion.com.au/privacy-policy" target="_top">Privacy Policy</a>
+          <a href="https://www.gymfusion.com.au/accessibility-inclusion-statement" target="_top">Accessibility</a>
+          <a href="https://www.gymfusion.com.au/terms-and-conditions" target="_top">T&amp;Cs</a>
+          <a href="https://www.gymfusion.com.au/our-policies/" target="_top">Our Policies</a>
+        </nav>
+
+        <div class="desktop-footer__identity">
+          <img class="desktop-footer__mark" src={spiralLogoSrc} alt="" aria-hidden="true" loading="eager" decoding="async" />
+          <strong>GYMFUSION</strong>
+          <span><span class="desktop-footer__abbr">ABN</span> 97 143 803 038</span>
+          <span>70 New Dookie Rd, Shepparton, VIC, 3629</span>
+          <a href="mailto:enquiries@gymfusion.com.au">enquiries@gymfusion.com.au</a>
+        </div>
+
+        <p class="desktop-footer__legal">
+          Copyright © 2026 GYMFUSION. All rights reserved. Website content, branding, and Expression of Interest materials may not be copied, reproduced, or redistributed without prior written permission.
+        </p>
+      </div>
+    </footer>
+  </main>
 </Layout>
+
+<script>
+  import '../lib/gfPublicMemberNav.js';
+
+  const gfHeader = document.querySelector<HTMLElement>('[data-site-header]');
+  const gfMenuButton = document.getElementById('gfMenuButton');
+  const gfMenuOverlay = gfHeader?.querySelector<HTMLElement>('[data-desktop-menu-overlay]');
+  const gfMenuPanel = gfHeader?.querySelector<HTMLElement>('#desktop-site-menu');
+  let isMenuOpen = false;
+
+  function setMenuOpen(nextOpen: boolean) {
+    isMenuOpen = nextOpen;
+    if (gfHeader) gfHeader.dataset.menuOpen = nextOpen ? 'true' : 'false';
+    gfMenuButton?.classList.toggle('is-open', nextOpen);
+    gfMenuButton?.setAttribute('aria-expanded', String(nextOpen));
+    if (gfMenuOverlay) gfMenuOverlay.hidden = !nextOpen;
+    if (gfMenuPanel) gfMenuPanel.hidden = !nextOpen;
+  }
+
+  gfMenuButton?.addEventListener('click', () => setMenuOpen(!isMenuOpen));
+  gfHeader?.querySelectorAll<HTMLElement>('.site-menu-link').forEach((link) => {
+    link.addEventListener('click', () => setMenuOpen(false));
+  });
+  gfMenuPanel?.addEventListener('mouseleave', () => setMenuOpen(false));
+  document.addEventListener('pointerdown', (event) => {
+    if (gfHeader && isMenuOpen && !gfHeader.contains(event.target as Node)) setMenuOpen(false);
+  }, true);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setMenuOpen(false);
+  });
+
+  const iframe = document.querySelector<HTMLIFrameElement>('[data-eoi-embed]');
+  if (iframe) {
+    const mobile = window.matchMedia('(max-width: 1023px)').matches;
+    iframe.src = mobile ? '/mobile-eoi-part-1.html' : '/desktop-eoi-part-1.html';
+  }
+
+</script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
+
+  @font-face {
+    font-family: CASmutFill;
+    src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/ca-smut-fill-1782165939-0/CASmut-Fill.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "GamuthSans";
+    src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "GamuthSansLightMobile";
+    src: url("https://raw.githubusercontent.com/J35S1CA007/gymfusion-assets/main/Gamuth%20Font%20Family/mobile/GamuthSans-Light_mobile.ttf") format("truetype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "GamuthSansRegularMobile";
+    src: url("https://raw.githubusercontent.com/J35S1CA007/gymfusion-assets/main/Gamuth%20Font%20Family/mobile/GamuthSans-Regular_mobile.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :global(body) {
+    background:
+      radial-gradient(circle at 50% 16%, rgba(157, 10, 255, 0.2), transparent 26%),
+      radial-gradient(circle at 82% 68%, rgba(252, 158, 25, 0.12), transparent 22%),
+      #000;
+  }
+
+  .eoi-landing {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    --cta-gradient: linear-gradient(111deg, rgba(157, 10, 255, 1) 0%, rgba(222, 7, 150, 1) 31%, rgba(253, 29, 29, 1) 68%, rgba(252, 158, 25, 1) 100%);
+    background:
+      radial-gradient(circle at 50% 12%, rgba(157, 10, 255, 0.24), transparent 28%),
+      radial-gradient(circle at 82% 70%, rgba(252, 158, 25, 0.14), transparent 24%),
+      #000;
+    background-color: #000;
+  }
+
+  .top-strip {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    padding: 0 16px;
+    flex: none;
+    height: 65px;
+    min-height: 65px;
+    width: 100%;
+    background: #000;
+    overflow: visible;
+  }
+
+  .brand-slot {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+    align-self: center;
+    transform: none;
+    display: grid;
+    place-items: center;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .brand-logo {
+    display: block;
+    width: clamp(34px, 4.4vw, 46px);
+    height: auto;
+  }
+
+  .nav-slot {
+    position: relative;
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: center;
+    align-self: center;
+    width: 300px;
+    height: 65px;
+    transform: none;
+    display: grid;
+    place-items: center;
+    z-index: 3;
+  }
+
+  .gf-member-nav-host {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 300px;
+    height: 349px;
+    display: block;
+    overflow: visible;
+  }
+
+  .desktop-chrome {
+    display: grid;
+    width: 100%;
+  }
+
+  .desktop-chrome--top {
+    position: relative;
+    z-index: 1;
+  }
+
+  .desktop-chrome--bottom {
+    position: relative;
+    z-index: 3;
+    margin-top: 0;
+    background: #000;
+  }
+
+  .desktop-marquee {
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 4px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .desktop-marquee.is-solid {
+    background: radial-gradient(circle at center, #2e1b4e, #1a0b2e, #05020a);
+  }
+
+  .desktop-marquee.is-transparent {
+    background: transparent;
+  }
+
+  .desktop-marquee__track {
+    display: flex;
+    width: max-content;
+    animation: gymfusionMarquee 52s linear infinite;
+    animation-play-state: running !important;
+    will-change: transform;
+  }
+
+  .desktop-marquee.is-left .desktop-marquee__track {
+    animation-direction: normal;
+  }
+
+  .desktop-marquee.is-right .desktop-marquee__track {
+    animation-direction: reverse;
+  }
+
+  .desktop-marquee__group {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .desktop-marquee__text {
+    font-family: CASmutFill, Arial, sans-serif;
+    font-size: 20px;
+    line-height: 1;
+    color: #bea9ff;
+    letter-spacing: .04em;
+    padding: 0 16px;
+  }
+
+  .desktop-marquee__divider {
+    width: 28px;
+    height: auto;
+    display: block;
+    flex: none;
+  }
+
+  .content-shell {
+    position: relative;
+    flex: 1;
+    display: grid;
+    place-items: center;
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 3rem) 48px;
+    overflow: hidden;
+    isolation: isolate;
+    background: radial-gradient(circle at 50% 30%, #1f0730 0%, #050308 75%);
+  }
+
+  .content-shell::before {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(circle at 20% 18%, rgba(255, 20, 147, 0.58) 0%, rgba(255, 20, 147, 0) 38%),
+      radial-gradient(circle at 80% 24%, rgba(110, 0, 240, 0.6) 0%, rgba(110, 0, 240, 0) 42%),
+      radial-gradient(circle at 30% 84%, rgba(255, 110, 0, 0.48) 0%, rgba(230, 80, 0, 0) 40%),
+      radial-gradient(circle at 82% 78%, rgba(255, 30, 50, 0.5) 0%, rgba(180, 10, 30, 0) 42%);
+    filter: blur(70px);
+    opacity: 0.95;
+    transform: translate3d(0, 0, 0);
+    pointer-events: none;
+    z-index: 0;
+    animation: contentShellGlow 28s ease-in-out infinite alternate;
+  }
+
+  .content-shell::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(5, 3, 8, 0) 35%, rgba(5, 3, 8, 0.8) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .middle-stage {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 1180px);
+    height: min(1010px, calc(100svh - 150px));
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 34px;
+    background:
+      linear-gradient(rgba(3, 5, 18, 0.96), rgba(3, 5, 18, 0.96)) padding-box,
+      var(--cta-gradient) border-box;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 28px 80px rgba(0, 0, 0, 0.52);
+    overflow: hidden;
+  }
+
+  .eoi-embed {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: inherit;
+    background: #000;
+    box-shadow: none;
+  }
+
+  .country-acknowledgement {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+    isolation: isolate;
+    background: url("/assets/ack-of-country-desktop-section-bkg-img.jpg") center / cover no-repeat;
+  }
+
+  .country-acknowledgement::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 624px;
+    height: 73px;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at 67.568359375% 60.56640625000001%, rgba(0,0,0,0.54) 0%, 17.5%, rgba(0,0,0,0) 35%),
+      radial-gradient(circle at 48.914388020833336% 45.123697916666664%, rgba(0,0,0,0.48) 0%, 17.5%, rgba(0,0,0,0) 35%),
+      radial-gradient(circle at 17.947591145833332% 43.421223958333336%, rgba(140,38,45,0.51) 0%, 17.5%, rgba(140,38,45,0) 35%),
+      radial-gradient(circle at 17.265625% 57.64648437499999%, rgba(140,38,45,0.39) 0%, 17.5%, rgba(140,38,45,0) 35%),
+      radial-gradient(circle at 100% 47.44466145833333%, #000000 0%, 7.5%, rgba(0,0,0,0) 15%),
+      radial-gradient(circle at 29.015299479166668% 95.16927083333333%, #000000 0%, 17.5%, rgba(0,0,0,0) 35%),
+      radial-gradient(circle at 61.865234375% 100%, #000000 0%, 17.5%, rgba(0,0,0,0) 35%),
+      radial-gradient(circle at 43.655598958333336% 91.845703125%, #000000 0%, 17.5%, rgba(0,0,0,0) 35%),
+      radial-gradient(circle at 6.560872395833334% 97.01171875%, #000000 0%, 17.5%, rgba(0,0,0,0) 35%),
+      radial-gradient(circle at 67.87923177083334% 5.338541666666666%, rgba(111,1,144,0.45) 0%, 17.5%, rgba(111,1,144,0) 35%),
+      radial-gradient(circle at 27.449544270833332% 5.354817708333334%, rgba(111,1,144,0.46) 0%, 17.5%, rgba(111,1,144,0) 35%),
+      radial-gradient(circle at 91.2646484375% 78.80859375%, rgba(111,1,144,0.87) 0%, 21.599999999999998%, rgba(111,1,144,0) 72%),
+      radial-gradient(circle at 7.838541666666667% 0%, rgba(111,1,144,0.5) 0%, 6%, rgba(111,1,144,0) 20%),
+      radial-gradient(circle at 49.794921875% 0%, rgba(111,1,144,0.66) 0%, 10.2%, rgba(111,1,144,0) 34%),
+      radial-gradient(circle at 91.24348958333334% 7.652994791666666%, #6F0190 0%, 8.7%, rgba(111,1,144,0) 29%),
+      radial-gradient(circle at 48.9013671875% 49.521484375%, rgba(255,255,255,0) 0%, 100%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+  }
+
+  .country-acknowledgement p {
+    position: relative;
+    isolation: isolate;
+    z-index: 1;
+    margin: 0;
+    width: 624px;
+    height: 73px;
+    padding: 0 1.25rem;
+    box-sizing: border-box;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    background: rgba(10, 8, 15, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: rgba(255, 247, 238, 0.9);
+    font-family: "GamuthSansLightMobile", "GamuthSans", Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.35;
+    overflow: hidden;
+  }
+
+  .country-acknowledgement__text {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+  }
+
+  .desktop-footer {
+    display: grid;
+    grid-template-columns: minmax(19rem, 1fr) minmax(15rem, .8fr) minmax(18rem, 1fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 5rem);
+    padding: 1.7rem clamp(3.5rem, 6vw, 6rem) 2.15rem;
+    background: #000;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    align-content: space-between;
+    gap: 8px;
+    width: 330px;
+    height: 84px;
+    box-sizing: border-box;
+    background: transparent;
+  }
+
+  .footer-links a {
+    flex: 0 0 calc((100% - 16px) / 3);
+    min-width: 0;
+    color: #ffffff;
+    background: transparent;
+    border: 2px solid #ffffff;
+    box-shadow: 4px 4px 0 #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, transform 160ms ease;
+  }
+
+  .footer-links a:hover,
+  .footer-links a:active,
+  .footer-links a:focus {
+    color: #000000;
+    background: #f26a21;
+    border-color: #f26a21;
+    box-shadow: 4px 4px 0 #ffffff;
+    outline: none;
+    transform: translate(-1px, -1px);
+  }
+
+  .footer-links a:active {
+    box-shadow: 1px 1px 0 #ffffff;
+    transform: translate(2px, 2px);
+  }
+
+  @media (max-width: 420px) {
+    .footer-links {
+      flex-wrap: wrap;
+      justify-content: center;
+      row-gap: 8px;
+    }
+  }
+
+  .desktop-footer__identity {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    color: #fff;
+    text-align: center;
+    font-family: "GamuthSansLightMobile", "GamuthSans", Arial, Helvetica, sans-serif;
+    font-size: 13px;
+  }
+
+  .desktop-footer__identity strong,
+  .desktop-footer__identity span,
+  .desktop-footer__identity a {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .desktop-footer__identity strong {
+    font-family: "GamuthSans", Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .desktop-footer__abbr {
+    font-family: "GamuthSans", Arial, Helvetica, sans-serif;
+    font-weight: 700;
+  }
+
+  .desktop-footer__identity a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  .desktop-footer__mark {
+    width: 36px;
+    height: 36px;
+    box-shadow: 0 0 10px rgba(157, 10, 255, 0.35);
+    object-fit: contain;
+    display: block;
+  }
+
+  .desktop-footer__legal {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    text-align: right;
+    font-family: "GamuthSansRegularMobile", "GamuthSans", Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  @keyframes contentShellGlow {
+    0% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(2%, -1%, 0) scale(1.05);
+    }
+    100% {
+      transform: translate3d(-2%, 1%, 0) scale(0.98);
+    }
+  }
+
+  .menu-slot {
+    position: relative;
+    width: fit-content;
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: center;
+    align-self: center;
+    transform: translateX(-65px);
+    display: grid;
+    place-items: center;
+    z-index: 2;
+    overflow: visible;
+  }
+
+  .menu-pill {
+    --pill-font-size: clamp(12px, min(5cqw, 23cqh), 16px);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55em;
+    min-width: 7.9em;
+    min-height: 2.65em;
+    padding: 0.64em 1.22em;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: var(--pill-font-size);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #f6fbff;
+    box-shadow: none;
+    transition:
+      transform 0.22s ease,
+      box-shadow 0.22s ease,
+      filter 0.22s ease;
+    z-index: 20;
+    isolation: isolate;
+    transform: translate(0, 0);
+    animation: breathe 3.6s ease-in-out infinite;
+  }
+
+  .menu-pill::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: inherit;
+    background: var(--cta-gradient);
+    filter: blur(8px);
+    opacity: 0.62;
+    z-index: -1;
+    transition: opacity 0.16s ease;
+  }
+
+  .menu-pill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: inherit;
+    background: var(--cta-gradient);
+    pointer-events: none;
+    z-index: -1;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .menu-pill > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  .menu-label {
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 1em;
+  }
+
+  .menu-icon {
+    width: 1.45em;
+    height: 1.45em;
+    stroke: currentColor;
+    stroke-width: 2.25px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    flex: none;
+    transition: transform 0.25s;
+    overflow: visible;
+  }
+
+  .menu-icon .line {
+    transition: transform 0.25s, opacity 0.2s;
+    transform-origin: center;
+  }
+
+  .menu-pill:hover,
+  .menu-pill:focus-visible,
+  .menu-pill.is-open {
+    transform: translate(0, -2px) scale(1.05);
+    animation: none;
+    background: #05020a;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .menu-pill:hover::before,
+  .menu-pill:focus-visible::before,
+  .menu-pill.is-open::before {
+    opacity: 0.72;
+  }
+
+  .menu-pill:hover .menu-icon,
+  .menu-pill:focus-visible .menu-icon,
+  .menu-pill.is-open .menu-icon {
+    transform: none;
+  }
+
+  .menu-pill.is-open .line-top {
+    transform: translateY(4px) rotate(45deg);
+  }
+
+  .menu-pill.is-open .line-middle {
+    opacity: 0;
+  }
+
+  .menu-pill.is-open .line-bottom {
+    transform: translateY(-4px) rotate(-45deg);
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(0, 0) scale(1.03);
+    }
+  }
+
+  .desktop-menu-overlay {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: -8px;
+    right: auto;
+    z-index: 240;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .desktop-menu-overlay[hidden],
+  .desktop-site-menu[hidden] {
+    display: none !important;
+  }
+
+  .desktop-site-menu {
+    display: grid;
+    width: 204px;
+    height: 314px;
+    grid-template-rows: repeat(6, 37px);
+    align-content: start;
+    row-gap: 11px;
+    padding: 17px 0 0;
+    box-sizing: border-box;
+    border: 1px solid #ffffff05;
+    background: linear-gradient(#030105db, #030105f5);
+    box-shadow: 0 24px 60px #0000009e;
+  }
+
+  .desktop-site-menu .site-menu-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 180px;
+    height: 37px;
+    min-height: 37px;
+    max-height: 37px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    border: 0;
+    background: #05020a;
+    color: #fff;
+    font-family: "GamuthSans", Arial, Helvetica, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .desktop-site-menu .site-menu-link::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(111deg, #9d0aff80 0%, #de079680 31%, #fd1d1d80 68%, #fc9e1980 100%), #05020a;
+    z-index: 0;
+  }
+
+  .desktop-site-menu .site-menu-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: linear-gradient(100deg, #a600ff 0%, #f0008c 38%, #ff174d 66%, #ff8a00 100%);
+    pointer-events: none;
+    z-index: 1;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .desktop-site-menu .site-menu-link__label {
+    position: relative;
+    z-index: 2;
+  }
+
+  .desktop-site-menu .site-menu-link:hover,
+  .desktop-site-menu .site-menu-link:focus-visible {
+    background: linear-gradient(111deg, #9d0aff57 0%, #de079657 31%, #fd1d1d57 68%, #fc9e1957 100%), #050107;
+    filter: none;
+    outline: none;
+    outline-offset: 0;
+  }
+
+  .desktop-site-menu .site-menu-link:hover::before,
+  .desktop-site-menu .site-menu-link:focus-visible::before {
+    background: linear-gradient(111deg, #9d0aff70 0%, #de079670 31%, #fd1d1d70 68%, #fc9e1970 100%), #050107;
+  }
+
+  .gf-nav {
+    position: relative;
+    pointer-events: auto;
+    isolation: isolate;
+    font-family: 'Sora', system-ui, sans-serif;
+  }
+
+  .gf-nav, .gf-nav * , .gf-nav *::before, .gf-nav *::after { box-sizing: border-box; }
+
+  .gf-nav__stack {
+    position: relative;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    width: max-content;
+  }
+
+  .gf-nav__row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .gf-nav__panel {
+    --pill-font-size: clamp(12px, min(5cqw, 23cqh), 16px);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65em;
+    min-width: 7.9em;
+    min-height: calc(2.65em - 1px);
+    padding: calc(0.64em - 0.5px) 1.22em;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: var(--pill-font-size);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: capitalize;
+    color: #f6fbff;
+    box-shadow: none;
+    transition:
+      transform 0.22s ease,
+      box-shadow 0.22s ease,
+      filter 0.22s ease;
+    z-index: 20;
+    isolation: isolate;
+    transform: translate(0, 0);
+  }
+
+  .gf-nav__panel::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: inherit;
+    background: var(--cta-gradient);
+    filter: blur(8px);
+    opacity: 0.62;
+    mix-blend-mode: screen;
+    z-index: -1;
+    transition: opacity 0.16s ease;
+  }
+
+  .gf-nav__panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: inherit;
+    background: var(--cta-gradient);
+    pointer-events: none;
+    z-index: 1;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .gf-nav__panel > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  .gf-nav__button,
+  .gf-nav__menu-item {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+  }
+
+  .gf-nav__button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 25px;
+    padding: 0 2.5px;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 3;
+  }
+
+  .gf-nav__button::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 10px;
+    pointer-events: auto;
+  }
+
+  .gf-nav__button--login {
+    font-size: 1em;
+    text-transform: capitalize;
+    letter-spacing: 0.08em;
+    transition: filter 0.22s ease;
+  }
+
+  .gf-nav__button--login:hover,
+  .gf-nav__button--login:focus-visible {
+    filter: brightness(1.18);
+    outline: none;
+  }
+
+  .gf-nav__button--login:hover::before,
+  .gf-nav__button--login:focus-visible::before {
+    opacity: 0.72;
+  }
+
+  .gf-nav__avatar {
+    width: 1.45em;
+    height: 1.45em;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    overflow: hidden;
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+
+  .gf-nav__avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .gf-nav__avatar-label,
+  .gf-nav__status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .gf-nav__dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 270px;
+    padding: 12px;
+    border-radius: 0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(5, 2, 10, 0.94);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .gf-nav__dropdown[hidden] { display: none; }
+  .gf-nav__menu { display: grid; gap: 10px; }
+
+  .gf-nav__menu-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: #f6fbff;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    isolation: isolate;
+    cursor: pointer;
+  }
+
+  .gf-nav__menu-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(111deg, #9d0aff80 0%, #de079680 31%, #fd1d1d80 68%, #fc9e1980 100%), #05020a;
+    opacity: 0.88;
+    z-index: -1;
+  }
+
+  .gf-nav__menu-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: inherit;
+    background: var(--cta-gradient);
+    pointer-events: none;
+    z-index: 1;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .gf-nav__menu-item > * { position: relative; z-index: 2; }
+
+  .gf-nav__menu-item:hover,
+  .gf-nav__menu-item:focus-visible {
+    transform: translateY(-1px) scale(1.02);
+    filter: brightness(1.15);
+    outline: none;
+  }
+
+  .gf-nav__menu-item:hover::before,
+  .gf-nav__menu-item:focus-visible::before {
+    opacity: 0.72;
+  }
+
+  .gf-nav__panel:hover,
+  .gf-nav__panel:focus-within,
+  .gf-nav__panel.is-open {
+    transform: translate(0, -2px) scale(1.05);
+    animation: none;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .gf-nav__panel:hover::before,
+  .gf-nav__panel:focus-within::before,
+  .gf-nav__panel.is-open::before {
+    opacity: 0.72;
+  }
+
+  .desktop-menu-overlay {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    z-index: 240;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .desktop-menu-overlay[hidden],
+  .desktop-site-menu[hidden] {
+    display: none !important;
+  }
+
+  @keyframes gymfusionMarquee {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-50%, 0, 0); }
+  }
+
+  @media (max-width: 900px) {
+    .desktop-footer {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
