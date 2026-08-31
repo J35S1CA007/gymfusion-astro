@@ -1,13 +1,22 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 const spiralLogoSrc = 'https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@2df01ea/loaders/logos/vibrant_spiral_transparent.png';
+const mobileEoiHtml = readFileSync(resolve(process.cwd(), 'public/mobile-eoi-part-1.html'), 'utf8');
+const mobileEoiBody = mobileEoiHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] ?? '';
+const mobileEoiMarkup = mobileEoiBody
+  .replace(/\s*<script[^>]*src=["']\.\/mobile\.js["'][^>]*><\/script>\s*$/i, '')
+  .replace(/^\s*<main\b/, '<div')
+  .replace(/<\/main>\s*$/, '</div>');
 ---
 
 <Layout
   title="GYMFUSION Expression of Interest"
   description="Public EOI Part 1 landing page for the GYMFUSION Astro migration."
 >
+  <link slot="head" rel="stylesheet" href="/mobile.css" media="screen and (max-width: 1023px)" />
   <main class="eoi-landing" aria-label="GYMFUSION Expression of Interest">
     <div class="top-strip" data-site-header>
       <div class="brand-slot" aria-hidden="true">
@@ -77,6 +86,7 @@ const spiralLogoSrc = 'https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@2
           loading="eager"
           referrerpolicy="no-referrer"
         ></iframe>
+        <div class="mobile-form-host" aria-label="Mobile EOI form" set:html={mobileEoiMarkup}></div>
       </div>
     </section>
 
@@ -165,14 +175,20 @@ const spiralLogoSrc = 'https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@2
   });
 
   const iframe = document.querySelector<HTMLIFrameElement>('[data-eoi-embed]');
-  if (iframe) {
-    const mobile = window.matchMedia('(max-width: 1023px)').matches;
-    iframe.src = mobile ? '/mobile-eoi-part-1.html' : '/desktop-eoi-part-1.html';
+  const mobile = window.matchMedia('(max-width: 1023px)').matches;
+  if (iframe && !mobile) {
+    iframe.src = '/desktop-eoi-part-1.html';
+  }
+  if (mobile) {
+    const mobileScript = document.createElement('script');
+    mobileScript.src = '/mobile.js';
+    mobileScript.defer = true;
+    document.body.appendChild(mobileScript);
   }
 
 </script>
 
-<style>
+  <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
 
   @font-face {
@@ -417,6 +433,132 @@ const spiralLogoSrc = 'https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@2
     border-radius: inherit;
     background: #000;
     box-shadow: none;
+  }
+
+  .mobile-form-host {
+    display: none;
+  }
+
+  @media (max-width: 1023px) {
+    :global(html),
+    :global(body) {
+      width: 100% !important;
+      height: auto !important;
+      min-width: 0 !important;
+      min-height: 100% !important;
+      max-width: none !important;
+      max-height: none !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior-y: auto !important;
+      background: #000 !important;
+    }
+
+    .content-shell {
+      padding: 0.75rem 0.5rem 1rem;
+      place-items: center;
+      height: calc(100svh - 65px);
+      min-height: 0;
+    }
+
+    .middle-stage {
+      width: min(300px, calc(100vw - 1rem));
+      max-width: 300px;
+      height: 100%;
+      min-height: 0;
+      border: 1px solid transparent;
+      border-radius: 34px;
+      background:
+        linear-gradient(rgba(3, 5, 18, 0.96), rgba(3, 5, 18, 0.96)) padding-box,
+        var(--cta-gradient) border-box;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+        0 18px 40px rgba(0, 0, 0, 0.36);
+      overflow: hidden;
+    }
+
+    .eoi-embed {
+      display: none;
+    }
+
+    .mobile-form-host {
+      display: block;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      border-radius: 0;
+    }
+
+    :global(.mobile-form-host > div) {
+      width: 100%;
+      height: 100%;
+    }
+
+    :global(.mobile-form-host > div.page) {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      max-width: none !important;
+      max-height: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      background: transparent !important;
+      overflow: hidden !important;
+    }
+
+    :global(.mobile-form-host > div.page > .deck),
+    :global(.mobile-form-host > div.page > .deck[data-deck-state="cover"]) {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      max-width: none !important;
+      max-height: none !important;
+      aspect-ratio: auto !important;
+      margin: 0 auto !important;
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      border-radius: inherit !important;
+      overflow: hidden !important;
+    }
+
+    :global(.mobile-form-host > div.page > .deck > .deck-track) {
+      width: calc(var(--slides) * 100%) !important;
+      height: 100% !important;
+      display: flex !important;
+      flex-direction: row !important;
+      position: relative !important;
+      overflow: hidden !important;
+      transform: translate3d(calc(var(--slide-index, 0) * (-100% / var(--slides))), 0, 0) !important;
+    }
+
+    :global(.mobile-form-host > div.page > .deck > .deck-track > .deck-page) {
+      width: calc(100% / var(--slides)) !important;
+      min-width: calc(100% / var(--slides)) !important;
+      max-width: calc(100% / var(--slides)) !important;
+      flex: 0 0 calc(100% / var(--slides)) !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      max-height: 100% !important;
+      position: relative !important;
+      overflow: hidden !important;
+    }
+
+    :global(.mobile-form-host > div.page > .deck > .deck-track > .deck-page > .content-scroll) {
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+    }
+
+    :global(.mobile-form-host > div.page > .deck::before) {
+      content: none !important;
+    }
   }
 
   .country-acknowledgement {

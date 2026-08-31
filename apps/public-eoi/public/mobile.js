@@ -35,8 +35,8 @@
       const iconResolutionCache = new Map();
       const ICON_SOURCE_MAP = Object.freeze({
         "accessibility-support-outline": {
-          primary: "https://static.wixstatic.com/shapes/f190ff_7eed619bcf3a42a094f4a0974ff9f264.svg",
-          backup: "https://i.ibb.co/0Vqzhkvj/accessibility-support-outline.jpg"
+          primary: "./GYMFUSION_EOI_Part_1_Form_Mobile_files/accessibility-button-icon.svg",
+          backup: "https://static.wixstatic.com/shapes/f190ff_7eed619bcf3a42a094f4a0974ff9f264.svg"
         },
         "accessibility-support": {
           primary: "https://static.wixstatic.com/shapes/f190ff_f6504a91a37e4dffb7f39c76006ea7bc.svg",
@@ -55,7 +55,7 @@
           backup: "https://i.ibb.co/Xr3sSB0h/preferences-graident-01.png"
         },
         "availability-calendar": {
-          primary: "wix:image://v1/f190ff_90b1edf5634840239b6226e633c8a655mv2.png/event-date-and-time-symbol-svgrepo-com.png#originWidth=800&originHeight=800",
+          primary: "https://i.ibb.co/rRvxnZHp/event-date-and-time-symbol-svgrepo-com.png",
           backup: "https://i.ibb.co/rRvxnZHp/event-date-and-time-symbol-svgrepo-com.png"
         },
         "thank-you": {
@@ -63,7 +63,7 @@
           backup: "https://i.ibb.co/XZVByDgg/thankyou-icon.png"
         },
         "menu-gradient": {
-          primary: "wix:image://v1/f190ff_13af7084cf044d788591fd478fce6d1d~mv2.png/menu-icon-graident.png#originWidth=800&originHeight=800",
+          primary: "https://i.ibb.co/LhkK3KR3/menu-icon-graident.png",
           backup: "https://i.ibb.co/LhkK3KR3/menu-icon-graident.png"
         }
       });

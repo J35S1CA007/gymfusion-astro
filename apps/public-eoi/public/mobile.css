@@ -3690,7 +3690,7 @@
     }
 
 
-    /* WixForge single-slide viewport hardening: keep only the active page visible and keep the frame border visible. */
+    /* WixForge single-slide viewport hardening: keep only the active page visible and keep a neutral frame visible. */
     .page {
       justify-content: center !important;
       align-items: flex-start !important;
@@ -3704,10 +3704,8 @@
       isolation: isolate !important;
       margin-left: auto !important;
       margin-right: auto !important;
-      border: 1px solid transparent !important;
-      background:
-        linear-gradient(#231329, #231329) padding-box,
-        var(--cta-gradient) border-box !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      background: #231329 !important;
     }
 
     .deck::before {
@@ -3718,9 +3716,8 @@
       pointer-events: none;
       border-radius: inherit;
       box-shadow:
-        inset 0 0 0 1px rgba(255, 89, 244, 0.62),
-        inset 0 1px 0 rgba(224, 95, 255, 0.74),
-        inset 0 -1px 0 rgba(255, 118, 39, 0.62);
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
 
     .deck[data-deck-state="cover"]::after {
@@ -3839,8 +3836,7 @@
       overflow: hidden !important;
       margin: 0 auto !important;
       box-shadow:
-        0 0 0 1px rgba(141, 54, 255, 0.26),
-        0 0 18px rgba(207, 55, 255, 0.24),
+        0 0 0 1px rgba(255, 255, 255, 0.06),
         0 16px 34px rgba(0, 0, 0, 0.42) !important;
     }
 
@@ -4191,6 +4187,16 @@
       bottom: 38px !important;
     }
 
+    .page[data-deck-state="form"] .deck {
+      border: 1px solid rgba(255, 255, 255, 0.16) !important;
+      background: #120314 !important;
+      box-shadow: var(--shadow) !important;
+    }
+
+    .page[data-deck-state="form"] .deck::before {
+      content: none !important;
+    }
+
     .accessibility-panel {
       width: min(268px, calc(100vw - 12px)) !important;
       max-height: 244px !important;
@@ -4305,10 +4311,12 @@
     }
 
     .cover-static-frame {
-      top: -6px !important;
-      width: min(calc(100% + 12px), 296px) !important;
-      height: calc(100% + 12px) !important;
-      object-fit: fill !important;
+      top: -14px !important;
+      left: 50% !important;
+      width: min(calc(100% + 28px), 412px) !important;
+      height: calc(100% + 34px) !important;
+      transform: translateX(-50%) !important;
+      object-fit: cover !important;
       object-position: center center !important;
     }
 

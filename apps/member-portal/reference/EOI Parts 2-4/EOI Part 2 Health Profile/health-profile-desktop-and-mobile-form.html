@@ -82,10 +82,10 @@
     }
 
     .gf-shell {
-      border: 1px solid var(--gf-line);
-      border-radius: 34px;
-      background: linear-gradient(180deg, #ffffff 0%, #fcfcfc 100%);
-      box-shadow: var(--gf-shadow);
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
       overflow: hidden;
     }
 
@@ -598,7 +598,7 @@
     }
 
     body.gf-embed-mobile .gf-shell {
-      border-radius: 24px;
+      border-radius: 0;
     }
 
     body.gf-embed-mobile .gf-header,
@@ -1117,7 +1117,10 @@
         formPart: "PART_2_HEALTH_SAFETY",
         formVersion: "v1.1.0-draft-2026-06-25",
         submitEndpoint: "/_functions/rfm_part2_health_safety_submit",
-        localPreviewMode: window.location.protocol === "file:" || window.location.pathname.includes("/preview"),
+        localPreviewMode:
+          window.location.protocol === "file:" ||
+          ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname) ||
+          window.location.pathname.includes("/preview"),
       });
 
       const CRM_FIELD_MAP = Object.freeze({
@@ -1183,6 +1186,7 @@
 
       const form = document.getElementById("gfHealthProfileForm");
       const pages = Array.from(document.querySelectorAll(".gf-page"));
+      const formShell = document.querySelector("[data-gf-form-shell]");
       const progress = document.querySelector("[data-progress]");
       const prevBtn = document.querySelector("[data-prev]");
       const nextBtn = document.querySelector("[data-next]");
@@ -1571,7 +1575,8 @@
         submitBtn.hidden = pageIndex !== pages.length - 1;
         progress.style.width = (((pageIndex + 1) / pages.length) * 100) + "%";
         statusEl.textContent = "Step " + (pageIndex + 1) + " of " + pages.length;
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (formShell instanceof HTMLElement) formShell.scrollTop = 0;
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
       }
       function validateCurrentPage() {
         clearValidationWarnings(pages[pageIndex]);
