@@ -1,0 +1,2263 @@
+{
+  "form": {
+    "formPart": "PART_3",
+    "formVersion": 1,
+    "officialInternalFormName": "Ready for Movement Screening: Past Injuries, Accessibility & Individual Needs",
+    "publicTitle": "Ready for Movement Pre-Exercise Screening: Your Movement, Comfort & Support Needs",
+    "tallyFormName": "RFM Screening: Your Movement, Comfort & Support Needs – P3/4 – MEMBERS ARCHIVED",
+    "tallyLink": "https://tally.so/r/pbW4GP",
+    "retrievedAt": "2026-06-18T06:08:17.884Z",
+    "source": "tally",
+    "questions": [
+      {
+        "id": "de04f74e-e54b-48d4-a94f-24486d4fab46",
+        "tallyFieldId": "de04f74e-e54b-48d4-a94f-24486d4fab46",
+        "order": 1,
+        "questionText": "Ready for Movement Pre-Exercise Screening: Your Movement, Comfort & Support Needs",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "de04f74e-e54b-48d4-a94f-24486d4fab46",
+          "type": "FORM_TITLE",
+          "groupUuid": "f8c5d14a-6442-48a1-8c20-551c61ef7301",
+          "groupType": "TEXT",
+          "payload": {
+            "button": {
+              "label": "Confirm"
+            },
+            "safeHTMLSchema": [
+              [
+                "Ready for Movement Pre-Exercise Screening: Your Movement, Comfort &amp; Support Needs"
+              ]
+            ],
+            "title": "Ready for Movement Pre-Exercise Screening: Your Movement, Comfort & Support Needs"
+          }
+        }
+      },
+      {
+        "id": "ec5c78a4-314d-458b-b15e-351edb62a7bc",
+        "tallyFieldId": "ec5c78a4-314d-458b-b15e-351edb62a7bc",
+        "order": 2,
+        "questionText": "No diagnosis required,tag,span,font-weight,bold,—,tag,span,font-style,italic, just let us know anything that might affect how you move or recover. \n\n,Please note:,tag,span,font-weight,bold, We will ask about disability, other conditions, or other factors that may be relevant in a separate question.",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "ec5c78a4-314d-458b-b15e-351edb62a7bc",
+          "type": "TEXT",
+          "groupUuid": "dbbbf0c7-ccfe-41f1-9db0-fce8d5771781",
+          "groupType": "TEXT",
+          "payload": {
+            "safeHTMLSchema": [
+              [
+                "No diagnosis required",
+                [
+                  [
+                    "tag",
+                    "span"
+                  ],
+                  [
+                    "font-weight",
+                    "bold"
+                  ]
+                ]
+              ],
+              [
+                "—",
+                [
+                  [
+                    "tag",
+                    "span"
+                  ],
+                  [
+                    "font-style",
+                    "italic"
+                  ]
+                ]
+              ],
+              [
+                " just let us know anything that might affect how you move or recover. \n\n"
+              ],
+              [
+                "Please note:",
+                [
+                  [
+                    "tag",
+                    "span"
+                  ],
+                  [
+                    "font-weight",
+                    "bold"
+                  ]
+                ]
+              ],
+              [
+                " We will ask about disability, other conditions, or other factors that may be relevant in a separate question."
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": "73c809da-0e93-4271-9b3f-98f64276044f",
+        "tallyFieldId": "73c809da-0e93-4271-9b3f-98f64276044f",
+        "order": 3,
+        "questionText": "Do you have any past injuries, current conditions, occasional or chronic pain, or a body area that just isn’t 100% that may affect how you move during sessions or recover afterward? (Select all that apply),tag,p",
+        "subtext": "No diagnosis required,tag,span,font-weight,bold,—,tag,span,font-style,italic, just let us know anything that might affect how you move or recover. \n\n,Please note:,tag,span,font-weight,bold, We will ask about disability, other conditions, or other factors that may be relevant in a separate question.",
+        "description": "No diagnosis required,tag,span,font-weight,bold,—,tag,span,font-style,italic, just let us know anything that might affect how you move or recover. \n\n,Please note:,tag,span,font-weight,bold, We will ask about disability, other conditions, or other factors that may be relevant in a separate question.",
+        "placeholder": "",
+        "fieldType": "checkbox",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": true,
+        "options": [
+          {
+            "label": "Previous injury (Fully recovered, but worth noting)",
+            "value": "5ccabf79-fcba-4e84-87a5-9e26e4648d6e",
+            "order": 1
+          },
+          {
+            "label": "Previous injury (may cause occasional discomfort or limitation)",
+            "value": "9c5764e4-8111-45fe-9832-f6757a8bb3b6",
+            "order": 2
+          },
+          {
+            "label": "Current injury (e.g., sprain, strain, tear, fracture etc)",
+            "value": "6dd0d419-fa32-47a7-88be-dcd9f299de33",
+            "order": 3
+          },
+          {
+            "label": "No issues — I do not have any injuries, pain, or areas that aren’t 100%",
+            "value": "7a2f62cb-174a-44f1-be27-bdbc2dc0ae79",
+            "order": 4
+          },
+          {
+            "label": "Chronic condition or pain",
+            "value": "010b2d63-ebbe-422b-9f08-3f1abac77ee0",
+            "order": 5
+          },
+          {
+            "label": "Something else? (Please specify)",
+            "value": "0c635757-4f36-4036-99d7-46d961c1e9cd",
+            "order": 6
+          }
+        ],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": [
+            {
+              "hasOtherOption": true
+            },
+            {
+              "hasOtherOption": true
+            },
+            {
+              "hasOtherOption": true
+            },
+            {
+              "hasOtherOption": true
+            },
+            {
+              "hasOtherOption": true
+            },
+            {
+              "hasOtherOption": true
+            }
+          ]
+        },
+        "raw": {
+          "titleBlock": {
+            "uuid": "e1d8754d-6bb1-4709-a439-6e65ca47fe21",
+            "type": "TITLE",
+            "groupUuid": "04c84803-a739-4590-99b8-23b110ed516b",
+            "groupType": "QUESTION",
+            "payload": {
+              "safeHTMLSchema": [
+                [
+                  "Do you have any past injuries, current conditions, occasional or chronic pain, or a body area that just isn’t 100% that may affect how you move during sessions or recover afterward? (Select all that apply)",
+                  [
+                    [
+                      "tag",
+                      "p"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          },
+          "helperBlocks": [
+            "No diagnosis required,tag,span,font-weight,bold,—,tag,span,font-style,italic, just let us know anything that might affect how you move or recover. \n\n,Please note:,tag,span,font-weight,bold, We will ask about disability, other conditions, or other factors that may be relevant in a separate question."
+          ],
+          "groupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+          "groupType": "CHECKBOXES",
+          "blocks": [
+            {
+              "uuid": "5ccabf79-fcba-4e84-87a5-9e26e4648d6e",
+              "type": "CHECKBOX",
+              "groupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "index": 0,
+                "isRequired": false,
+                "isFirst": true,
+                "isLast": false,
+                "columnListUuid": "e6d61c87-58a1-47f5-9381-a3e954d3e0cc",
+                "columnUuid": "3f9853d8-3ab4-4cfb-b429-6ac75cfffbe3",
+                "columnRatio": 50,
+                "hasOtherOption": true,
+                "text": "Previous injury (Fully recovered, but worth noting)"
+              }
+            },
+            {
+              "uuid": "9c5764e4-8111-45fe-9832-f6757a8bb3b6",
+              "type": "CHECKBOX",
+              "groupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "index": 1,
+                "isRequired": false,
+                "isFirst": false,
+                "isLast": false,
+                "columnListUuid": "e6d61c87-58a1-47f5-9381-a3e954d3e0cc",
+                "columnUuid": "3f9853d8-3ab4-4cfb-b429-6ac75cfffbe3",
+                "columnRatio": 50,
+                "hasOtherOption": true,
+                "text": "Previous injury (may cause occasional discomfort or limitation)"
+              }
+            },
+            {
+              "uuid": "6dd0d419-fa32-47a7-88be-dcd9f299de33",
+              "type": "CHECKBOX",
+              "groupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "index": 2,
+                "isRequired": false,
+                "isFirst": false,
+                "isLast": false,
+                "columnListUuid": "e6d61c87-58a1-47f5-9381-a3e954d3e0cc",
+                "columnUuid": "3f9853d8-3ab4-4cfb-b429-6ac75cfffbe3",
+                "columnRatio": 50,
+                "hasOtherOption": true,
+                "text": "Current injury (e.g., sprain, strain, tear, fracture etc)"
+              }
+            },
+            {
+              "uuid": "7a2f62cb-174a-44f1-be27-bdbc2dc0ae79",
+              "type": "CHECKBOX",
+              "groupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "isRequired": false,
+                "index": 3,
+                "isFirst": false,
+                "isLast": false,
+                "columnListUuid": "e6d61c87-58a1-47f5-9381-a3e954d3e0cc",
+                "columnUuid": "113f681d-f64c-4bc0-8e26-5563e11efc9b",
+                "columnRatio": 50,
+                "hasOtherOption": true,
+                "text": "No issues — I do not have any injuries, pain, or areas that aren’t 100%"
+              }
+            },
+            {
+              "uuid": "010b2d63-ebbe-422b-9f08-3f1abac77ee0",
+              "type": "CHECKBOX",
+              "groupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "isRequired": false,
+                "index": 4,
+                "isFirst": false,
+                "isLast": false,
+                "columnListUuid": "e6d61c87-58a1-47f5-9381-a3e954d3e0cc",
+                "columnUuid": "113f681d-f64c-4bc0-8e26-5563e11efc9b",
+                "columnRatio": 50,
+                "hasOtherOption": true,
+                "text": "Chronic condition or pain"
+              }
+            },
+            {
+              "uuid": "0c635757-4f36-4036-99d7-46d961c1e9cd",
+              "type": "CHECKBOX",
+              "groupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "isOtherOption": true,
+                "columnListUuid": "e6d61c87-58a1-47f5-9381-a3e954d3e0cc",
+                "columnUuid": "113f681d-f64c-4bc0-8e26-5563e11efc9b",
+                "columnRatio": 50,
+                "isRequired": false,
+                "index": 5,
+                "isFirst": false,
+                "isLast": true,
+                "hasOtherOption": true,
+                "text": "Something else? (Please specify)"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "238ba0e0-ba80-49ab-b98e-5697a2ab00b5",
+        "tallyFieldId": "238ba0e0-ba80-49ab-b98e-5697a2ab00b5",
+        "order": 4,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "238ba0e0-ba80-49ab-b98e-5697a2ab00b5",
+          "type": "TEXT",
+          "groupUuid": "58cc1355-f748-4e49-aaf0-3048979753dc",
+          "groupType": "TEXT",
+          "payload": {
+            "columnListUuid": "e6d61c87-58a1-47f5-9381-a3e954d3e0cc",
+            "columnUuid": "113f681d-f64c-4bc0-8e26-5563e11efc9b",
+            "columnRatio": 50,
+            "safeHTMLSchema": []
+          }
+        }
+      },
+      {
+        "id": "7022cb17-04aa-41f4-82e8-ac352280ae68",
+        "tallyFieldId": "7022cb17-04aa-41f4-82e8-ac352280ae68",
+        "order": 5,
+        "questionText": "Triggers for Flare Up",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "7022cb17-04aa-41f4-82e8-ac352280ae68",
+          "type": "PAGE_BREAK",
+          "groupUuid": "d9f58cb4-2f11-4d25-af91-7c20e0c7ae6c",
+          "groupType": "PAGE_BREAK",
+          "payload": {
+            "index": 0,
+            "name": "Triggers for Flare Up",
+            "isQualifiedForThankYouPage": false,
+            "isThankYouPage": false,
+            "isFirst": true,
+            "isLast": false,
+            "button": {
+              "label": "Next"
+            }
+          }
+        }
+      },
+      {
+        "id": "da97b6d9-fabf-43b4-adb9-08dc9e957c48",
+        "tallyFieldId": "da97b6d9-fabf-43b4-adb9-08dc9e957c48",
+        "order": 6,
+        "questionText": "Your response helps us understand any known limitations and plan appropriate modifications or alternative options (such as 1:1 sessions) to support your safety during training. We will only ask you to engage with a relevant health professional if this is necessary to ensure safe participation.",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "da97b6d9-fabf-43b4-adb9-08dc9e957c48",
+          "type": "TEXT",
+          "groupUuid": "d3dd73d3-e5af-4fb3-b7e3-220365d48497",
+          "groupType": "TEXT",
+          "payload": {
+            "isHidden": false,
+            "safeHTMLSchema": [
+              [
+                "Your response helps us understand any known limitations and plan appropriate modifications or alternative options (such as 1:1 sessions) to support your safety during training. We will only ask you to engage with a relevant health professional if this is necessary to ensure safe participation."
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": "7f841af4-5870-437d-88bd-840f54b370bf",
+        "tallyFieldId": "7f841af4-5870-437d-88bd-840f54b370bf",
+        "order": 7,
+        "questionText": "Please provide relevant details about the issue, including what it is, which movements aggravate it, anything that tends to trigger flare-ups, how you currently manage it, and whether you have previously done or are currently doing physiotherapy",
+        "subtext": "Your response helps us understand any known limitations and plan appropriate modifications or alternative options (such as 1:1 sessions) to support your safety during training. We will only ask you to engage with a relevant health professional if this is necessary to ensure safe participation.",
+        "description": "Your response helps us understand any known limitations and plan appropriate modifications or alternative options (such as 1:1 sessions) to support your safety during training. We will only ask you to engage with a relevant health professional if this is necessary to ensure safe participation.",
+        "placeholder": "e.g., My wrist doesn’t love weight-bearing or pushing movements, but it’s not injured. / I’ve noticed my hip feels off and aches more when rain is coming or during weather changes. / Had MPFL reconstruction on my right knee about 7 years ago and haven’t had any issues since. I’ve got patella alta in both knees, and my left knee has dislocated a handful of times, but I manage it with a brace and the physio exercises I was given.",
+        "fieldType": "textarea",
+        "required": true,
+        "isVisibleQuestion": true,
+        "isAnswerField": true,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": 350,
+          "allowedFileTypes": [],
+          "otherValidationRules": [
+            {
+              "hasMinCharacters": true
+            },
+            {
+              "minCharacters": 30
+            },
+            {
+              "hasMaxCharacters": true
+            },
+            {
+              "maxCharacters": 350
+            }
+          ]
+        },
+        "raw": {
+          "titleBlock": {
+            "uuid": "ca4a9e9e-e4d5-4e3c-a20a-96ae71d1a949",
+            "type": "TITLE",
+            "groupUuid": "f1f8cc0a-dc0f-423f-99e2-b9da668bca92",
+            "groupType": "QUESTION",
+            "payload": {
+              "isHidden": false,
+              "safeHTMLSchema": [
+                [
+                  "Please provide relevant details about the issue, including what it is, which movements aggravate it, anything that tends to trigger flare-ups, how you currently manage it, and whether you have previously done or are currently doing physiotherapy"
+                ]
+              ]
+            }
+          },
+          "helperBlocks": [
+            "Your response helps us understand any known limitations and plan appropriate modifications or alternative options (such as 1:1 sessions) to support your safety during training. We will only ask you to engage with a relevant health professional if this is necessary to ensure safe participation."
+          ],
+          "groupUuid": "7f841af4-5870-437d-88bd-840f54b370bf",
+          "groupType": "TEXTAREA",
+          "blocks": [
+            {
+              "uuid": "6d45c991-148c-44d7-8602-5964179a7307",
+              "type": "TEXTAREA",
+              "groupUuid": "7f841af4-5870-437d-88bd-840f54b370bf",
+              "groupType": "TEXTAREA",
+              "payload": {
+                "isRequired": true,
+                "isHidden": false,
+                "hasMinCharacters": true,
+                "minCharacters": 30,
+                "hasMaxCharacters": true,
+                "maxCharacters": 350,
+                "placeholder": "e.g., My wrist doesn’t love weight-bearing or pushing movements, but it’s not injured. / I’ve noticed my hip feels off and aches more when rain is coming or during weather changes. / Had MPFL reconstruction on my right knee about 7 years ago and haven’t had any issues since. I’ve got patella alta in both knees, and my left knee has dislocated a handful of times, but I manage it with a brace and the physio exercises I was given."
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "d0ae5281-756a-41a6-a495-08cc33bec48b",
+        "tallyFieldId": "d0ae5281-756a-41a6-a495-08cc33bec48b",
+        "order": 8,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "d0ae5281-756a-41a6-a495-08cc33bec48b",
+          "type": "TEXT",
+          "groupUuid": "d9dfe258-9d03-4a2d-a3cd-a741e02d22d8",
+          "groupType": "TEXT",
+          "payload": {
+            "safeHTMLSchema": []
+          }
+        }
+      },
+      {
+        "id": "25b53ad1-f1a5-4fc6-a931-f67c794988e5",
+        "tallyFieldId": "25b53ad1-f1a5-4fc6-a931-f67c794988e5",
+        "order": 9,
+        "questionText": "Disability or Other Conditions/Factors Enquiry",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "25b53ad1-f1a5-4fc6-a931-f67c794988e5",
+          "type": "PAGE_BREAK",
+          "groupUuid": "8499b9be-a0fa-4b15-ba03-36e40ae665dd",
+          "groupType": "PAGE_BREAK",
+          "payload": {
+            "index": 1,
+            "name": "Disability or Other Conditions/Factors Enquiry",
+            "isQualifiedForThankYouPage": false,
+            "isThankYouPage": false,
+            "isFirst": false,
+            "isLast": false,
+            "button": {
+              "label": "Confirm"
+            }
+          }
+        }
+      },
+      {
+        "id": "bd4e0ac3-d0c7-4915-8028-e044d983ef66",
+        "tallyFieldId": "bd4e0ac3-d0c7-4915-8028-e044d983ef66",
+        "order": 10,
+        "questionText": "Accessibility & Individual Needs,tag,div",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "bd4e0ac3-d0c7-4915-8028-e044d983ef66",
+          "type": "HEADING_1",
+          "groupUuid": "96df3d8f-3205-4351-b3b2-e43d032b2524",
+          "groupType": "HEADING_1",
+          "payload": {
+            "safeHTMLSchema": [
+              [
+                "Accessibility &amp; Individual Needs",
+                [
+                  [
+                    "tag",
+                    "div"
+                  ]
+                ]
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": "cdd956f1-51aa-4b98-9376-5cf4789e6fa0",
+        "tallyFieldId": "cdd956f1-51aa-4b98-9376-5cf4789e6fa0",
+        "order": 11,
+        "questionText": "We ask this to help us understand any adjustments that may support your participation. Your comfort and inclusion matter to us, and you’re welcome to select ‘Prefer not to say’ if you’d rather not share details.,tag,div",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "cdd956f1-51aa-4b98-9376-5cf4789e6fa0",
+          "type": "TEXT",
+          "groupUuid": "c5c4ddbd-a0c1-4e63-80cf-5b6337f68bd5",
+          "groupType": "TEXT",
+          "payload": {
+            "safeHTMLSchema": [
+              [
+                "We ask this to help us understand any adjustments that may support your participation. Your comfort and inclusion matter to us, and you’re welcome to select ‘Prefer not to say’ if you’d rather not share details.",
+                [
+                  [
+                    "tag",
+                    "div"
+                  ]
+                ]
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+        "tallyFieldId": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+        "order": 12,
+        "questionText": "Is there anything — such as a diagnosed disability, long-term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way? (Select all that apply, or leave blank if none apply / you prefer not to say)",
+        "subtext": "We ask this to help us understand any adjustments that may support your participation. Your comfort and inclusion matter to us, and you’re welcome to select ‘Prefer not to say’ if you’d rather not share details.,tag,div",
+        "description": "We ask this to help us understand any adjustments that may support your participation. Your comfort and inclusion matter to us, and you’re welcome to select ‘Prefer not to say’ if you’d rather not share details.,tag,div",
+        "placeholder": "",
+        "fieldType": "checkbox",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": true,
+        "options": [
+          {
+            "label": "Yes — I have a disability that may influence how I train or participate",
+            "value": "8673b49e-e49f-48aa-9207-43a6bf3d2794",
+            "order": 1
+          },
+          {
+            "label": "Yes — I have a long-term or ongoing health condition that may affect how I train or participate (not already mentioned)",
+            "value": "234e562b-c5b7-4bab-adb9-88e2a06ab5d9",
+            "order": 2
+          },
+          {
+            "label": "Yes — I am neurodivergent and may benefit from specific communication or environmental considerations",
+            "value": "2328786f-d461-41ed-baa7-05faa3be972c",
+            "order": 3
+          },
+          {
+            "label": "Yes — I have another condition or factor that may influence how I train or participate (not previously mentioned).",
+            "value": "c2d0c6e1-0326-498f-9798-e397f693d8b2",
+            "order": 4
+          },
+          {
+            "label": "No — I do not have any long-term or ongoing health conditions that affect how I train or participate.",
+            "value": "0190c4d9-04ab-4673-851e-05b850c5e52a",
+            "order": 5
+          }
+        ],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "titleBlock": {
+            "uuid": "20ae9699-fdc3-4932-967c-e9defb29f212",
+            "type": "TITLE",
+            "groupUuid": "f7434635-c3c2-4c3a-ae34-5b1d1db4dd91",
+            "groupType": "QUESTION",
+            "payload": {
+              "isFolded": false,
+              "safeHTMLSchema": [
+                [
+                  "Is there anything — such as a diagnosed disability, long-term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way? (Select all that apply, or leave blank if none apply / you prefer not to say)"
+                ]
+              ]
+            }
+          },
+          "helperBlocks": [
+            "We ask this to help us understand any adjustments that may support your participation. Your comfort and inclusion matter to us, and you’re welcome to select ‘Prefer not to say’ if you’d rather not share details.,tag,div"
+          ],
+          "groupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+          "groupType": "CHECKBOXES",
+          "blocks": [
+            {
+              "uuid": "8673b49e-e49f-48aa-9207-43a6bf3d2794",
+              "type": "CHECKBOX",
+              "groupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "index": 0,
+                "isRequired": false,
+                "isFirst": true,
+                "isLast": false,
+                "text": "Yes — I have a disability that may influence how I train or participate"
+              }
+            },
+            {
+              "uuid": "234e562b-c5b7-4bab-adb9-88e2a06ab5d9",
+              "type": "CHECKBOX",
+              "groupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "isRequired": false,
+                "index": 1,
+                "isFirst": false,
+                "isLast": false,
+                "text": "Yes — I have a long-term or ongoing health condition that may affect how I train or participate (not already mentioned)"
+              }
+            },
+            {
+              "uuid": "2328786f-d461-41ed-baa7-05faa3be972c",
+              "type": "CHECKBOX",
+              "groupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "isRequired": false,
+                "index": 2,
+                "isFirst": false,
+                "isLast": false,
+                "text": "Yes — I am neurodivergent and may benefit from specific communication or environmental considerations"
+              }
+            },
+            {
+              "uuid": "c2d0c6e1-0326-498f-9798-e397f693d8b2",
+              "type": "CHECKBOX",
+              "groupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "isRequired": false,
+                "index": 3,
+                "isFirst": false,
+                "isLast": false,
+                "text": "Yes — I have another condition or factor that may influence how I train or participate (not previously mentioned)."
+              }
+            },
+            {
+              "uuid": "0190c4d9-04ab-4673-851e-05b850c5e52a",
+              "type": "CHECKBOX",
+              "groupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+              "groupType": "CHECKBOXES",
+              "payload": {
+                "isRequired": false,
+                "index": 4,
+                "isFirst": false,
+                "isLast": true,
+                "text": "No — I do not have any long-term or ongoing health conditions that affect how I train or participate."
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+        "tallyFieldId": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+        "order": 13,
+        "questionText": "Accessibility, Inclusion, Individual Needs",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+          "type": "PAGE_BREAK",
+          "groupUuid": "195f8fed-a784-48e7-b798-4de90ef3fda5",
+          "groupType": "PAGE_BREAK",
+          "payload": {
+            "index": 2,
+            "name": "Accessibility, Inclusion, Individual Needs",
+            "isQualifiedForThankYouPage": false,
+            "isThankYouPage": false,
+            "isFirst": false,
+            "isLast": true,
+            "button": {
+              "label": "Submit"
+            }
+          }
+        }
+      },
+      {
+        "id": "8019227d-10c5-43e3-a1e6-1a5e2e19307e",
+        "tallyFieldId": "8019227d-10c5-43e3-a1e6-1a5e2e19307e",
+        "order": 14,
+        "questionText": "Additional Details ,(Optional),tag,span,font-weight,normal",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "8019227d-10c5-43e3-a1e6-1a5e2e19307e",
+          "type": "HEADING_1",
+          "groupUuid": "784c73a0-16cc-45e3-b26a-d38a1dfd10fe",
+          "groupType": "HEADING_1",
+          "payload": {
+            "isHidden": false,
+            "safeHTMLSchema": [
+              [
+                "Additional Details "
+              ],
+              [
+                "(Optional)",
+                [
+                  [
+                    "tag",
+                    "span"
+                  ],
+                  [
+                    "font-weight",
+                    "normal"
+                  ]
+                ]
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": "b9753bf7-93e7-4d3c-a36c-d8c9b42f9cff",
+        "tallyFieldId": "b9753bf7-93e7-4d3c-a36c-d8c9b42f9cff",
+        "order": 15,
+        "questionText": "We ask this to help us understand any adjustments or modifications that may support your participation. While we may not be able to accommodate every individual need, having this information allows us to explore reasonable modifications where appropriate and communicate clearly about what we can offer. \n\nIf we’re not able to provide a suitable modification, alternative option, or service, we’ll be upfront about why and let you know about other appropriate options available within the GV area. \n\nYou’re always welcome to click 'Continue' if you’d rather not share details.",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "b9753bf7-93e7-4d3c-a36c-d8c9b42f9cff",
+          "type": "TEXT",
+          "groupUuid": "195f8fed-a784-48e7-b798-4de90ef3fda5",
+          "groupType": "PAGE_BREAK",
+          "payload": {
+            "safeHTMLSchema": [
+              [
+                "We ask this to help us understand any adjustments or modifications that may support your participation. While we may not be able to accommodate every individual need, having this information allows us to explore reasonable modifications where appropriate and communicate clearly about what we can offer. \n\nIf we’re not able to provide a suitable modification, alternative option, or service, we’ll be upfront about why and let you know about other appropriate options available within the GV area. \n\nYou’re always welcome to click 'Continue' if you’d rather not share details."
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": "98ef360b-110d-40d6-8dd5-ac9aee5c0aa7",
+        "tallyFieldId": "98ef360b-110d-40d6-8dd5-ac9aee5c0aa7",
+        "order": 16,
+        "questionText": "Please share any details you feel comfortable providing that may help us understand your needs or support your participation",
+        "subtext": "We ask this to help us understand any adjustments or modifications that may support your participation. While we may not be able to accommodate every individual need, having this information allows us to explore reasonable modifications where appropriate and communicate clearly about what we can offer. \n\nIf we’re not able to provide a suitable modification, alternative option, or service, we’ll be upfront about why and let you know about other appropriate options available within the GV area. \n\nYou’re always welcome to click 'Continue' if you’d rather not share details.",
+        "description": "We ask this to help us understand any adjustments or modifications that may support your participation. While we may not be able to accommodate every individual need, having this information allows us to explore reasonable modifications where appropriate and communicate clearly about what we can offer. \n\nIf we’re not able to provide a suitable modification, alternative option, or service, we’ll be upfront about why and let you know about other appropriate options available within the GV area. \n\nYou’re always welcome to click 'Continue' if you’d rather not share details.",
+        "placeholder": "Share any details you feel comfortable with...",
+        "fieldType": "textarea",
+        "required": true,
+        "isVisibleQuestion": true,
+        "isAnswerField": true,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "titleBlock": {
+            "uuid": "a7b9f045-e050-4661-8ae1-0f48fee867bb",
+            "type": "TITLE",
+            "groupUuid": "b046e710-5cfa-47d1-840f-681946c93516",
+            "groupType": "QUESTION",
+            "payload": {
+              "safeHTMLSchema": [
+                [
+                  "Please share any details you feel comfortable providing that may help us understand your needs or support your participation"
+                ]
+              ]
+            }
+          },
+          "helperBlocks": [
+            "We ask this to help us understand any adjustments or modifications that may support your participation. While we may not be able to accommodate every individual need, having this information allows us to explore reasonable modifications where appropriate and communicate clearly about what we can offer. \n\nIf we’re not able to provide a suitable modification, alternative option, or service, we’ll be upfront about why and let you know about other appropriate options available within the GV area. \n\nYou’re always welcome to click 'Continue' if you’d rather not share details."
+          ],
+          "groupUuid": "98ef360b-110d-40d6-8dd5-ac9aee5c0aa7",
+          "groupType": "TEXTAREA",
+          "blocks": [
+            {
+              "uuid": "104e37c9-e31c-453e-bcc5-bf623a02b06d",
+              "type": "TEXTAREA",
+              "groupUuid": "98ef360b-110d-40d6-8dd5-ac9aee5c0aa7",
+              "groupType": "TEXTAREA",
+              "payload": {
+                "isRequired": true,
+                "placeholder": "Share any details you feel comfortable with..."
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "f8d83bf5-0641-4f7f-a4c9-e3625e0dc9c9",
+        "tallyFieldId": "f8d83bf5-0641-4f7f-a4c9-e3625e0dc9c9",
+        "order": 17,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "statement",
+        "required": false,
+        "isVisibleQuestion": true,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "f8d83bf5-0641-4f7f-a4c9-e3625e0dc9c9",
+          "type": "TEXT",
+          "groupUuid": "00175fc7-19a8-4eb3-8f59-16d3aa9ce723",
+          "groupType": "PAGE_BREAK",
+          "payload": {
+            "safeHTMLSchema": []
+          }
+        }
+      },
+      {
+        "id": "9324a065-538d-4aff-b29a-24c226d78fe5",
+        "tallyFieldId": "9324a065-538d-4aff-b29a-24c226d78fe5",
+        "order": 18,
+        "questionText": "episode_id",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "hidden",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": true,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "block": {
+            "uuid": "7fc5f0f4-8cfe-4393-8354-d01c6802f9fc",
+            "type": "HIDDEN_FIELDS",
+            "groupUuid": "1860b1ef-929c-462e-b2b1-1c10b6905eb4",
+            "groupType": "HIDDEN_FIELDS",
+            "payload": {
+              "hiddenFields": [
+                {
+                  "uuid": "9324a065-538d-4aff-b29a-24c226d78fe5",
+                  "name": "episode_id"
+                },
+                {
+                  "uuid": "c414b4c1-0394-4f25-98e2-ba2e95f89e0d",
+                  "name": "wix_member_id"
+                },
+                {
+                  "uuid": "a790ffab-128f-43a9-92a5-ab2c663b90c9",
+                  "name": "member_email"
+                }
+              ]
+            }
+          },
+          "hiddenField": {
+            "uuid": "9324a065-538d-4aff-b29a-24c226d78fe5",
+            "name": "episode_id"
+          }
+        }
+      },
+      {
+        "id": "c414b4c1-0394-4f25-98e2-ba2e95f89e0d",
+        "tallyFieldId": "c414b4c1-0394-4f25-98e2-ba2e95f89e0d",
+        "order": 19,
+        "questionText": "wix_member_id",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "hidden",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": true,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "block": {
+            "uuid": "7fc5f0f4-8cfe-4393-8354-d01c6802f9fc",
+            "type": "HIDDEN_FIELDS",
+            "groupUuid": "1860b1ef-929c-462e-b2b1-1c10b6905eb4",
+            "groupType": "HIDDEN_FIELDS",
+            "payload": {
+              "hiddenFields": [
+                {
+                  "uuid": "9324a065-538d-4aff-b29a-24c226d78fe5",
+                  "name": "episode_id"
+                },
+                {
+                  "uuid": "c414b4c1-0394-4f25-98e2-ba2e95f89e0d",
+                  "name": "wix_member_id"
+                },
+                {
+                  "uuid": "a790ffab-128f-43a9-92a5-ab2c663b90c9",
+                  "name": "member_email"
+                }
+              ]
+            }
+          },
+          "hiddenField": {
+            "uuid": "c414b4c1-0394-4f25-98e2-ba2e95f89e0d",
+            "name": "wix_member_id"
+          }
+        }
+      },
+      {
+        "id": "a790ffab-128f-43a9-92a5-ab2c663b90c9",
+        "tallyFieldId": "a790ffab-128f-43a9-92a5-ab2c663b90c9",
+        "order": 20,
+        "questionText": "member_email",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "hidden",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": true,
+        "options": [],
+        "logic": {
+          "conditions": []
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "block": {
+            "uuid": "7fc5f0f4-8cfe-4393-8354-d01c6802f9fc",
+            "type": "HIDDEN_FIELDS",
+            "groupUuid": "1860b1ef-929c-462e-b2b1-1c10b6905eb4",
+            "groupType": "HIDDEN_FIELDS",
+            "payload": {
+              "hiddenFields": [
+                {
+                  "uuid": "9324a065-538d-4aff-b29a-24c226d78fe5",
+                  "name": "episode_id"
+                },
+                {
+                  "uuid": "c414b4c1-0394-4f25-98e2-ba2e95f89e0d",
+                  "name": "wix_member_id"
+                },
+                {
+                  "uuid": "a790ffab-128f-43a9-92a5-ab2c663b90c9",
+                  "name": "member_email"
+                }
+              ]
+            }
+          },
+          "hiddenField": {
+            "uuid": "a790ffab-128f-43a9-92a5-ab2c663b90c9",
+            "name": "member_email"
+          }
+        }
+      },
+      {
+        "id": "0a7ed0ba-5543-437f-8c00-9080babd309d",
+        "tallyFieldId": "0a7ed0ba-5543-437f-8c00-9080babd309d",
+        "order": 21,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "unknown",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": [
+            {
+              "ifQuestionId": "",
+              "ifTallyFieldId": "",
+              "operator": "unknown",
+              "value": "",
+              "action": "jump_to",
+              "targetQuestionId": "7022cb17-04aa-41f4-82e8-ac352280ae68",
+              "targetTallyFieldId": "7022cb17-04aa-41f4-82e8-ac352280ae68",
+              "raw": {
+                "logicBlockUuid": "0a7ed0ba-5543-437f-8c00-9080babd309d",
+                "conditional": {
+                  "uuid": "9640f7c8-3bfd-4da4-87b6-d61cee70e258",
+                  "type": "SINGLE",
+                  "payload": {
+                    "field": {
+                      "uuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                      "type": "INPUT_FIELD",
+                      "questionType": "MULTI_SELECT",
+                      "blockGroupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                      "title": "Is there anything — such as a past injury, occasional or chronic pain, or a body area that just isn’t 100% — that could affect how you move during sessions or recover after sessions? "
+                    },
+                    "comparison": "IS_ANY_OF",
+                    "value": [
+                      "5ccabf79-fcba-4e84-87a5-9e26e4648d6e",
+                      "9c5764e4-8111-45fe-9832-f6757a8bb3b6",
+                      "6dd0d419-fa32-47a7-88be-dcd9f299de33",
+                      "7a2f62cb-174a-44f1-be27-bdbc2dc0ae79",
+                      "0c635757-4f36-4036-99d7-46d961c1e9cd"
+                    ]
+                  }
+                },
+                "action": {
+                  "uuid": "a8e3a015-2951-4bf2-8d9b-52026eb09fac",
+                  "type": "JUMP_TO_PAGE",
+                  "payload": {
+                    "jumpToPage": "7022cb17-04aa-41f4-82e8-ac352280ae68"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "0a7ed0ba-5543-437f-8c00-9080babd309d",
+          "type": "CONDITIONAL_LOGIC",
+          "groupUuid": "7b3c299c-ef38-4f83-8e41-1575665f8780",
+          "groupType": "CONDITIONAL_LOGIC",
+          "payload": {
+            "updateUuid": "5b7f1ec8-d769-47c5-8cf1-1294c2194638",
+            "logicalOperator": "OR",
+            "conditionals": [
+              {
+                "uuid": "9640f7c8-3bfd-4da4-87b6-d61cee70e258",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                    "type": "INPUT_FIELD",
+                    "questionType": "MULTI_SELECT",
+                    "blockGroupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                    "title": "Is there anything — such as a past injury, occasional or chronic pain, or a body area that just isn’t 100% — that could affect how you move during sessions or recover after sessions? "
+                  },
+                  "comparison": "IS_ANY_OF",
+                  "value": [
+                    "5ccabf79-fcba-4e84-87a5-9e26e4648d6e",
+                    "9c5764e4-8111-45fe-9832-f6757a8bb3b6",
+                    "6dd0d419-fa32-47a7-88be-dcd9f299de33",
+                    "7a2f62cb-174a-44f1-be27-bdbc2dc0ae79",
+                    "0c635757-4f36-4036-99d7-46d961c1e9cd"
+                  ]
+                }
+              }
+            ],
+            "actions": [
+              {
+                "uuid": "a8e3a015-2951-4bf2-8d9b-52026eb09fac",
+                "type": "JUMP_TO_PAGE",
+                "payload": {
+                  "jumpToPage": "7022cb17-04aa-41f4-82e8-ac352280ae68"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "50c7b740-0efc-43ad-98dd-e7691ad4ba67",
+        "tallyFieldId": "50c7b740-0efc-43ad-98dd-e7691ad4ba67",
+        "order": 22,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "unknown",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": [
+            {
+              "ifQuestionId": "",
+              "ifTallyFieldId": "",
+              "operator": "unknown",
+              "value": "",
+              "action": "jump_to",
+              "targetQuestionId": "25b53ad1-f1a5-4fc6-a931-f67c794988e5",
+              "targetTallyFieldId": "25b53ad1-f1a5-4fc6-a931-f67c794988e5",
+              "raw": {
+                "logicBlockUuid": "50c7b740-0efc-43ad-98dd-e7691ad4ba67",
+                "conditional": {
+                  "uuid": "9640f7c8-3bfd-4da4-87b6-d61cee70e258",
+                  "type": "SINGLE",
+                  "payload": {
+                    "field": {
+                      "uuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                      "type": "INPUT_FIELD",
+                      "questionType": "MULTI_SELECT",
+                      "blockGroupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                      "title": "Is there anything — such as a past injury, occasional or chronic pain, or a body area that just isn’t 100% — that could affect how you move during sessions or recover after sessions? "
+                    },
+                    "comparison": "IS_ANY_OF",
+                    "value": [
+                      "7a2f62cb-174a-44f1-be27-bdbc2dc0ae79"
+                    ]
+                  }
+                },
+                "action": {
+                  "uuid": "a8e3a015-2951-4bf2-8d9b-52026eb09fac",
+                  "type": "JUMP_TO_PAGE",
+                  "payload": {
+                    "jumpToPage": "25b53ad1-f1a5-4fc6-a931-f67c794988e5"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "50c7b740-0efc-43ad-98dd-e7691ad4ba67",
+          "type": "CONDITIONAL_LOGIC",
+          "groupUuid": "8a98b849-b50e-4c42-a041-04023499a719",
+          "groupType": "CONDITIONAL_LOGIC",
+          "payload": {
+            "updateUuid": "73123b33-d1c4-45d3-a8d7-9088de4f5a92",
+            "logicalOperator": "OR",
+            "conditionals": [
+              {
+                "uuid": "9640f7c8-3bfd-4da4-87b6-d61cee70e258",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                    "type": "INPUT_FIELD",
+                    "questionType": "MULTI_SELECT",
+                    "blockGroupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                    "title": "Is there anything — such as a past injury, occasional or chronic pain, or a body area that just isn’t 100% — that could affect how you move during sessions or recover after sessions? "
+                  },
+                  "comparison": "IS_ANY_OF",
+                  "value": [
+                    "7a2f62cb-174a-44f1-be27-bdbc2dc0ae79"
+                  ]
+                }
+              }
+            ],
+            "actions": [
+              {
+                "uuid": "a8e3a015-2951-4bf2-8d9b-52026eb09fac",
+                "type": "JUMP_TO_PAGE",
+                "payload": {
+                  "jumpToPage": "25b53ad1-f1a5-4fc6-a931-f67c794988e5"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "9e1b06d0-6465-47b5-972f-4d7b317df375",
+        "tallyFieldId": "9e1b06d0-6465-47b5-972f-4d7b317df375",
+        "order": 23,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "unknown",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": [
+            {
+              "ifQuestionId": "",
+              "ifTallyFieldId": "",
+              "operator": "unknown",
+              "value": "",
+              "action": "jump_to",
+              "targetQuestionId": "25b53ad1-f1a5-4fc6-a931-f67c794988e5",
+              "targetTallyFieldId": "25b53ad1-f1a5-4fc6-a931-f67c794988e5",
+              "raw": {
+                "logicBlockUuid": "9e1b06d0-6465-47b5-972f-4d7b317df375",
+                "conditional": {
+                  "uuid": "8e5eea16-1426-4d84-9a2c-7efea8be831f",
+                  "type": "SINGLE",
+                  "payload": {
+                    "field": {
+                      "uuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                      "type": "INPUT_FIELD",
+                      "questionType": "CHECKBOXES",
+                      "blockGroupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                      "title": "Is there anything — such as a past injury, occasional or chronic pain, or a body area that just isn’t 100% — that could affect how you move during sessions or recover after sessions? "
+                    },
+                    "comparison": "IS_EMPTY",
+                    "value": ""
+                  }
+                },
+                "action": {
+                  "uuid": "a629eb80-1eb6-456b-8c80-333b73734a74",
+                  "type": "JUMP_TO_PAGE",
+                  "payload": {
+                    "jumpToPage": "25b53ad1-f1a5-4fc6-a931-f67c794988e5"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "9e1b06d0-6465-47b5-972f-4d7b317df375",
+          "type": "CONDITIONAL_LOGIC",
+          "groupUuid": "42f4980a-7911-4e70-b12b-9bbbed57b38a",
+          "groupType": "CONDITIONAL_LOGIC",
+          "payload": {
+            "updateUuid": "0a59e6b4-0b72-445b-8d8c-311314ccddf7",
+            "logicalOperator": "AND",
+            "conditionals": [
+              {
+                "uuid": "8e5eea16-1426-4d84-9a2c-7efea8be831f",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "73c809da-0e93-4271-9b3f-98f64276044f",
+                    "title": "Is there anything — such as a past injury, occasional or chronic pain, or a body area that just isn’t 100% — that could affect how you move during sessions or recover after sessions? "
+                  },
+                  "comparison": "IS_EMPTY",
+                  "value": ""
+                }
+              }
+            ],
+            "actions": [
+              {
+                "uuid": "a629eb80-1eb6-456b-8c80-333b73734a74",
+                "type": "JUMP_TO_PAGE",
+                "payload": {
+                  "jumpToPage": "25b53ad1-f1a5-4fc6-a931-f67c794988e5"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "1f84e96b-54ba-4b8e-848e-5af34301f443",
+        "tallyFieldId": "1f84e96b-54ba-4b8e-848e-5af34301f443",
+        "order": 24,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "unknown",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": [
+            {
+              "ifQuestionId": "",
+              "ifTallyFieldId": "",
+              "operator": "unknown",
+              "value": "",
+              "action": "unknown",
+              "targetQuestionId": "",
+              "targetTallyFieldId": "",
+              "raw": {
+                "logicBlockUuid": "1f84e96b-54ba-4b8e-848e-5af34301f443",
+                "conditional": {
+                  "uuid": "d00b8ba0-256d-4343-b54c-517b2fd6d8b6",
+                  "type": "SINGLE",
+                  "payload": {
+                    "field": {
+                      "uuid": "7f841af4-5870-437d-88bd-840f54b370bf",
+                      "type": "INPUT_FIELD",
+                      "questionType": "TEXTAREA",
+                      "blockGroupUuid": "7f841af4-5870-437d-88bd-840f54b370bf",
+                      "title": "Please share any details you feel comfortable providing (e.g., where the issue is, what movements irritate it, or anything that tends to flare up)"
+                    },
+                    "comparison": "IS_EMPTY",
+                    "value": ""
+                  }
+                },
+                "action": {
+                  "uuid": "42c19908-b6d6-4b7d-a8f2-518262b2b4c4",
+                  "type": "HIDE_BUTTON_TO_DISABLE_COMPLETION"
+                }
+              }
+            }
+          ]
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "1f84e96b-54ba-4b8e-848e-5af34301f443",
+          "type": "CONDITIONAL_LOGIC",
+          "groupUuid": "c8866cce-0749-4338-8eba-c1c06937af42",
+          "groupType": "CONDITIONAL_LOGIC",
+          "payload": {
+            "updateUuid": "7379ccbd-5ae1-4154-930c-7dc6c1ec7def",
+            "logicalOperator": "AND",
+            "conditionals": [
+              {
+                "uuid": "d00b8ba0-256d-4343-b54c-517b2fd6d8b6",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "7f841af4-5870-437d-88bd-840f54b370bf",
+                    "type": "INPUT_FIELD",
+                    "questionType": "TEXTAREA",
+                    "blockGroupUuid": "7f841af4-5870-437d-88bd-840f54b370bf",
+                    "title": "Please share any details you feel comfortable providing (e.g., where the issue is, what movements irritate it, or anything that tends to flare up)"
+                  },
+                  "comparison": "IS_EMPTY",
+                  "value": ""
+                }
+              }
+            ],
+            "actions": [
+              {
+                "uuid": "42c19908-b6d6-4b7d-a8f2-518262b2b4c4",
+                "type": "HIDE_BUTTON_TO_DISABLE_COMPLETION"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+        "tallyFieldId": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+        "order": 25,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "unknown",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": [
+            {
+              "ifQuestionId": "",
+              "ifTallyFieldId": "",
+              "operator": "unknown",
+              "value": "",
+              "action": "jump_to",
+              "targetQuestionId": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+              "targetTallyFieldId": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+              "raw": {
+                "logicBlockUuid": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+                "conditional": {
+                  "uuid": "2bf1b2ee-fb6a-4733-b139-3768839b73a2",
+                  "type": "SINGLE",
+                  "payload": {
+                    "field": {
+                      "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                      "type": "INPUT_FIELD",
+                      "questionType": "CHECKBOXES",
+                      "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                      "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                    },
+                    "comparison": "CONTAINS",
+                    "value": "8673b49e-e49f-48aa-9207-43a6bf3d2794"
+                  }
+                },
+                "action": {
+                  "uuid": "017eeacd-7b61-494f-8218-ceb483bba8ba",
+                  "type": "JUMP_TO_PAGE",
+                  "payload": {
+                    "jumpToPage": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+          "type": "CONDITIONAL_LOGIC",
+          "groupUuid": "9d1b241b-5852-4b44-93a2-8e8e2ea0931e",
+          "groupType": "CONDITIONAL_LOGIC",
+          "payload": {
+            "updateUuid": "217b6b05-75d6-4329-b9cf-602308518fa1",
+            "logicalOperator": "OR",
+            "conditionals": [
+              {
+                "uuid": "2bf1b2ee-fb6a-4733-b139-3768839b73a2",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "8673b49e-e49f-48aa-9207-43a6bf3d2794"
+                }
+              },
+              {
+                "uuid": "2a0af083-03ba-4829-b499-f2b195ca42a8",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "234e562b-c5b7-4bab-adb9-88e2a06ab5d9"
+                }
+              },
+              {
+                "uuid": "1644b178-aff7-4090-afab-840dd646d8a7",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "2328786f-d461-41ed-baa7-05faa3be972c"
+                }
+              },
+              {
+                "uuid": "2418d24e-b7fc-4182-9cb1-91326c6f98a7",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "c2d0c6e1-0326-498f-9798-e397f693d8b2"
+                }
+              }
+            ],
+            "actions": [
+              {
+                "uuid": "017eeacd-7b61-494f-8218-ceb483bba8ba",
+                "type": "JUMP_TO_PAGE",
+                "payload": {
+                  "jumpToPage": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+        "tallyFieldId": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+        "order": 26,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "unknown",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": [
+            {
+              "ifQuestionId": "",
+              "ifTallyFieldId": "",
+              "operator": "unknown",
+              "value": "",
+              "action": "jump_to",
+              "targetQuestionId": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+              "targetTallyFieldId": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+              "raw": {
+                "logicBlockUuid": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+                "conditional": {
+                  "uuid": "2a0af083-03ba-4829-b499-f2b195ca42a8",
+                  "type": "SINGLE",
+                  "payload": {
+                    "field": {
+                      "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                      "type": "INPUT_FIELD",
+                      "questionType": "CHECKBOXES",
+                      "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                      "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                    },
+                    "comparison": "CONTAINS",
+                    "value": "234e562b-c5b7-4bab-adb9-88e2a06ab5d9"
+                  }
+                },
+                "action": {
+                  "uuid": "017eeacd-7b61-494f-8218-ceb483bba8ba",
+                  "type": "JUMP_TO_PAGE",
+                  "payload": {
+                    "jumpToPage": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+          "type": "CONDITIONAL_LOGIC",
+          "groupUuid": "9d1b241b-5852-4b44-93a2-8e8e2ea0931e",
+          "groupType": "CONDITIONAL_LOGIC",
+          "payload": {
+            "updateUuid": "217b6b05-75d6-4329-b9cf-602308518fa1",
+            "logicalOperator": "OR",
+            "conditionals": [
+              {
+                "uuid": "2bf1b2ee-fb6a-4733-b139-3768839b73a2",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "8673b49e-e49f-48aa-9207-43a6bf3d2794"
+                }
+              },
+              {
+                "uuid": "2a0af083-03ba-4829-b499-f2b195ca42a8",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "234e562b-c5b7-4bab-adb9-88e2a06ab5d9"
+                }
+              },
+              {
+                "uuid": "1644b178-aff7-4090-afab-840dd646d8a7",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "2328786f-d461-41ed-baa7-05faa3be972c"
+                }
+              },
+              {
+                "uuid": "2418d24e-b7fc-4182-9cb1-91326c6f98a7",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "c2d0c6e1-0326-498f-9798-e397f693d8b2"
+                }
+              }
+            ],
+            "actions": [
+              {
+                "uuid": "017eeacd-7b61-494f-8218-ceb483bba8ba",
+                "type": "JUMP_TO_PAGE",
+                "payload": {
+                  "jumpToPage": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+        "tallyFieldId": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+        "order": 27,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "unknown",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": [
+            {
+              "ifQuestionId": "",
+              "ifTallyFieldId": "",
+              "operator": "unknown",
+              "value": "",
+              "action": "jump_to",
+              "targetQuestionId": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+              "targetTallyFieldId": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+              "raw": {
+                "logicBlockUuid": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+                "conditional": {
+                  "uuid": "1644b178-aff7-4090-afab-840dd646d8a7",
+                  "type": "SINGLE",
+                  "payload": {
+                    "field": {
+                      "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                      "type": "INPUT_FIELD",
+                      "questionType": "CHECKBOXES",
+                      "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                      "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                    },
+                    "comparison": "CONTAINS",
+                    "value": "2328786f-d461-41ed-baa7-05faa3be972c"
+                  }
+                },
+                "action": {
+                  "uuid": "017eeacd-7b61-494f-8218-ceb483bba8ba",
+                  "type": "JUMP_TO_PAGE",
+                  "payload": {
+                    "jumpToPage": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+          "type": "CONDITIONAL_LOGIC",
+          "groupUuid": "9d1b241b-5852-4b44-93a2-8e8e2ea0931e",
+          "groupType": "CONDITIONAL_LOGIC",
+          "payload": {
+            "updateUuid": "217b6b05-75d6-4329-b9cf-602308518fa1",
+            "logicalOperator": "OR",
+            "conditionals": [
+              {
+                "uuid": "2bf1b2ee-fb6a-4733-b139-3768839b73a2",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "8673b49e-e49f-48aa-9207-43a6bf3d2794"
+                }
+              },
+              {
+                "uuid": "2a0af083-03ba-4829-b499-f2b195ca42a8",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "234e562b-c5b7-4bab-adb9-88e2a06ab5d9"
+                }
+              },
+              {
+                "uuid": "1644b178-aff7-4090-afab-840dd646d8a7",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "2328786f-d461-41ed-baa7-05faa3be972c"
+                }
+              },
+              {
+                "uuid": "2418d24e-b7fc-4182-9cb1-91326c6f98a7",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "c2d0c6e1-0326-498f-9798-e397f693d8b2"
+                }
+              }
+            ],
+            "actions": [
+              {
+                "uuid": "017eeacd-7b61-494f-8218-ceb483bba8ba",
+                "type": "JUMP_TO_PAGE",
+                "payload": {
+                  "jumpToPage": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+        "tallyFieldId": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+        "order": 28,
+        "questionText": "",
+        "subtext": "",
+        "description": "",
+        "placeholder": "",
+        "fieldType": "unknown",
+        "required": false,
+        "isVisibleQuestion": false,
+        "isAnswerField": false,
+        "options": [],
+        "logic": {
+          "conditions": [
+            {
+              "ifQuestionId": "",
+              "ifTallyFieldId": "",
+              "operator": "unknown",
+              "value": "",
+              "action": "jump_to",
+              "targetQuestionId": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+              "targetTallyFieldId": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b",
+              "raw": {
+                "logicBlockUuid": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+                "conditional": {
+                  "uuid": "2418d24e-b7fc-4182-9cb1-91326c6f98a7",
+                  "type": "SINGLE",
+                  "payload": {
+                    "field": {
+                      "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                      "type": "INPUT_FIELD",
+                      "questionType": "CHECKBOXES",
+                      "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                      "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                    },
+                    "comparison": "CONTAINS",
+                    "value": "c2d0c6e1-0326-498f-9798-e397f693d8b2"
+                  }
+                },
+                "action": {
+                  "uuid": "017eeacd-7b61-494f-8218-ceb483bba8ba",
+                  "type": "JUMP_TO_PAGE",
+                  "payload": {
+                    "jumpToPage": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "calculations": {
+          "formula": "",
+          "dependsOn": []
+        },
+        "validation": {
+          "min": null,
+          "max": null,
+          "maxLength": null,
+          "allowedFileTypes": [],
+          "otherValidationRules": []
+        },
+        "raw": {
+          "uuid": "9dbcb1b2-cfc8-4173-aa60-0dbb2c4fd5b3",
+          "type": "CONDITIONAL_LOGIC",
+          "groupUuid": "9d1b241b-5852-4b44-93a2-8e8e2ea0931e",
+          "groupType": "CONDITIONAL_LOGIC",
+          "payload": {
+            "updateUuid": "217b6b05-75d6-4329-b9cf-602308518fa1",
+            "logicalOperator": "OR",
+            "conditionals": [
+              {
+                "uuid": "2bf1b2ee-fb6a-4733-b139-3768839b73a2",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "8673b49e-e49f-48aa-9207-43a6bf3d2794"
+                }
+              },
+              {
+                "uuid": "2a0af083-03ba-4829-b499-f2b195ca42a8",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "234e562b-c5b7-4bab-adb9-88e2a06ab5d9"
+                }
+              },
+              {
+                "uuid": "1644b178-aff7-4090-afab-840dd646d8a7",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "2328786f-d461-41ed-baa7-05faa3be972c"
+                }
+              },
+              {
+                "uuid": "2418d24e-b7fc-4182-9cb1-91326c6f98a7",
+                "type": "SINGLE",
+                "payload": {
+                  "field": {
+                    "uuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "type": "INPUT_FIELD",
+                    "questionType": "CHECKBOXES",
+                    "blockGroupUuid": "38bfe07a-7a47-4d80-9f27-cf7280547acc",
+                    "title": "Is there anything — such as a diagnosed disability, long‑term health condition, neurodivergence, or any other factor — that may influence your training or participation in any way?"
+                  },
+                  "comparison": "CONTAINS",
+                  "value": "c2d0c6e1-0326-498f-9798-e397f693d8b2"
+                }
+              }
+            ],
+            "actions": [
+              {
+                "uuid": "017eeacd-7b61-494f-8218-ceb483bba8ba",
+                "type": "JUMP_TO_PAGE",
+                "payload": {
+                  "jumpToPage": "c6e980d5-0ff3-462b-9ce6-1d39329a0b3b"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

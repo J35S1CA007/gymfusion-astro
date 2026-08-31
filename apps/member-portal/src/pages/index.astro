@@ -1,0 +1,1787 @@
+---
+import HealthDateTimePicker from "../components/HealthDateTimePicker";
+import HealthSignaturePad from "../components/HealthSignaturePad";
+---
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GYMFUSION Member Portal | Health Profile</title>
+  <style is:global>
+    /*
+      GYMFUSION HEALTH PROFILE - ASTRO MEMBER PORTAL
+      Version: v1.1 target-state frontend
+      Purpose: Ready for Movement Screening Part 2 - Health & Safety
+      Backend target: approved server-side boundary to authoritative Wix services
+
+      IMPORTANT:
+      1. Complete authenticated server-side submission integration before production.
+      2. Keep health data out of Member profile fields; send to the approved RFM collections only.
+    */
+
+    @font-face {
+      font-family: "Gamuth";
+      src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Gamuth";
+      src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Bold.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --gf-bg: #f5f5f5;
+      --gf-bg-accent: #ffffff;
+      --gf-text: #000000;
+      --gf-muted: #4b4b4b;
+      --gf-line: rgba(0, 0, 0, 0.16);
+      --gf-line-strong: rgba(0, 0, 0, 0.86);
+      --gf-soft: #fafafa;
+      --gf-focus: #000000;
+      --gf-radius: 24px;
+      --gf-shadow: 0 24px 70px rgba(0, 0, 0, 0.08);
+      --gf-shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 24px rgba(0, 0, 0, 0.04);
+      --gf-font: "Gamuth", Arial, Helvetica, sans-serif;
+      --gf-space-1: 8px;
+      --gf-space-2: 12px;
+      --gf-space-3: 16px;
+      --gf-space-4: 20px;
+      --gf-space-5: 24px;
+      --gf-space-6: 32px;
+      --gf-page-gap: 26px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      background: radial-gradient(circle at top, #ffffff 0%, #f7f7f7 44%, #eeeeee 100%);
+      color: var(--gf-text);
+      font-family: var(--gf-font);
+      line-height: 1.55;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body { padding: 0; }
+
+    .gf-wrap {
+      width: min(940px, 100%);
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .gf-shell {
+      border: 1px solid var(--gf-line);
+      border-radius: 34px;
+      background: linear-gradient(180deg, #ffffff 0%, #fcfcfc 100%);
+      box-shadow: var(--gf-shadow);
+      overflow: hidden;
+    }
+
+    .gf-header {
+      padding: 34px 34px 30px;
+      border-bottom: 1px solid var(--gf-line);
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .gf-kicker {
+      display: inline-flex;
+      align-self: center;
+      width: fit-content;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--gf-line);
+      border-radius: 999px;
+      min-height: 34px;
+      padding: 6px 16px 5px;
+      font-size: 11.5px;
+      letter-spacing: 0.085em;
+      text-transform: uppercase;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: clamp(32px, 5.5vw, 60px);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+
+    .gf-intro {
+      color: var(--gf-muted);
+      max-width: 700px;
+      font-size: 18px;
+      line-height: 1.62;
+      font-weight: 500;
+    }
+
+    .gf-progress {
+      height: 6px;
+      background: #f0f0f0;
+      border-bottom: 1px solid var(--gf-line);
+    }
+
+    .gf-progress > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: #000;
+      transition: width 220ms ease;
+    }
+
+    form { margin: 0; }
+
+    .gf-page { display: none; padding: 34px 34px 44px; }
+    .gf-page.is-active {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gf-page-gap);
+    }
+
+    .gf-page[data-page="2"].is-active {
+      gap: 38px;
+    }
+
+    .gf-page[data-page="2"] .gf-card {
+      margin-bottom: 24px;
+    }
+
+    .gf-page[data-page="2"] fieldset > .gf-choice-row {
+      margin-top: 20px;
+    }
+
+    .gf-page[data-page="2"] .gf-followup-item > .gf-choice-row {
+      margin-top: 12px;
+      margin-bottom: 8px;
+    }
+
+    .gf-page[data-page="2"] .gf-conditional {
+      margin-top: 8px;
+      padding: 24px;
+      gap: 30px;
+    }
+
+    .gf-page[data-page="2"] .gf-followup-stack {
+      gap: 28px;
+    }
+
+    .gf-page[data-page="2"] .gf-followup-item {
+      gap: 16px;
+      padding-top: 24px;
+    }
+
+    .gf-section-title {
+      font-size: clamp(26px, 3vw, 38px);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+
+    .gf-section-note {
+      color: var(--gf-muted);
+      max-width: 760px;
+      line-height: 1.62;
+      font-size: 16px;
+    }
+
+    .gf-card {
+      border: 1px solid var(--gf-line);
+      border-radius: 28px;
+      padding: 30px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      box-shadow: var(--gf-shadow-soft);
+    }
+
+    .gf-card.soft {
+      background: linear-gradient(180deg, #fcfcfc 0%, #f7f7f7 100%);
+      gap: 16px;
+    }
+
+    .gf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .gf-signature-meta {
+      position: relative;
+      margin-bottom: 28px;
+    }
+
+    .gf-signature-meta:has(.gf-datetimepicker-trigger[aria-expanded="true"]) {
+      z-index: 90;
+    }
+
+    .gf-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label, legend {
+      display: block;
+      font-weight: 800;
+      color: #000;
+      line-height: 1.4;
+    }
+
+    .gf-help {
+      color: var(--gf-muted);
+      font-size: 13px;
+      line-height: 1.62;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1.25px solid var(--gf-line);
+      border-radius: 17px;
+      background: #fff;
+      color: #000;
+      padding: 15px 16px;
+      font: inherit;
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    textarea { min-height: 120px; resize: vertical; }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--gf-line-strong);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-date-field] { position: relative; }
+
+    .gf-datetimepicker {
+      position: relative;
+      width: 100%;
+    }
+
+    .gf-datetimepicker-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 52px;
+      padding: 14px 16px;
+      border: 1.25px solid var(--gf-line);
+      border-radius: 17px;
+      background: #fff;
+      color: #000;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .gf-datetimepicker-trigger svg {
+      flex: 0 0 auto;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .gf-datetimepicker-trigger:hover,
+    .gf-datetimepicker-trigger:focus-visible,
+    .gf-datetimepicker-trigger[aria-expanded="true"] {
+      border-color: #000;
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+      outline: none;
+    }
+
+    .gf-datetimepicker-popover {
+      position: absolute;
+      z-index: 80;
+      top: calc(100% + 10px);
+      left: 0;
+      width: min(354px, 100%);
+      padding: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.16);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(14px);
+      animation: gf-picker-in 160ms ease-out both;
+    }
+
+    @keyframes gf-picker-in {
+      from { opacity: 0; transform: translateY(-6px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .gf-datetimepicker-header {
+      display: grid;
+      grid-template-columns: 38px 1fr 38px;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .gf-datetimepicker-header strong {
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .gf-datetimepicker-header button,
+    .gf-datetimepicker-day {
+      display: inline-grid;
+      place-items: center;
+      border: 0;
+      background: transparent;
+      color: #000;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .gf-datetimepicker-header button {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      font-size: 27px;
+      line-height: 1;
+    }
+
+    .gf-datetimepicker-header button:hover,
+    .gf-datetimepicker-header button:focus-visible,
+    .gf-datetimepicker-day:hover,
+    .gf-datetimepicker-day:focus-visible {
+      background: #ededed;
+      outline: 2px solid #000;
+      outline-offset: 1px;
+    }
+
+    .gf-datetimepicker-weekdays,
+    .gf-datetimepicker-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .gf-datetimepicker-weekdays {
+      margin-bottom: 4px;
+      color: var(--gf-muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .gf-datetimepicker-weekdays span {
+      padding: 6px 0;
+    }
+
+    .gf-datetimepicker-day {
+      aspect-ratio: 1;
+      min-width: 0;
+      border-radius: 11px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .gf-datetimepicker-day[data-outside-month="true"] {
+      color: #9a9a9a;
+    }
+
+    .gf-datetimepicker-day[aria-current="date"] {
+      box-shadow: inset 0 0 0 1.5px var(--gf-green);
+    }
+
+    .gf-datetimepicker-day[aria-pressed="true"] {
+      background: #000;
+      color: #fff;
+      box-shadow: none;
+    }
+
+    .gf-datetimepicker-day[aria-pressed="true"]:hover,
+    .gf-datetimepicker-day[aria-pressed="true"]:focus-visible {
+      background: var(--gf-green);
+      color: #000;
+    }
+
+    fieldset {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    fieldset > .gf-choice-row {
+      margin-top: 20px;
+    }
+
+    fieldset > .gf-conditional {
+      margin-top: 12px;
+    }
+
+    fieldset > .gf-other-condition {
+      margin-top: 20px;
+    }
+
+    .gf-choice-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .gf-choice {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 58px;
+      border: 1.25px solid var(--gf-line);
+      border-radius: 18px;
+      padding: 14px 16px;
+      cursor: pointer;
+      background: #fff;
+      color: #111;
+      font-weight: 700;
+      margin: 0;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+      transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .gf-choice:hover {
+      border-color: rgba(0, 0, 0, 0.36);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      transform: translateY(-1px);
+    }
+
+    .gf-choice input {
+      width: 18px;
+      height: 18px;
+      accent-color: #000;
+      flex: 0 0 auto;
+    }
+
+    .gf-choice:has(input:checked) {
+      background: #000;
+      color: #fff;
+      border-color: #000;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+    }
+
+    .gf-choice:has(input:checked) *,
+    .gf-choice:has(input:checked) label,
+    .gf-choice:has(input:checked) span {
+      color: #fff !important;
+    }
+
+    .gf-choice:has(input:checked) input {
+      accent-color: #fff;
+    }
+
+    .gf-conditional {
+      display: none;
+      margin-top: 0;
+      padding: 22px;
+      border: 1px dashed rgba(0, 0, 0, 0.45);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #ffffff 0%, #fcfcfc 100%);
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .gf-conditional.is-visible {
+      display: flex;
+    }
+
+    .gf-followup-heading {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      font-weight: 800;
+    }
+
+    .gf-followup-note {
+      margin: 0;
+      color: var(--gf-muted);
+      line-height: 1.5;
+    }
+
+    .gf-followup-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .gf-followup-item > .gf-choice-row {
+      margin-top: 12px;
+      margin-bottom: 8px;
+    }
+
+    .gf-followup-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .gf-followup-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    div.gf-followup-section.is-visible {
+      display: flex;
+    }
+
+    .gf-followup-section:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .gf-followup-section-title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      font-weight: 800;
+    }
+
+    .gf-followup-section-note {
+      margin: 0;
+      color: var(--gf-muted);
+      line-height: 1.5;
+    }
+
+    .gf-followup-item {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .gf-conditional .gf-field {
+      gap: 14px;
+    }
+
+    .gf-conditional .gf-field > .gf-choice-row {
+      margin-top: 10px;
+      margin-bottom: 8px;
+    }
+
+    .gf-followup-item:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .gf-skip-toggle {
+      margin-top: var(--gf-space-2);
+    }
+
+    [data-show-if],
+    [data-show-if-any],
+    [data-show-unless],
+    [data-show-when-answered],
+    [data-show-when-any-answered],
+    [data-show-when-all-answered],
+    [data-show-when-breathing-followup] {
+      display: none;
+    }
+
+    [data-show-if].is-visible,
+    [data-show-if-any].is-visible,
+    [data-show-unless].is-visible,
+    [data-show-when-answered].is-visible,
+    [data-show-when-any-answered].is-visible,
+    [data-show-when-all-answered].is-visible,
+    [data-show-when-breathing-followup].is-visible {
+      display: block;
+    }
+
+    .gf-conditional.is-visible,
+    .gf-field.is-visible {
+      display: flex;
+    }
+
+    .gf-followup-flow.is-visible,
+    .gf-followup-item.is-visible {
+      display: flex;
+    }
+
+    .gf-alert {
+      border: 1px solid #000;
+      border-radius: 18px;
+      padding: 18px;
+      background: #000;
+      color: #fff;
+      margin: 18px 0;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .gf-alert.is-visible { display: block; }
+
+    .gf-alert strong { display: block; margin-bottom: 6px; }
+
+    .gf-error {
+      display: none;
+      margin-top: 4px;
+      color: #b00020;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .gf-error.is-visible { display: block; }
+
+    .gf-visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+    .gf-member-lock {
+      display: none;
+      margin: 0 28px 24px;
+      padding: 14px 16px;
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      border-radius: 14px;
+      background: #fafafa;
+      color: #111;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.04);
+    }
+    .gf-member-lock.is-visible { display: block; }
+
+    .gf-invalid {
+      border-color: #b00020 !important;
+      box-shadow: 0 0 0 4px rgba(176, 0, 32, 0.12);
+    }
+
+    .gf-signature-pad {
+      border: 1.25px solid var(--gf-line);
+      border-radius: 20px;
+      background: #fff;
+      min-height: 198px;
+      overflow: hidden;
+      touch-action: none;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .gf-signature-pad canvas {
+      display: block;
+      width: 100%;
+      height: 198px;
+      cursor: crosshair;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .gf-signature-pad canvas:focus-visible {
+      outline: 3px solid var(--gf-green);
+      outline-offset: -5px;
+    }
+
+    .gf-signature-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 2px;
+    }
+
+    .gf-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 10px;
+      padding: 24px 30px 30px;
+      border-top: 1px solid var(--gf-line);
+      align-items: center;
+    }
+
+    .gf-nav-button {
+      border: 1.25px solid var(--gf-line);
+      border-radius: 999px;
+      padding: 14px 24px;
+      min-height: 50px;
+      min-width: 144px;
+      background: var(--gf-button-accent);
+      color: #000;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+      transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .gf-nav-button:hover:not([disabled]),
+    .gf-nav-button:active:not([disabled]) {
+      background: #000;
+      color: var(--gf-button-accent);
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.14);
+    }
+
+    .gf-nav-button:active:not([disabled]) {
+      transform: translateY(1px);
+    }
+
+    .gf-nav-button--back { --gf-button-accent: #e05555; }
+    .gf-nav-button--clear { --gf-button-accent: #f2a51a; }
+    .gf-nav-button--continue { --gf-button-accent: #78a941; }
+
+    .gf-nav-button[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+    .gf-status {
+      min-height: 24px;
+      padding: 0 30px 26px;
+      font-size: 14px;
+      color: var(--gf-muted);
+    }
+
+    .gf-small { font-size: 13px; color: var(--gf-muted); }
+
+    @media (max-width: 720px) {
+      .gf-wrap { padding: 10px; }
+      .gf-header { padding: 18px; }
+      .gf-page { padding: 18px 18px 28px; }
+      .gf-grid, .gf-choice-row { grid-template-columns: 1fr; }
+      .gf-nav { margin-top: 14px; padding: 18px 18px 22px; }
+      .gf-nav-button { width: 100%; }
+    }
+
+    body.gf-embed-mobile .gf-wrap {
+      width: 100%;
+      padding: 8px;
+    }
+
+    body.gf-embed-mobile .gf-shell {
+      border-radius: 24px;
+    }
+
+    body.gf-embed-mobile .gf-header,
+    body.gf-embed-mobile .gf-page {
+      padding: 18px;
+    }
+
+    body.gf-embed-mobile .gf-page[data-page="2"].is-active {
+      gap: 32px;
+    }
+
+    body.gf-embed-mobile .gf-page[data-page="2"] .gf-card {
+      margin-bottom: 26px;
+    }
+
+    body.gf-embed-mobile .gf-page[data-page="2"] fieldset > .gf-choice-row {
+      margin-top: 20px;
+    }
+
+    body.gf-embed-mobile .gf-page[data-page="2"] .gf-followup-item > .gf-choice-row {
+      margin-top: 10px;
+      margin-bottom: 6px;
+    }
+
+    body.gf-embed-mobile .gf-page[data-page="2"] .gf-conditional {
+      margin-top: 10px;
+      padding: 22px;
+      gap: 26px;
+    }
+
+    body.gf-embed-mobile .gf-page[data-page="2"] .gf-followup-stack {
+      gap: 24px;
+    }
+
+    body.gf-embed-mobile .gf-page[data-page="2"] .gf-followup-item {
+      gap: 14px;
+      padding-top: 22px;
+    }
+
+    body.gf-embed-mobile .gf-grid,
+    body.gf-embed-mobile .gf-choice-row {
+      grid-template-columns: 1fr;
+    }
+
+    body.gf-embed-mobile .gf-nav {
+      margin-top: 14px;
+      padding: 16px 18px 20px;
+    }
+
+    body.gf-embed-mobile .gf-nav-button {
+      width: 100%;
+    }
+
+    body.gf-embed-desktop .gf-wrap {
+      width: 878px;
+      max-width: 100%;
+      height: 1039px;
+      max-height: 100vh;
+      padding: 0;
+    }
+
+    body.gf-embed-desktop .gf-shell {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-shadow: none;
+    }
+
+    body.gf-embed-desktop {
+      font-size: 17px;
+    }
+
+    body.gf-embed-desktop label,
+    body.gf-embed-desktop legend {
+      font-size: 17px;
+      line-height: 1.45;
+      font-weight: 800;
+    }
+
+    body.gf-embed-desktop p,
+    body.gf-embed-desktop .gf-help,
+    body.gf-embed-desktop .gf-section-note {
+      color: #333;
+      line-height: 1.6;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .gf-choice,
+      .gf-nav-button,
+      input,
+      select,
+      textarea,
+      .gf-progress > span {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="gf-wrap">
+    <div class="gf-shell" data-gf-form-shell>
+      <header class="gf-header">
+        <span class="gf-kicker">EOI PART 2</span>
+        <h1>Health Profile</h1>
+        <p class="gf-intro">Complete this profile so GYMFUSION can support safe and appropriate coaching. This information is treated as private health information and is intended for staff review only.</p>
+      </header>
+
+      <div class="gf-progress" aria-hidden="true"><span data-progress></span></div>
+      <form id="gfHealthProfileForm" novalidate>
+        <section class="gf-page is-active" data-page="0">
+          <h2 class="gf-section-title">Collection of Health Information Notice</h2>
+          <p class="gf-section-note">Please read this notice before continuing.</p>
+
+          <div class="gf-card soft">
+            <h3>Purpose of Collection</h3>
+            <p>GYMFUSION collects personal and health information, including medical history, disability, and fitness-related information, for the purpose of assessing health-related risks, determining safe participation in training, and identifying any supports or reasonable adjustments that may be required.</p>
+            <p>This information enables GYMFUSION to uphold participant safety, meet its duty of care, and make informed decisions regarding program suitability.</p>
+
+            <h3>Basis of Screening</h3>
+            <p>GYMFUSION’s screening process is informed by Australia’s national pre-exercise screening framework; however, it is not a direct reproduction of the Australian Pre-Exercise Screening System (APSS).</p>
+            <p>The process incorporates gymnastics-specific, movement-based, and follow-up questions to obtain a comprehensive understanding of an individual’s background and training needs. Where responses indicate that additional support or consideration may be beneficial, GYMFUSION staff will discuss appropriate options with the participant.</p>
+
+            <h3>Participant Responsibilities and Disclosures</h3>
+            <p>Participants are required to provide accurate and complete information to the best of their knowledge, based on their current and, where relevant, past health status.</p>
+            <p>Disclosure of a health condition, injury, or relevant aspect of disability does not automatically preclude participation in GYMFUSION services. This information is used solely to determine appropriate supports or reasonable adjustments, whether a condition is stable for participation, the level of supervision or session format that may be suitable, and whether medical clearance or referral to a qualified health professional is advisable.</p>
+            <p>Where clinical guidance is recommended, participants may re-engage once appropriate advice has been obtained regarding safe participation, including any required supports or modifications. GYMFUSION adopts a person-centred approach, with a focus on supporting individuals to participate safely and effectively.</p>
+
+            <h3>Legal Authority and Privacy Compliance</h3>
+            <p>Personal and health information is collected and managed in accordance with applicable privacy laws, including the Privacy Act 1988 (Cth), including the Australian Privacy Principles (APPs), and the Health Records Act 2001 (Vic), including the Health Privacy Principles (HPPs), where applicable.</p>
+            <p>Because GYMFUSION collects and handles health information in Victoria, that information is handled in accordance with the Health Records Act 2001 (Vic) and the Health Privacy Principles (HPPs), where applicable.</p>
+            <p>Health information is collected and used solely for the purpose of assessing risk and supporting safe participation in GYMFUSION programs, unless otherwise required or authorised by law.</p>
+
+            <h3>Storage, Retention, and Disposal</h3>
+            <p>Health information collected as part of the assessment process will be retained as part of the participant’s Expression of Interest record.</p>
+            <p>Where an individual becomes a member, relevant information will form part of their ongoing member record and be retained in accordance with operational and legal requirements.</p>
+            <p>Where an individual does not proceed, their information will be securely destroyed or de-identified in accordance with GYMFUSION’s Privacy Policy and applicable Commonwealth and State privacy legislation.</p>
+
+            <h3>Use and Disclosure</h3>
+            <p>Health information is used by authorised GYMFUSION staff for health screening, safety, coaching suitability, reasonable adjustments and related service administration. It may also be processed through GYMFUSION’s approved technology providers as described in our Privacy Policy. We do not disclose health information to external health professionals or other third parties unless you consent, the disclosure is reasonably necessary for the relevant purpose and permitted by law, or disclosure is otherwise required or authorised by law.</p>
+
+            <h3>Access and Correction</h3>
+            <p>You may request access to, or correction of, health information we hold about you. Details about how to make a request are available in our Privacy Policy or via privacy@gymfusion.com.au.</p>
+
+            <h3>Acknowledgement and Consent</h3>
+            <div class="gf-grid gf-signature-meta">
+              <div class="gf-field">
+                <label for="healthInformationFirstName">First Name</label>
+                <input id="healthInformationFirstName" name="healthInformationFirstName" type="text" autocomplete="given-name" required />
+              </div>
+              <div class="gf-field">
+                <label for="healthInformationLastName">Last Name</label>
+                <input id="healthInformationLastName" name="healthInformationLastName" type="text" autocomplete="family-name" required />
+              </div>
+              <div class="gf-field" data-date-field>
+                <label for="healthInformationDateTrigger">Date</label>
+                <input id="healthInformationDate" name="healthInformationDate" type="hidden" required />
+                <HealthDateTimePicker client:load />
+              </div>
+            </div>
+            <div class="gf-field">
+              <label class="gf-choice">
+                <input type="checkbox" name="healthInformationConsent" value="yes" required />
+                <span>I acknowledge that I have read and understood this Health Information Collection Notice and consent to GYMFUSION collecting, using, storing and disclosing the health information I provide for the purposes described in this Notice and the GYMFUSION Privacy Policy.</span>
+              </label>
+            </div>
+            <div class="gf-field" data-signature-field>
+              <label for="healthInformationSignaturePad">Signature</label>
+              <div class="gf-signature-pad">
+                <HealthSignaturePad client:load />
+              </div>
+              <input id="healthInformationSignature" name="healthInformationSignature" type="hidden" required />
+              <input id="healthInformationSignatureSvg" name="healthInformationSignatureSvg" type="hidden" />
+              <input id="healthInformationSignatureFileName" name="healthInformationSignatureFileName" type="hidden" />
+              <input id="healthInformationSignatureSignedAt" name="healthInformationSignatureSignedAt" type="hidden" />
+              <input id="healthInformationSignatureDocumentID" name="healthInformationSignatureDocumentID" type="hidden" />
+              <div class="gf-signature-actions">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="gf-page" data-page="1">
+          <h2 class="gf-section-title">Ready for Movement</h2>
+          <p class="gf-section-note">Pre-exercise Screening Questionnaire.</p>
+
+          <div class="gf-card">
+            <fieldset>
+              <legend>Has your medical practitioner ever told you that you have a heart condition or have you ever suffered a stroke?</legend>
+              <div class="gf-choice-row">
+                <label class="gf-choice"><input type="radio" name="heartConditionStroke" value="No" required />No</label>
+                <label class="gf-choice"><input type="radio" name="heartConditionStroke" value="Yes" />Yes</label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="gf-card">
+            <fieldset>
+              <legend>Do you ever experience unexplained pains or discomfort in your chest at rest or during physical activity/exercise?</legend>
+              <div class="gf-choice-row">
+                <label class="gf-choice"><input type="radio" name="chestPainDiscomfort" value="No" required />No</label>
+                <label class="gf-choice"><input type="radio" name="chestPainDiscomfort" value="Yes" />Yes</label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="gf-card">
+            <fieldset data-conditional-source="dizzyBalanceEpisodes">
+              <legend>Do you ever feel faint, dizzy, or lose your balance during training or when changing posture (for example, standing up quickly or bending)?</legend>
+              <div class="gf-choice-row">
+                <label class="gf-choice"><input type="radio" name="dizzyBalanceEpisodes" value="No" required />No – I do not experience this</label>
+                <label class="gf-choice"><input type="radio" name="dizzyBalanceEpisodes" value="Exercise only" />Yes – During training/exercise only</label>
+                <label class="gf-choice"><input type="radio" name="dizzyBalanceEpisodes" value="Exercise and posture" />Yes – Both during exercise and with posture changes</label>
+                <label class="gf-choice"><input type="radio" name="dizzyBalanceEpisodes" value="Varies" />Yes – I have experienced this, but the circumstances vary or I don't recall exactly when it happens</label>
+              </div>
+              <div class="gf-conditional" data-show-unless="dizzyBalanceEpisodes:No">
+                <div class="gf-field" data-show-if="dizzyBalanceEpisodes:Exercise only">
+                  <label>Would you like to share any additional information about these episodes?</label>
+                  <div class="gf-choice-row">
+                    <label class="gf-choice"><input type="radio" name="dizzyShareMore" value="Yes" />Yes –– I would like to share more information.</label>
+                    <label class="gf-choice"><input type="radio" name="dizzyShareMore" value="No" />No thank-you –– I prefer not to provide further details.</label>
+                  </div>
+                </div>
+                <div class="gf-field" data-show-if="dizzyShareMore:Yes">
+                  <label for="dizzyEpisodeDetails">Further Information</label>
+                  <p class="gf-help">Feel free to share things like: how long ago you experienced it (ballpark), how often it occurs (or if it’s a new or infrequent occurrence), whether it has ever caused you to faint, what kinds of exercises or fitness activities you were doing when it happened (e.g., heavy weights, upper‑body strength training, running), and whether it occurred in warm weather or across different temperatures.</p>
+                  <textarea id="dizzyEpisodeDetails" name="dizzyEpisodeDetails" required></textarea>
+                </div>
+                <div class="gf-field" data-show-if="dizzyBalanceEpisodes:Varies">
+                  <label>Would you like to let us know anything further about these episodes?</label>
+                  <div class="gf-choice-row">
+                    <label class="gf-choice"><input type="radio" name="dizzyShareFurther" value="Yes" />Yes –– I would like to share more information.</label>
+                    <label class="gf-choice"><input type="radio" name="dizzyShareFurther" value="No" />No thank-you –– I prefer not to provide further details.</label>
+                  </div>
+                </div>
+                <div class="gf-field" data-show-if="dizzyShareFurther:Yes">
+                  <label for="dizzyMoreInformation">More Information</label>
+                  <p class="gf-help">Feel free to share things like: how long ago you experienced it (ballpark), how often it occurs (or if it’s a new or infrequent occurrence), whether it has ever caused you to faint, what kinds of exercises or fitness activities you were doing when it happened (e.g., heavy weights, upper‑body strength training, running), what general activity you were doing at the time (such as standing, walking, stretching, or changing position), and whether it occurred in warm weather or across different temperatures.</p>
+                  <textarea id="dizzyMoreInformation" name="dizzyMoreInformation" required></textarea>
+                </div>
+                <div class="gf-field" data-show-if="dizzyBalanceEpisodes:Exercise and posture">
+                  <label>Is there anything else you'd like to tell us about these episodes?</label>
+                  <div class="gf-choice-row">
+                    <label class="gf-choice"><input type="radio" name="dizzyShareAnythingElse" value="Yes" />Yes –– I would like to share more information.</label>
+                    <label class="gf-choice"><input type="radio" name="dizzyShareAnythingElse" value="No" />No thank-you –– I prefer not to provide further details.</label>
+                  </div>
+                </div>
+                <div class="gf-field" data-show-if="dizzyShareAnythingElse:Yes">
+                  <label for="dizzyAdditionalInformation">Add More Information</label>
+                  <p class="gf-help">Feel free to share things like: how long ago you experienced it (ballpark), how often it occurs (or if it’s a new or infrequent occurrence), whether it has ever caused you to faint, what kinds of exercises or fitness activities you were doing when it happened (e.g., heavy weights, upper‑body strength training, running), and whether it occurred in warm weather or across different temperatures.</p>
+                  <textarea id="dizzyAdditionalInformation" name="dizzyAdditionalInformation" required></textarea>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <section class="gf-page" data-page="2">
+          <h2 class="gf-section-title">Breathing Comfort</h2>
+          <p class="gf-section-note">Select any breathing or airway conditions relevant to training.</p>
+
+          <div class="gf-card">
+            <fieldset data-conditional-source="breathingConditions">
+              <legend>Do you have any of the following conditions that might affect breathing comfort or airway stability? (Select all that apply)</legend>
+              <div class="gf-choice-row">
+                <label class="gf-choice"><input type="checkbox" name="breathingConditions" value="Asthma" />Asthma</label>
+                <label class="gf-choice"><input type="checkbox" name="breathingConditions" value="COPD" />Chronic Obstructive Pulmonary Disease</label>
+                <label class="gf-choice"><input type="checkbox" name="breathingConditions" value="OSA" />Obstructive Sleep Apnea (OSA)</label>
+                <label class="gf-choice"><input type="checkbox" name="breathingConditions" value="Long Covid" />Long Covid</label>
+                <label class="gf-choice"><input type="checkbox" name="breathingConditions" value="Chronic Bronchitis" />Chronic Bronchitis</label>
+                <label class="gf-choice"><input type="checkbox" name="breathingConditions" value="None" />No known conditions affecting breathing comfort or airway stability</label>
+                <label class="gf-choice"><input type="checkbox" name="breathingConditions" value="Other" />Other (Please Specify)</label>
+              </div>
+              <div class="gf-field gf-conditional gf-other-condition" data-show-if="breathingConditions:Other">
+                <label for="breathingConditionOther">Please specify the other condition</label>
+                <input id="breathingConditionOther" name="breathingConditionOther" type="text" autocomplete="off" required />
+              </div>
+              <div class="gf-conditional gf-followup-flow" data-show-if-any="breathingConditions:Asthma|COPD|OSA|Long Covid|Chronic Bronchitis|None|Other" data-show-when-breathing-followup="airway asthma none other multiple">
+                <div class="gf-followup-section">
+                  <div class="gf-followup-stack">
+                    <div class="gf-followup-item" data-show-when-breathing-followup="airway">
+                      <label>Over the last 12 months, have you had any sudden breathing difficulties – similar to an asthma attack – that required urgent medical care?</label>
+                      <div class="gf-choice-row">
+                        <label class="gf-choice"><input type="radio" name="urgentBreathingCare12m" value="No" required />No</label>
+                        <label class="gf-choice"><input type="radio" name="urgentBreathingCare12m" value="Yes" />Yes</label>
+                      </div>
+                    </div>
+                    <div class="gf-followup-item" data-show-when-breathing-followup="asthma">
+                      <label>Have you had an asthma attack requiring immediate medical attention at any time over the last 12 months?</label>
+                      <div class="gf-choice-row">
+                        <label class="gf-choice"><input type="radio" name="asthmaAttackMedicalAttention12m" value="No" required />No</label>
+                        <label class="gf-choice"><input type="radio" name="asthmaAttackMedicalAttention12m" value="Yes" />Yes</label>
+                      </div>
+                    </div>
+                    <div class="gf-followup-item" data-show-when-breathing-followup="none">
+                      <label>Just to confirm, in the last 12 months, have you had any breathing episodes – even unexpected ones – that required urgent or emergency treatment?</label>
+                      <div class="gf-choice-row">
+                        <label class="gf-choice"><input type="radio" name="unexpectedBreathingEmergency12m" value="No" required />No</label>
+                        <label class="gf-choice"><input type="radio" name="unexpectedBreathingEmergency12m" value="Yes" />Yes</label>
+                      </div>
+                    </div>
+                    <div class="gf-followup-item" data-show-when-breathing-followup="other multiple">
+                      <label>Over the last 12 months, have you had any breathing episodes – due to asthma or another condition – that required urgent or emergency treatment?</label>
+                      <div class="gf-choice-row">
+                        <label class="gf-choice"><input type="radio" name="anyConditionBreathingEmergency12m" value="No" required />No</label>
+                        <label class="gf-choice"><input type="radio" name="anyConditionBreathingEmergency12m" value="Yes" />Yes</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="gf-followup-section" data-show-when-any-answered="urgentBreathingCare12m|asthmaAttackMedicalAttention12m|unexpectedBreathingEmergency12m|anyConditionBreathingEmergency12m">
+                  <p class="gf-followup-section-title">Triggers</p>
+                  <div class="gf-followup-item">
+                    <label>Are you aware of any triggers, patterns, or environments that tend to bring your symptoms on or make them worse?</label>
+                    <div class="gf-choice-row">
+                      <label class="gf-choice"><input type="radio" name="breathingTriggersKnown" value="No" required />No</label>
+                      <label class="gf-choice"><input type="radio" name="breathingTriggersKnown" value="Yes" />Yes</label>
+                    </div>
+                  </div>
+                  <div class="gf-followup-item" data-show-if="breathingTriggersKnown:Yes">
+                    <label for="breathingTriggerDetails">Please share any specific triggers or factors which you have noticed worsen your symptoms or bring them on. It can help us understand your experience and consider any necessary precautions.</label>
+                    <textarea id="breathingTriggerDetails" name="breathingTriggerDetails" required></textarea>
+                  </div>
+                </div>
+                <div class="gf-followup-section" data-show-if-any="breathingConditions:Asthma" data-show-when-answered="breathingTriggersKnown">
+                  <p class="gf-followup-section-title">Ventolin</p>
+                  <div class="gf-followup-item">
+                    <label>Do you use an inhaler?</label>
+                    <div class="gf-choice-row">
+                      <label class="gf-choice"><input type="radio" name="inhalerUse" value="Ventolin" required />Yes – Ventolin</label>
+                      <label class="gf-choice"><input type="radio" name="inhalerUse" value="Ventolin and preventer" />Yes – Ventolin and a preventer</label>
+                      <label class="gf-choice"><input type="radio" name="inhalerUse" value="No inhaler" />No – I do not use any inhaler</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="gf-followup-section" data-show-if-any="inhalerUse:Ventolin|Ventolin and preventer">
+                  <p class="gf-followup-section-title">Inhaler</p>
+                  <div class="gf-followup-item">
+                    <label>Do you use a spacer with your Ventolin inhaler?</label>
+                    <div class="gf-choice-row">
+                      <label class="gf-choice"><input type="radio" name="spacerUse" value="Yes" required />Yes –– I use an spacer with my inhaler</label>
+                      <label class="gf-choice"><input type="radio" name="spacerUse" value="No" />No –– I do not use a spacer with my inhaler</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="gf-followup-section" data-show-if-any="inhalerUse:Ventolin|Ventolin and preventer" data-show-when-answered="spacerUse">
+                  <p class="gf-followup-section-title">Bringing Ventolin Inhaler to the Studio</p>
+                  <p class="gf-followup-section-note">To support your safety and wellbeing during training, you are required to bring your Ventolin inhaler (and spacer, if applicable) to all sessions.</p>
+                  <div class="gf-followup-item">
+                    <label class="gf-choice">
+                      <input type="checkbox" name="bringInhalerAgreement" value="yes" required />
+                      <span><strong>Can you confirm that you will do this?</strong> You acknowledge and confirm that you will bring your Ventolin inhaler (and spacer, if applicable) to all training sessions.</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <section class="gf-page" data-page="3">
+          <h2 class="gf-section-title">Blood Sugar</h2>
+          <p class="gf-section-note">These questions follow the source health and safety form.</p>
+
+          <div class="gf-card">
+            <fieldset data-conditional-source="bloodSugarCondition">
+              <legend>Do you have diabetes or another condition that requires you to monitor your blood sugar levels more closely?</legend>
+              <div class="gf-choice-row">
+                <label class="gf-choice"><input type="radio" name="bloodSugarCondition" value="Diabetes" required />Yes – diabetes Type 1 or Type 2</label>
+                <label class="gf-choice"><input type="radio" name="bloodSugarCondition" value="Other blood sugar condition" />Yes – another blood sugar condition</label>
+                <label class="gf-choice"><input type="radio" name="bloodSugarCondition" value="No" />No</label>
+              </div>
+              <div class="gf-conditional" data-show-unless="bloodSugarCondition:No">
+                <label>Have you had difficulty controlling your blood sugar (glucose) in the last 3 months?</label>
+                <div class="gf-choice-row">
+                  <label class="gf-choice"><input type="checkbox" name="diabetesGlucoseControl3m" value="No difficulty" />No difficulty in the last 3 months</label>
+                  <label class="gf-choice"><input type="checkbox" name="diabetesGlucoseControl3m" value="Difficulty" />Yes – difficulty in the last 3 months</label>
+                  <label class="gf-choice"><input type="checkbox" name="diabetesGlucoseControl3m" value="Some challenges but managed" />Some challenges, currently well managed</label>
+                </div>
+                <label>Have you experienced any challenges managing your blood sugar because of this condition in the last 3 months?</label>
+                <div class="gf-choice-row">
+                  <label class="gf-choice"><input type="radio" name="bloodSugarControl3m" value="No difficulty" required />No difficulty</label>
+                  <label class="gf-choice"><input type="radio" name="bloodSugarControl3m" value="Difficulty" />Yes – difficulty</label>
+                  <label class="gf-choice"><input type="radio" name="bloodSugarControl3m" value="Some challenges but managed" />Some challenges, currently managed</label>
+                  <label class="gf-choice"><input type="radio" name="bloodSugarControl3m" value="Prefer not to say" />Prefer not to say</label>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <section class="gf-page" data-page="4">
+          <h2 class="gf-section-title">Smoking & Vaping</h2>
+          <p class="gf-section-note">This section is optional in the source form.</p>
+
+          <div class="gf-card">
+            <fieldset data-conditional-source="smokingVapingSkip">
+              <legend>You’re welcome to skip smoking & vaping questions if you prefer.</legend>
+              <div class="gf-skip-toggle">
+                <label class="gf-choice"><input type="checkbox" name="smokingVapingSkip" value="skip" required />I would prefer to skip these questions.</label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="gf-card" data-hide-if="smokingVapingSkip:skip">
+            <fieldset data-conditional-source="smokingVapingCurrent">
+              <legend>Do you currently smoke or vape?</legend>
+              <div class="gf-choice-row">
+                <label class="gf-choice"><input type="checkbox" name="smokingVapingCurrent" value="Smoke" />I currently smoke</label>
+                <label class="gf-choice"><input type="checkbox" name="smokingVapingCurrent" value="Vape" />I currently vape</label>
+                <label class="gf-choice"><input type="checkbox" name="smokingVapingCurrent" value="Both" />Both</label>
+                <label class="gf-choice"><input type="checkbox" name="smokingVapingCurrent" value="Neither" />Neither</label>
+              </div>
+              <div class="gf-field">
+                <label>Or have you recently quit smoking or vaping?</label>
+                <div class="gf-choice-row">
+                  <label class="gf-choice"><input type="checkbox" name="recentlyQuit" value="Quit smoking within 6 months" />Quit smoking within 6 months</label>
+                  <label class="gf-choice"><input type="checkbox" name="recentlyQuit" value="Quit vaping within 6 months" />Quit vaping within 6 months</label>
+                </div>
+              </div>
+              <div class="gf-conditional" data-show-if-any="smokingVapingCurrent:Smoke|Both">
+                <label>How often do you currently smoke?</label>
+                <div class="gf-choice-row">
+                  <label class="gf-choice"><input type="radio" name="smokingFrequency" value="Daily" />Daily</label>
+                  <label class="gf-choice"><input type="radio" name="smokingFrequency" value="Weekly" />Weekly</label>
+                  <label class="gf-choice"><input type="radio" name="smokingFrequency" value="Occasionally" />Occasionally</label>
+                  <label class="gf-choice"><input type="radio" name="smokingFrequency" value="Mistake" />I made a mistake</label>
+                </div>
+                <div class="gf-grid">
+                  <div class="gf-field"><label for="smokingDaysPerWeek">Roughly how many days per week do you smoke?</label><input id="smokingDaysPerWeek" name="smokingDaysPerWeek" type="number" min="0" max="7" /></div>
+                  <div class="gf-field"><label for="cigarettesPerDay">On days you smoke, how many cigarettes do you have?</label><select id="cigarettesPerDay" name="cigarettesPerDay"><option value="">Select...</option><option>1-10</option><option>11-20</option><option>21-30</option><option>31+</option></select></div>
+                </div>
+              </div>
+              <div class="gf-conditional" data-show-if-any="smokingVapingCurrent:Vape|Both">
+                <label>How often do you currently vape?</label>
+                <div class="gf-choice-row">
+                  <label class="gf-choice"><input type="radio" name="vapingFrequency" value="Daily" />Daily</label>
+                  <label class="gf-choice"><input type="radio" name="vapingFrequency" value="Weekly" />Weekly</label>
+                  <label class="gf-choice"><input type="radio" name="vapingFrequency" value="Occasionally" />Occasionally</label>
+                  <label class="gf-choice"><input type="radio" name="vapingFrequency" value="Mistake" />I made a mistake</label>
+                </div>
+                <div class="gf-grid">
+                  <div class="gf-field"><label for="vapingDaysPerWeek">Roughly how many days per week do you vape?</label><input id="vapingDaysPerWeek" name="vapingDaysPerWeek" type="number" min="0" max="7" /></div>
+                  <div class="gf-field"><label for="vapingUsePerDay">On days you vape, which best describes your use?</label><select id="vapingUsePerDay" name="vapingUsePerDay"><option value="">Select...</option><option>A couple of short vape breaks (1-3 sessions/day)</option><option>A few short vape breaks (3-5 sessions/day)</option><option>Regular sessions (6-10 sessions/day)</option><option>Frequent sessions (10+ sessions/day)</option><option>Occasional use (&lt;10 days/month)</option></select></div>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <section class="gf-page" data-page="5">
+          <h2 class="gf-section-title">Injury, Pain & Movement</h2>
+          <p class="gf-section-note">This section uses the injury/pain question from part 3 only.</p>
+
+          <div class="gf-card">
+            <fieldset data-conditional-source="injuryPainStatus">
+              <legend>Do you have any past injuries, current conditions, occasional or chronic pain, or a body area that just isn’t 100% that may affect how you move during sessions or recover afterward?</legend>
+              <p class="gf-help">Select all that apply. No diagnosis required.</p>
+              <div class="gf-choice-row">
+                <label class="gf-choice"><input type="checkbox" name="injuryPainStatus" value="Previous injury - fully recovered" />Previous injury – fully recovered, but worth noting</label>
+                <label class="gf-choice"><input type="checkbox" name="injuryPainStatus" value="Previous injury - occasional discomfort or limitation" />Previous injury – occasional discomfort or limitation</label>
+                <label class="gf-choice"><input type="checkbox" name="injuryPainStatus" value="Current injury" />Current injury</label>
+                <label class="gf-choice"><input type="checkbox" name="injuryPainStatus" value="Chronic condition or pain" />Chronic condition or pain</label>
+                <label class="gf-choice"><input type="checkbox" name="injuryPainStatus" value="Something else" />Something else</label>
+                <label class="gf-choice"><input type="checkbox" name="injuryPainStatus" value="No issues" />No issues</label>
+              </div>
+              <div class="gf-conditional" data-show-if-any="injuryPainStatus:Previous injury - fully recovered|Previous injury - occasional discomfort or limitation|Current injury|Chronic condition or pain|Something else">
+                <label for="injuryPainDetails">Please provide relevant details</label>
+                <p class="gf-help">Include what it is, which movements aggravate it, triggers for flare-ups, how you manage it, and physiotherapy history if relevant.</p>
+                <textarea id="injuryPainDetails" name="injuryPainDetails" required></textarea>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <section class="gf-page" data-page="6">
+          <h2 class="gf-section-title">Review and submit</h2>
+          <p class="gf-section-note">Submit only when your answers are accurate.</p>
+
+          <div class="gf-card soft">
+            <div class="gf-field">
+              <label for="additionalNotes">Anything else GYMFUSION should know before programming or coaching you?</label>
+              <textarea id="additionalNotes" name="additionalNotes"></textarea>
+            </div>
+            <div class="gf-field">
+              <label class="gf-choice">
+                <input type="checkbox" name="declaration" value="yes" required />
+                <span>I declare that the information I have provided is accurate to the best of my knowledge and I will notify GYMFUSION if anything changes.</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <div class="gf-nav">
+          <button type="button" class="gf-nav-button gf-nav-button--back" data-prev>Back</button>
+          <button type="button" class="gf-nav-button gf-nav-button--clear" data-clear-signature>Clear signature</button>
+          <button type="button" class="gf-nav-button gf-nav-button--continue" data-next>Continue</button>
+          <button type="submit" class="gf-nav-button gf-nav-button--continue" data-submit hidden>Submit Health Profile</button>
+        </div>
+        <div class="gf-status" data-status aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <script is:inline>
+    (() => {
+      "use strict";
+
+      const CONFIG = Object.freeze({
+        formId: "rfm_part2_health_safety",
+        formPart: "PART_2_HEALTH_SAFETY",
+        formVersion: "v1.1.0-draft-2026-06-25",
+        submitEndpoint: "/_functions/rfm_part2_health_safety_submit",
+        integrationPending: true,
+      });
+
+      const CRM_FIELD_MAP = Object.freeze({
+        memberEmail: "memberEmail",
+        wixMemberID: "wix_member_id",
+        healthInformationFirstName: "health_information_collection_first_name",
+        healthInformationLastName: "health_information_collection_last_name",
+        healthInformationDate: "health_information_collection_date",
+        healthInformationConsent: "health_information_collection_consent",
+        healthInformationSignature: "health_information_collection_signature_png_data_url",
+        healthInformationSignatureSvg: "health_information_collection_signature_svg",
+        healthInformationSignatureFileName: "health_information_collection_signature_file_name",
+        healthInformationSignatureSignedAt: "health_information_collection_signature_signed_at",
+        healthInformationSignatureDocumentID: "health_information_collection_signature_document_id",
+        heartConditionStroke: "apss_heart_condition_or_stroke",
+        chestPainDiscomfort: "apss_unexplained_chest_pain",
+        dizzyBalanceEpisodes: "apss_dizzy_faint_balance_training_posture",
+        dizzyShareMore: "apss_dizzy_followup_share_more",
+        dizzyShareFurther: "apss_dizzy_followup_share_further",
+        dizzyShareAnythingElse: "apss_dizzy_followup_anything_else",
+        dizzyEpisodeDetails: "apss_dizzy_followup_details",
+        dizzyMoreInformation: "apss_dizzy_more_information",
+        dizzyAdditionalInformation: "apss_dizzy_additional_information",
+        breathingConditions: "breathing_airway_conditions",
+        breathingConditionOther: "breathing_airway_condition_other",
+        urgentBreathingCare12m: "breathing_urgent_medical_care_12m",
+        asthmaAttackMedicalAttention12m: "asthma_attack_medical_attention_12m",
+        unexpectedBreathingEmergency12m: "unexpected_breathing_emergency_12m",
+        anyConditionBreathingEmergency12m: "any_condition_breathing_emergency_12m",
+        breathingTriggersKnown: "breathing_triggers_known",
+        breathingTriggerDetails: "breathing_trigger_details",
+        inhalerUse: "asthma_inhaler_use",
+        spacerUse: "asthma_spacer_use",
+        bringInhalerAgreement: "asthma_bring_inhaler_agreement",
+        bloodSugarCondition: "blood_sugar_condition",
+        diabetesGlucoseControl3m: "diabetes_glucose_control_3m",
+        bloodSugarControl3m: "blood_sugar_control_3m",
+        smokingVapingSkip: "smoking_vaping_skip_optional",
+        smokingVapingCurrent: "smoking_vaping_current_status",
+        recentlyQuit: "smoking_vaping_recently_quit",
+        smokingFrequency: "smoking_frequency",
+        smokingDaysPerWeek: "smoking_days_per_week",
+        cigarettesPerDay: "cigarettes_per_day",
+        vapingFrequency: "vaping_frequency",
+        vapingDaysPerWeek: "vaping_days_per_week",
+        vapingUsePerDay: "vaping_use_per_day",
+        injuryPainStatus: "injury_pain_movement_status",
+        injuryPainDetails: "injury_pain_movement_details",
+        apssRiskScore: "apss_risk_score",
+        borderlineApssRiskScore: "borderline_apss_risk_score",
+        dizzyDetailsRequired: "apss_dizzy_details_required",
+        dizzyDetailsProvided: "apss_dizzy_details_provided",
+        dizzyMoreInformationRequired: "apss_dizzy_more_information_required",
+        dizzyMoreInformationProvided: "apss_dizzy_more_information_provided",
+        dizzyAdditionalInformationRequired: "apss_dizzy_additional_information_required",
+        dizzyAdditionalInformationProvided: "apss_dizzy_additional_information_provided",
+        breathingTriggerDetailsRequired: "breathing_trigger_details_required",
+        breathingTriggerDetailsProvided: "breathing_trigger_details_provided",
+        injuryPainDetailsRequired: "injury_pain_details_required",
+        injuryPainDetailsProvided: "injury_pain_details_provided",
+        additionalNotes: "health_profile_additional_notes",
+        declaration: "health_profile_declaration"
+      });
+
+      const form = document.getElementById("gfHealthProfileForm");
+      const pages = Array.from(document.querySelectorAll(".gf-page"));
+      const progress = document.querySelector("[data-progress]");
+      const prevBtn = document.querySelector("[data-prev]");
+      const nextBtn = document.querySelector("[data-next]");
+      const submitBtn = document.querySelector("[data-submit]");
+      const statusEl = document.querySelector("[data-status]");
+      const signatureCanvas = document.querySelector("[data-signature-pad]");
+      const clearSignatureBtn = document.querySelector("[data-clear-signature]");
+      const signatureInput = document.getElementById("healthInformationSignature");
+      const signatureSvgInput = document.getElementById("healthInformationSignatureSvg");
+      const signatureFileNameInput = document.getElementById("healthInformationSignatureFileName");
+      const signatureSignedAtInput = document.getElementById("healthInformationSignatureSignedAt");
+      const signatureDocumentIDInput = document.getElementById("healthInformationSignatureDocumentID");
+      const healthInformationDateInput = document.getElementById("healthInformationDate");
+      let pageIndex = 0;
+
+      function localISODate() {
+        const now = new Date();
+        return new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 10);
+      }
+
+      function controlsByName(name) { return Array.from(form.elements).filter((el) => el.name === name); }
+      function escapeXml(value) {
+        return value.replace(/[<>&"']/g, (character) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "\"": "&quot;", "'": "&apos;" })[character]);
+      }
+      function createDocumentID() {
+        const suffix = globalThis.crypto?.randomUUID?.().slice(0, 8).toUpperCase() || Math.random().toString(36).slice(2, 10).toUpperCase();
+        return `RFM-P2-SIGN-${Date.now()}-${suffix}`;
+      }
+      function updateSignatureInputs(signature) {
+        const hasSignature = typeof signature === "string" && signature.startsWith("data:image/png;base64,");
+        const signedAt = hasSignature ? (signatureSignedAtInput.value || new Date().toISOString()) : "";
+        const documentID = hasSignature ? (signatureDocumentIDInput.value || createDocumentID()) : "";
+        const fileName = hasSignature ? `rfm-part2-health-notice-signature_${documentID}_${signedAt.replace(/[:.]/g, "-")}.png` : "";
+        const canvasWidth = signatureCanvas?.clientWidth || 800;
+        const canvasHeight = signatureCanvas?.clientHeight || 198;
+        const stampText = hasSignature ? `Document ID: ${documentID} | Signed: ${signedAt}` : "";
+
+        signatureInput.value = hasSignature ? signature : "";
+        signatureSignedAtInput.value = signedAt;
+        signatureDocumentIDInput.value = documentID;
+        signatureFileNameInput.value = fileName;
+        signatureSvgInput.value = hasSignature
+          ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvasWidth} ${canvasHeight + 34}"><rect width="100%" height="100%" fill="white"/><image href="${signature}" width="${canvasWidth}" height="${canvasHeight}"/><text x="12" y="${canvasHeight + 22}" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000">${escapeXml(stampText)}</text></svg>`
+          : "";
+        if (hasSignature) clearValidationWarnings(document.querySelector("[data-signature-field]") || form);
+      }
+      function getValue(name) {
+        const controls = controlsByName(name);
+        if (!controls.length) return null;
+        const first = controls[0];
+        if (first.type === "radio") return controls.find((el) => el.checked)?.value || "";
+        if (first.type === "checkbox") return controls.filter((el) => el.checked).map((el) => el.value);
+        return first.value.trim();
+      }
+      function matches(name, expected) {
+        const current = getValue(name);
+        if (Array.isArray(current)) return current.includes(expected);
+        return current === expected;
+      }
+      function matchesAny(rule) {
+        const parts = rule.split(":");
+        return parts[1].split("|").some((expected) => matches(parts[0], expected));
+      }
+      function hasAnswer(name) {
+        const current = getValue(name);
+        if (Array.isArray(current)) return current.length > 0;
+        return Boolean(current);
+      }
+      function allAnswered(rule) {
+        return rule.split("|").map((name) => name.trim()).filter(Boolean).every(hasAnswer);
+      }
+      function anyAnswered(rule) {
+        return rule.split("|").map((name) => name.trim()).filter(Boolean).some(hasAnswer);
+      }
+      function resolveBreathingFollowup() {
+        const selected = (getValue("breathingConditions") || []).filter(Boolean);
+        const count = selected.length;
+        if (count > 1) return "multiple";
+        if (count === 0) return "";
+        const only = selected[0];
+        if (only === "Asthma") return "asthma";
+        if (["COPD", "OSA", "Long Covid", "Chronic Bronchitis"].includes(only)) return "airway";
+        if (only === "None") return "none";
+        if (only === "Other") return "other";
+        return "";
+      }
+      function evaluateConditionalPanel(panel) {
+        if (panel.dataset.hideIf) {
+          const parts = panel.dataset.hideIf.split(":");
+          if (matches(parts[0], parts[1])) return false;
+        }
+        if (panel.dataset.showIf) {
+          const parts = panel.dataset.showIf.split(":");
+          if (!matches(parts[0], parts[1])) return false;
+        }
+        if (panel.dataset.showIfAny && !matchesAny(panel.dataset.showIfAny)) return false;
+        if (panel.dataset.showUnless) {
+          const parts = panel.dataset.showUnless.split(":");
+          const current = getValue(parts[0]);
+          const visible = Boolean(Array.isArray(current) ? current.length : current) && !matches(parts[0], parts[1]);
+          if (!visible) return false;
+        }
+        if (panel.dataset.showWhenAnswered && !hasAnswer(panel.dataset.showWhenAnswered)) return false;
+        if (panel.dataset.showWhenAnyAnswered && !anyAnswered(panel.dataset.showWhenAnyAnswered)) return false;
+        if (panel.dataset.showWhenAllAnswered && !allAnswered(panel.dataset.showWhenAllAnswered)) return false;
+        if (panel.dataset.showWhenBreathingFollowup) {
+          const current = resolveBreathingFollowup();
+          const allowed = panel.dataset.showWhenBreathingFollowup.split(/\s+/).some((expected) => expected === current);
+          if (!allowed) return false;
+        }
+        return true;
+      }
+      function clearPanel(panel) {
+        panel.querySelectorAll("input, textarea, select").forEach((el) => {
+          if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+          else el.value = "";
+          el.required = false;
+        });
+        clearValidationWarnings(panel);
+      }
+      function setRequiredState(panel, visible) {
+        panel.querySelectorAll("input, textarea, select").forEach((el) => {
+          if (el.hasAttribute("data-original-required")) el.required = visible && !el.closest(".gf-conditional:not(.is-visible), [hidden]");
+        });
+      }
+      function initRequiredState() {
+        document.querySelectorAll(".gf-conditional [required]").forEach((el) => {
+          el.dataset.originalRequired = "true";
+          el.required = false;
+        });
+      }
+      function setConditionalVisibility() {
+        document.querySelectorAll("[data-show-if], [data-show-if-any], [data-show-unless], [data-hide-if], [data-show-when-answered], [data-show-when-any-answered], [data-show-when-all-answered], [data-show-when-breathing-followup]").forEach((panel) => {
+          const visible = evaluateConditionalPanel(panel);
+          panel.classList.toggle("is-visible", visible);
+          if (panel.hasAttribute("data-hide-if")) panel.hidden = !visible;
+          setRequiredState(panel, visible);
+          if (!visible) clearPanel(panel);
+        });
+        document.querySelectorAll(".gf-conditional:not(.is-visible), [data-show-if]:not(.is-visible), [data-show-if-any]:not(.is-visible), [data-show-unless]:not(.is-visible), [data-show-when-answered]:not(.is-visible), [data-show-when-any-answered]:not(.is-visible), [data-show-when-all-answered]:not(.is-visible), [data-show-when-breathing-followup]:not(.is-visible), [hidden]").forEach(clearPanel);
+      }
+      function clearValidationWarnings(scope) {
+        scope.querySelectorAll(".gf-invalid").forEach((el) => el.classList.remove("gf-invalid"));
+        scope.querySelectorAll("[data-validation-error-id]").forEach((el) => {
+          const errorId = el.dataset.validationErrorId;
+          const describedBy = (el.getAttribute("aria-describedby") || "")
+            .split(/\s+/)
+            .filter((id) => id && id !== errorId);
+          if (describedBy.length) el.setAttribute("aria-describedby", describedBy.join(" "));
+          else el.removeAttribute("aria-describedby");
+          el.removeAttribute("aria-invalid");
+          delete el.dataset.validationErrorId;
+        });
+        scope.querySelectorAll(".gf-error").forEach((el) => el.remove());
+      }
+      function fieldLabel(control) {
+        const field = control.closest(".gf-field, fieldset");
+        return field?.querySelector("label, legend")?.textContent?.trim() || "This question";
+      }
+      function showValidationWarning(control) {
+        const field = control.closest(".gf-field, fieldset") || control.parentElement;
+        if (!field) return;
+        clearValidationWarnings(field);
+        const error = document.createElement("div");
+        error.className = "gf-error is-visible";
+        const errorKey = (control.name || control.id || "field").replace(/[^a-zA-Z0-9_-]/g, "-");
+        error.id = `gf-error-${pageIndex}-${errorKey}`;
+        error.textContent = control.name === "healthInformationConsent"
+          ? "Invalid: This confirmation box must be checked before proceeding."
+          : control.tagName === "TEXTAREA"
+          ? "Please add the requested details, or change the earlier answer if this no longer applies."
+          : fieldLabel(control) + " requires a response before you continue.";
+        field.appendChild(error);
+        const namedControls = control.name ? controlsByName(control.name) : [control];
+        namedControls.forEach((el) => {
+          el.classList.add("gf-invalid");
+          el.setAttribute("aria-invalid", "true");
+          const describedBy = new Set((el.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
+          describedBy.add(error.id);
+          el.setAttribute("aria-describedby", Array.from(describedBy).join(" "));
+          el.dataset.validationErrorId = error.id;
+        });
+        if (control === signatureInput) {
+          signatureCanvas?.closest(".gf-signature-pad")?.classList.add("gf-invalid");
+          signatureCanvas?.setAttribute("aria-invalid", "true");
+          if (signatureCanvas) {
+            const describedBy = new Set((signatureCanvas.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
+            describedBy.add(error.id);
+            signatureCanvas.setAttribute("aria-describedby", Array.from(describedBy).join(" "));
+            signatureCanvas.dataset.validationErrorId = error.id;
+          }
+        }
+      }
+      function showPage(index) {
+        pageIndex = Math.max(0, Math.min(index, pages.length - 1));
+        pages.forEach((page, idx) => page.classList.toggle("is-active", idx === pageIndex));
+        prevBtn.hidden = pageIndex === 0;
+        clearSignatureBtn.hidden = pageIndex !== 0;
+        nextBtn.hidden = pageIndex === pages.length - 1;
+        submitBtn.hidden = pageIndex !== pages.length - 1;
+        progress.style.width = (((pageIndex + 1) / pages.length) * 100) + "%";
+        statusEl.textContent = "Step " + (pageIndex + 1) + " of " + pages.length;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      function validateCurrentPage() {
+        clearValidationWarnings(pages[pageIndex]);
+        let firstInvalidControl = null;
+        const controls = Array.from(pages[pageIndex].querySelectorAll("input, select, textarea"))
+          .filter((control) => !control.closest(".gf-conditional:not(.is-visible), [data-show-if]:not(.is-visible), [data-show-if-any]:not(.is-visible), [data-show-unless]:not(.is-visible), [data-show-when-answered]:not(.is-visible), [data-show-when-any-answered]:not(.is-visible), [data-show-when-all-answered]:not(.is-visible), [data-show-when-breathing-followup]:not(.is-visible), [hidden]"));
+        for (const control of controls) {
+          if (!control.checkValidity()) {
+            showValidationWarning(control);
+            if (!firstInvalidControl) firstInvalidControl = control;
+          }
+        }
+        if (pageIndex === 0 && !signatureInput.value) {
+          showValidationWarning(signatureInput);
+          if (!firstInvalidControl) firstInvalidControl = signatureInput;
+        }
+        if (firstInvalidControl) {
+          const target = firstInvalidControl === signatureInput ? signatureCanvas : firstInvalidControl;
+          target?.focus({ preventScroll: true });
+          target?.scrollIntoView({ block: "center", behavior: "smooth" });
+          return false;
+        }
+        return true;
+      }
+      function calculateScores(answers) {
+        const apssRiskScore = [
+          answers.heartConditionStroke === "Yes",
+          answers.chestPainDiscomfort === "Yes",
+          answers.urgentBreathingCare12m === "Yes",
+          answers.asthmaAttackMedicalAttention12m === "Yes",
+          answers.unexpectedBreathingEmergency12m === "Yes",
+          answers.anyConditionBreathingEmergency12m === "Yes",
+          Array.isArray(answers.diabetesGlucoseControl3m) ? answers.diabetesGlucoseControl3m.some((v) => String(v).includes("Difficulty")) : false,
+          Array.isArray(answers.bloodSugarControl3m) ? answers.bloodSugarControl3m.some((v) => String(v).includes("Difficulty")) : String(answers.bloodSugarControl3m || "").includes("Difficulty")
+        ].filter(Boolean).length;
+        const borderlineApssRiskScore = answers.dizzyBalanceEpisodes && answers.dizzyBalanceEpisodes !== "No" ? 1 : 0;
+        const injuryPainDetailsRequired = Array.isArray(answers.injuryPainStatus)
+          && answers.injuryPainStatus.some((value) => value !== "No issues");
+        return {
+          apssRiskScore,
+          borderlineApssRiskScore,
+          dizzyDetailsRequired: answers.dizzyShareMore === "Yes",
+          dizzyDetailsProvided: Boolean(answers.dizzyEpisodeDetails),
+          dizzyMoreInformationRequired: answers.dizzyShareFurther === "Yes",
+          dizzyMoreInformationProvided: Boolean(answers.dizzyMoreInformation),
+          dizzyAdditionalInformationRequired: answers.dizzyShareAnythingElse === "Yes",
+          dizzyAdditionalInformationProvided: Boolean(answers.dizzyAdditionalInformation),
+          breathingTriggerDetailsRequired: answers.breathingTriggersKnown === "Yes",
+          breathingTriggerDetailsProvided: Boolean(answers.breathingTriggerDetails),
+          injuryPainDetailsRequired,
+          injuryPainDetailsProvided: Boolean(answers.injuryPainDetails)
+        };
+      }
+      function getAllAnswers() {
+        const answers = {};
+        Object.keys(CRM_FIELD_MAP).forEach((name) => {
+          if (![
+            "apssRiskScore",
+            "borderlineApssRiskScore",
+            "dizzyDetailsRequired",
+            "dizzyDetailsProvided",
+            "dizzyMoreInformationRequired",
+            "dizzyMoreInformationProvided",
+            "dizzyAdditionalInformationRequired",
+            "dizzyAdditionalInformationProvided",
+            "breathingTriggerDetailsRequired",
+            "breathingTriggerDetailsProvided",
+            "injuryPainDetailsRequired",
+            "injuryPainDetailsProvided"
+          ].includes(name)) answers[name] = getValue(name);
+        });
+        const calculatedFields = calculateScores(answers);
+        return Object.assign(answers, calculatedFields);
+      }
+      function buildConditionalFollowups(answers) {
+        return [
+          {
+            sourceField: "dizzyShareMore",
+            sourceQuestion: "Would you like to share any additional information about these episodes?",
+            triggerAnswer: "Yes",
+            triggered: answers.dizzyShareMore === "Yes",
+            requiredField: "dizzyEpisodeDetails",
+            requiredQuestion: "Add more information",
+            answered: Boolean(answers.dizzyEpisodeDetails),
+            value: answers.dizzyEpisodeDetails || ""
+          },
+          {
+            sourceField: "dizzyShareFurther",
+            sourceQuestion: "Would you like to let us know anything further about these episodes?",
+            triggerAnswer: "Yes",
+            triggered: answers.dizzyShareFurther === "Yes",
+            requiredField: "dizzyMoreInformation",
+            requiredQuestion: "Further information",
+            answered: Boolean(answers.dizzyMoreInformation),
+            value: answers.dizzyMoreInformation || ""
+          },
+          {
+            sourceField: "dizzyShareAnythingElse",
+            sourceQuestion: "Is there anything else you'd like to tell us about these episodes?",
+            triggerAnswer: "Yes",
+            triggered: answers.dizzyShareAnythingElse === "Yes",
+            requiredField: "dizzyAdditionalInformation",
+            requiredQuestion: "More information",
+            answered: Boolean(answers.dizzyAdditionalInformation),
+            value: answers.dizzyAdditionalInformation || ""
+          },
+          {
+            sourceField: "breathingTriggersKnown",
+            sourceQuestion: "Are you aware of any triggers, patterns, or environments that bring symptoms on or make them worse?",
+            triggerAnswer: "Yes",
+            triggered: answers.breathingTriggersKnown === "Yes",
+            requiredField: "breathingTriggerDetails",
+            requiredQuestion: "Please share any specific triggers or factors",
+            answered: Boolean(answers.breathingTriggerDetails),
+            value: answers.breathingTriggerDetails || ""
+          },
+          {
+            sourceField: "injuryPainStatus",
+            sourceQuestion: "Do you have any past injuries, current conditions, occasional or chronic pain, or a body area that just isn’t 100% that may affect how you move during sessions or recover afterward?",
+            triggerAnswer: "Any injury, pain, chronic condition, or something else",
+            triggered: Boolean(answers.injuryPainDetailsRequired),
+            requiredField: "injuryPainDetails",
+            requiredQuestion: "Please provide relevant details",
+            answered: Boolean(answers.injuryPainDetails),
+            value: answers.injuryPainDetails || ""
+          }
+        ];
+      }
+      function buildSubmissionPayload() {
+        const answers = getAllAnswers();
+        const normalizedAnswers = Object.entries(answers).map(([fieldName, value]) => ({ fieldName, crmFieldName: CRM_FIELD_MAP[fieldName] || fieldName, value, sensitivityClass: "health" }));
+        const calculatedFields = {
+          apssRiskScore: answers.apssRiskScore,
+          borderlineApssRiskScore: answers.borderlineApssRiskScore,
+          dizzyDetailsRequired: answers.dizzyDetailsRequired,
+          dizzyDetailsProvided: answers.dizzyDetailsProvided,
+          dizzyMoreInformationRequired: answers.dizzyMoreInformationRequired,
+          dizzyMoreInformationProvided: answers.dizzyMoreInformationProvided,
+          dizzyAdditionalInformationRequired: answers.dizzyAdditionalInformationRequired,
+          dizzyAdditionalInformationProvided: answers.dizzyAdditionalInformationProvided,
+          breathingTriggerDetailsRequired: answers.breathingTriggerDetailsRequired,
+          breathingTriggerDetailsProvided: answers.breathingTriggerDetailsProvided,
+          injuryPainDetailsRequired: answers.injuryPainDetailsRequired,
+          injuryPainDetailsProvided: answers.injuryPainDetailsProvided
+        };
+        const conditionalFollowups = buildConditionalFollowups(answers);
+        return {
+          formId: CONFIG.formId,
+          formPart: CONFIG.formPart,
+          formVersion: CONFIG.formVersion,
+          submissionID: "HP-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8).toUpperCase(),
+          submittedAt: new Date().toISOString(),
+          memberEmail: null,
+          wixMemberID: null,
+          crmContactID: null,
+          source: "astro_member_portal_health_profile",
+          riskSummary: {
+            apssRiskScore: answers.apssRiskScore,
+            borderlineApssRiskScore: answers.borderlineApssRiskScore,
+            injuryPainFlag: Array.isArray(answers.injuryPainStatus) && !answers.injuryPainStatus.includes("No issues") && answers.injuryPainStatus.length > 0
+          },
+          calculatedFields,
+          conditionalFollowups,
+          answers,
+          normalizedAnswers
+        };
+      }
+      async function submitPayload() {
+        if (!CONFIG.integrationPending) throw new Error("Secure submission integration is unavailable.");
+        return { ok: true, integrationPending: true };
+      }
+      initRequiredState();
+      if (healthInformationDateInput && !healthInformationDateInput.value) healthInformationDateInput.value = localISODate();
+      showPage(0);
+      setConditionalVisibility();
+      window.addEventListener("gymfusion:signature-change", (event) => {
+        updateSignatureInputs(event.detail?.signature || null);
+      });
+      clearSignatureBtn?.addEventListener("click", () => {
+        window.dispatchEvent(new CustomEvent("gymfusion:signature-clear"));
+        clearValidationWarnings(document.querySelector("[data-signature-field]") || form);
+      });
+      form.addEventListener("change", setConditionalVisibility);
+      form.addEventListener("input", setConditionalVisibility);
+      form.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.tagName === "TEXTAREA" || target.tagName === "BUTTON" || target.isContentEditable) return;
+        event.preventDefault();
+      });
+      prevBtn.addEventListener("click", () => showPage(pageIndex - 1));
+      nextBtn.addEventListener("click", () => { setConditionalVisibility(); if (validateCurrentPage()) showPage(pageIndex + 1); });
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        setConditionalVisibility();
+        if (!validateCurrentPage()) return;
+        let payload;
+        try {
+          payload = buildSubmissionPayload();
+        } catch (error) {
+          statusEl.textContent = error.message;
+          return;
+        }
+        submitBtn.disabled = true;
+        statusEl.textContent = "Validating...";
+        try {
+          const result = await submitPayload(payload);
+          statusEl.textContent = result.integrationPending
+            ? "Form validated. Secure member submission integration is pending."
+            : "Submitted. GYMFUSION staff will review your Health Profile.";
+          submitBtn.disabled = false;
+        } catch (error) {
+          console.error(error);
+          statusEl.textContent = "Submission failed. Please check your connection or contact GYMFUSION staff.";
+          submitBtn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Welcome Back Embed</title>
+  <style>
+    @font-face {
+      font-family: "Separated";
+      src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/SEPARATED.ttf") format("truetype");
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Pacifico";
+      src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Pacifico-Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Gamuth Sans";
+      src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Regular.ttf") format("truetype");
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Gamuth Sans";
+      src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Bold.ttf") format("truetype");
+      font-weight: 700;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Gamuth Display";
+      src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/Gamuth%20Display%20Black.ttf") format("truetype");
+      font-weight: 900;
+      font-display: swap;
+    }
+
+    :root {
+      --ink: rgba(18, 18, 18, 0.96);
+      --ink-soft: rgba(18, 18, 18, 0.72);
+      --field-text: rgba(22, 22, 22, 0.9);
+      --line: rgba(24, 24, 24, 0.86);
+      --line-soft: rgba(24, 24, 24, 0.14);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      background: transparent;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Gamuth Sans", system-ui, sans-serif;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .embed {
+      width: 100%;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: clamp(18px, 4vw, 44px);
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .artboard {
+      width: min(860px, 100%);
+      min-height: clamp(560px, 76vh, 620px);
+      display: grid;
+      gap: clamp(18px, 3vw, 30px);
+      align-items: start;
+      justify-items: center;
+      position: relative;
+      animation: rise 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      overflow: hidden;
+    }
+
+    .title-wrap {
+      width: 100%;
+      position: relative;
+      display: grid;
+      place-items: center;
+      padding-top: clamp(8px, 1.8vw, 18px);
+      padding-bottom: 0;
+    }
+
+    .title {
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      font-family: "Separated", "Gamuth Display", sans-serif;
+      font-weight: 400;
+      font-size: clamp(3.8rem, 11vw, 6.9rem);
+      line-height: 0.82;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--ink);
+      transform: translateX(0.02em);
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .title::before,
+    .title::after {
+      content: none;
+    }
+
+    .title-punctuation {
+      font-family: "Separated", "Gamuth Display", sans-serif;
+      font-weight: inherit;
+    }
+
+    .title-subtitle {
+      margin: 15px 0 0;
+      font-family: "Pacifico", cursive;
+      font-size: 32.5px;
+      line-height: 1;
+      font-weight: 400;
+      color: #ffffff;
+      text-align: center;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .reset-instructions {
+      width: min(335px, 90%);
+      margin: 23px 0 0;
+      font-family: "Gamuth Sans", sans-serif;
+      font-size: 13.5px;
+      line-height: 1.35;
+      font-weight: 400;
+      color: #ffffff;
+      text-align: center;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .copy-enter {
+      animation: copy-enter 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .title-subtitle.copy-enter {
+      animation-duration: 1s;
+      animation-timing-function: linear;
+      animation-delay: 1400ms;
+    }
+
+    .reset-instructions.copy-enter {
+      animation-duration: 1s;
+      animation-timing-function: linear;
+      animation-delay: 1700ms;
+    }
+
+    @media (min-width: 701px) {
+      .field--cool {
+        overflow: hidden;
+      }
+    }
+
+    .form {
+      width: min(400px, 100%);
+      display: grid;
+      gap: clamp(18px, 2.8vw, 26px);
+      justify-items: start;
+      margin-bottom: 60px;
+      transition: none;
+    }
+
+    .field {
+      width: 100%;
+      display: grid;
+      gap: 12px;
+      position: relative;
+    }
+
+    .field--cool {
+      margin-top: clamp(4px, 1vw, 6px);
+      overflow: hidden;
+      max-height: 140px;
+      transition: max-height 500ms ease 0ms, opacity 500ms ease 0ms, margin-top 500ms ease 0ms, transform 500ms ease 0ms;
+      will-change: max-height, opacity, margin-top, transform;
+    }
+
+    .field--cool .field-shell {
+      will-change: transform, opacity;
+    }
+
+    .field--cool .label {
+      will-change: transform, opacity;
+    }
+
+    .field--warm,
+    .cta-stack {
+      will-change: transform;
+    }
+
+    .field--warm {
+      transition: none;
+    }
+
+    .cta-stack {
+      transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .label {
+      position: relative;
+      z-index: 1;
+      margin-left: 0;
+      font-family: "Gamuth Sans", system-ui, sans-serif;
+      font-size: clamp(1.45rem, 3.4vw, 2.05rem);
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      text-shadow: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .field-shell {
+      position: relative;
+      width: 100%;
+      height: clamp(54px, 12vw, 64px);
+    }
+
+    .input {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 clamp(22px, 3vw, 34px);
+      background: transparent;
+      color: var(--field-text);
+      font-size: clamp(1.05rem, 2.5vw, 1.55rem);
+      line-height: 1;
+      outline: none;
+      box-shadow: none;
+    }
+
+    .input::placeholder {
+      color: rgba(22, 22, 22, 0.52);
+      opacity: 1;
+      font-size: clamp(0.9rem, 2.1vw, 1.05rem);
+      line-height: 1.1;
+    }
+
+    .input:focus-visible {
+      box-shadow: 0 0 0 3px rgba(24, 24, 24, 0.12);
+    }
+
+    .cta-stack {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-areas: "forgot login";
+      gap: 12px;
+      padding-top: clamp(14px, 2vw, 22px);
+    }
+
+    .cta,
+    .forgot {
+      width: 100%;
+      height: clamp(54px, 7vw, 66px);
+      padding: 0 clamp(10px, 1.6vw, 18px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ffffff;
+      border-radius: 8px;
+      background: #000000;
+      color: #ffffff;
+      font-family: "Gamuth Sans", system-ui, sans-serif;
+      font-size: clamp(14px, 2.8vw, 16px);
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .cta {
+      grid-area: login;
+      margin-top: 5px;
+    }
+
+    .forgot {
+      grid-area: forgot;
+      margin-top: 5px;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .forgot:hover,
+    .forgot:active {
+      transform: translateY(-1px);
+      background: #ffffff;
+      color: #000000;
+      border-color: #000000;
+      box-shadow: 0 20px 36px rgba(0, 0, 0, 0.08);
+    }
+
+    .forgot:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.78);
+      outline-offset: 4px;
+      border-radius: 8px;
+    }
+
+    .cta:hover,
+    .cta:active,
+    .forgot:hover,
+    .forgot:active {
+      transform: translateY(-1px);
+      background: #ffffff;
+      color: #000000;
+      border-color: #000000;
+      box-shadow: 0 20px 36px rgba(0, 0, 0, 0.08);
+    }
+
+    .cta:active,
+    .forgot:active {
+      transform: translateY(2px) scale(0.99);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .cta:focus-visible,
+    .forgot:focus-visible {
+      outline: 3px solid rgba(255, 255, 255, 0.78);
+      outline-offset: 4px;
+    }
+
+    .form.is-password-exiting .field--cool,
+    .form.is-password-collapsed .field--cool,
+    .form.is-password-returning .field--cool,
+    .form.is-password-entering .field--cool {
+      pointer-events: none;
+    }
+
+    /* Password Exiting Animation (Slides out to the right) */
+    .form.is-password-exiting .field--cool .field-shell,
+    .form.is-password-exiting .field--cool .label {
+      animation: password-slide-out 200ms cubic-bezier(0.22, 0.3, 0.36, 1) forwards;
+    }
+
+    /* Password Entering Animation (Slides in from the left) */
+    .form.is-password-entering .field--cool .field-shell,
+    .form.is-password-entering .field--cool .label {
+      animation: password-slide-in 200ms cubic-bezier(0.22, 0.3, 0.36, 1) forwards;
+    }
+
+    /* Hold the password fully off-canvas while the buttons occupy its row. */
+    .form.is-password-collapsed .field--cool .field-shell,
+    .form.is-password-collapsed .field--cool .label,
+    .form.is-password-returning .field--cool .field-shell,
+    .form.is-password-returning .field--cool .label {
+      transform: translateX(112%);
+      opacity: 0;
+    }
+
+    .form.is-password-collapsed .cta-stack {
+      transform: translateY(calc(-1 * (clamp(1.45rem, 3.4vw, 2.05rem) + 12px + clamp(54px, 12vw, 64px) + clamp(18px, 2.8vw, 26px))));
+    }
+
+    .form.is-password-returning .cta-stack {
+      transform: translateY(0);
+    }
+
+    .password-spacer {
+      display: none;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.992);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes password-slide-out {
+      0% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      18% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(112%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes password-label-slide {
+      0% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      18% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(112%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes password-slide-in {
+      0% {
+        transform: translateX(-112%);
+        opacity: 0;
+      }
+      18% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes copy-enter {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes cta-stack-rise {
+      from {
+        transform: translateY(66px);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes cta-stack-drop {
+      from {
+        transform: translateY(-66px);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .artboard {
+        height: 500px;
+        min-height: 500px;
+        gap: 16px;
+      }
+
+      .artboard.is-reset-mode {
+        height: 500px;
+        min-height: 500px;
+        margin-top: 80px;
+      }
+
+      .artboard:not(.is-reset-mode) .title {
+        margin-top: 40px;
+      }
+
+      .title {
+        font-size: clamp(50px, 13vw, 65px);
+        line-height: 0.9;
+        white-space: nowrap;
+        color: #ffffff;
+      }
+
+      .form {
+        width: min(100%, 340px);
+        margin-bottom: 90px;
+        gap: 16px;
+      }
+
+      .label {
+        color: #ffffff;
+        font-size: clamp(16px, 3.5vw, 18px);
+      }
+
+      .field-shell {
+        height: clamp(54px, 12vw, 64px);
+      }
+
+      .input {
+        background: #ffffff;
+        border-color: #ffffff;
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+
+      .input::placeholder {
+        font-size: clamp(0.92rem, 3vw, 1rem);
+      }
+
+      .cta,
+      .forgot {
+        width: 100%;
+        height: clamp(54px, 7vw, 66px);
+        background: #000000;
+        color: #ffffff;
+        border-color: #ffffff;
+        border-radius: 8px;
+        font-size: clamp(14px, 2.8vw, 16px);
+      }
+
+      .cta:hover,
+      .cta:active,
+      .forgot:hover,
+      .forgot:active {
+        background: #ffffff;
+        color: #000000;
+        border-color: #000000;
+      }
+
+      .cta:active,
+      .forgot:active {
+        transform: translateY(2px) scale(0.99);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.03);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .embed {
+        padding: 14px;
+      }
+
+      .title {
+        font-size: clamp(50px, 13vw, 65px);
+      }
+
+      .form {
+        width: min(100%, 320px);
+        gap: 14px;
+      }
+
+      .field {
+        gap: 10px;
+      }
+
+      .label {
+        font-size: clamp(15px, 3.9vw, 16px);
+      }
+
+      .field-shell {
+        height: clamp(54px, 12vw, 60px);
+      }
+
+      .input {
+        font-size: 1rem;
+        padding: 0 18px;
+        border-radius: 8px;
+      }
+
+      .input::placeholder {
+        font-size: clamp(0.9rem, 2.8vw, 0.98rem);
+      }
+
+      .cta,
+      .forgot {
+        width: 100%;
+        height: clamp(54px, 7vw, 64px);
+        font-size: clamp(14px, 3.6vw, 16px);
+        padding: 0 clamp(10px, 1.6vw, 18px);
+        border-radius: 8px;
+      }
+
+      .cta {
+        margin-top: 5px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .title {
+        font-size: 50px;
+      }
+    }
+
+    @media (min-width: 701px) {
+      .artboard {
+        width: min(544px, 100%);
+        background: transparent;
+        padding: clamp(24px, 4vw, 40px);
+      }
+
+      .title {
+        font-size: 72px;
+        color: #ffffff;
+        white-space: nowrap;
+      }
+
+      .label {
+        font-size: 19px;
+        color: #ffffff;
+      }
+
+      .form {
+        width: min(355px, 100%);
+        justify-items: center;
+      }
+
+      .field-shell {
+        height: clamp(58px, 7vw, 64px);
+      }
+
+      .input {
+        font-size: 17.5px;
+        background: #ffffff;
+        border-color: #ffffff;
+      }
+
+      .input::placeholder {
+        font-size: 16px;
+      }
+
+      .cta,
+      .forgot {
+        width: 100%;
+        height: clamp(58px, 6vw, 66px);
+        font-size: 16px;
+        padding: 0 clamp(10px, 1.6vw, 18px);
+        background: #000000;
+        color: #ffffff;
+        border-color: #ffffff;
+      }
+
+      .cta {
+        margin-top: 5px;
+      }
+
+      .cta:hover,
+      .cta:active,
+      .forgot:hover,
+      .forgot:active {
+        background: #ffffff;
+        color: #000000;
+        border-color: #000000;
+      }
+
+      .cta:active,
+      .forgot:active {
+        transform: translateY(2px) scale(0.99);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.03);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .artboard,
+      .cta,
+      .copy-enter {
+        animation: none;
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="embed" aria-label="Welcome back login embed">
+    <section class="artboard">
+      <div class="title-wrap">
+        <h1 class="title" data-text="WELCOME BACK">WELCOME BACK</h1>
+      </div>
+
+      <form class="form" onsubmit="event.preventDefault();">
+        <label class="field field--warm">
+          <span class="label">Email</span>
+          <span class="field-shell">
+            <input class="input" type="email" name="email" placeholder="Enter your email" autocomplete="email" />
+          </span>
+        </label>
+
+        <label class="field field--cool" id="password-field">
+          <span class="label">Password</span>
+          <span class="field-shell">
+            <input class="input" type="password" name="password" placeholder="Enter your password" autocomplete="current-password" />
+          </span>
+        </label>
+
+        <div class="password-spacer" aria-hidden="true"></div>
+
+        <div class="cta-stack">
+          <button class="cta" type="submit">Login</button>
+          <button class="forgot" type="button" aria-controls="password-field" aria-expanded="true">Forgot Password?</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script>
+    const form = document.querySelector('.form');
+    const artboard = document.querySelector('.artboard');
+    const titleWrap = document.querySelector('.title-wrap');
+    const title = document.querySelector('.title');
+    const loginButton = document.querySelector('.cta');
+    const forgotButton = document.querySelector('.forgot');
+    const passwordField = document.querySelector('#password-field');
+    const passwordInput = passwordField?.querySelector('.input');
+    let returnAnimationTimer = null;
+
+    const syncButtonLabels = (collapsed, animate = true) => {
+      artboard.classList.toggle('is-reset-mode', collapsed);
+      titleWrap.classList.toggle('is-reset-mode', collapsed);
+      title.innerHTML = collapsed ? 'FORGOT PASS<span class="title-punctuation">?</span>' : 'WELCOME BACK';
+      forgotButton.textContent = collapsed ? 'Return to Login' : 'Forgot Password?';
+      forgotButton.setAttribute('aria-expanded', String(!collapsed));
+      loginButton.textContent = collapsed ? 'Reset Password' : 'Login';
+
+      if (animate) {
+        title.classList.remove('copy-enter');
+        void titleWrap.offsetWidth;
+        title.classList.add('copy-enter');
+      }
+    };
+
+    let isTransitioning = false;
+
+    forgotButton?.addEventListener('click', () => {
+      if (isTransitioning) return;
+
+      const isCollapsed = form.classList.contains('is-password-collapsed');
+      window.clearTimeout(returnAnimationTimer);
+      isTransitioning = true;
+
+      if (!isCollapsed) {
+        syncButtonLabels(true);
+        passwordInput?.blur();
+        form.classList.add('is-password-exiting');
+
+        returnAnimationTimer = window.setTimeout(() => {
+          form.classList.add('is-password-collapsed');
+
+          returnAnimationTimer = window.setTimeout(() => {
+            form.classList.remove('is-password-exiting');
+            isTransitioning = false;
+          }, 500);
+        }, 55);
+        return;
+      }
+
+      syncButtonLabels(false);
+      form.classList.add('is-password-returning');
+
+      returnAnimationTimer = window.setTimeout(() => {
+        form.classList.add('is-password-entering');
+
+        returnAnimationTimer = window.setTimeout(() => {
+          form.classList.remove('is-password-collapsed', 'is-password-returning', 'is-password-entering');
+          isTransitioning = false;
+        }, 420);
+      }, 110);
+    });
+
+    syncButtonLabels(false, false);
+  </script>
+</body>
+</html>

@@ -1,0 +1,393 @@
+{
+  "formId": "eoi_part_1",
+  "displayName": "GYMFUSION EOI Part 1",
+  "source": {
+    "astroComponent": "apps/public-eoi/src/components/EoiShell.astro",
+    "stateModule": "apps/public-eoi/src/lib/eoiPart1State.js",
+    "payloadBuilders": [
+      "apps/public-eoi/public/desktop.js",
+      "apps/public-eoi/public/mobile.js"
+    ]
+  },
+  "submissionContract": {
+    "topLevelKeys": [
+      "submissionId",
+      "formId",
+      "submittedAt",
+      "wixMemberId",
+      "episodeId",
+      "email",
+      "fields",
+      "selections",
+      "availability",
+      "rawPayload"
+    ],
+    "notes": [
+      "This file mirrors the current public Part 1 form structure.",
+      "It does not change backend routing or persistence."
+    ]
+  },
+  "steps": [
+    {
+      "id": "intro",
+      "label": "Introduction",
+      "title": "Before you continue",
+      "fields": [
+        "age_eligibility",
+        "under18_age_band",
+        "acknowledge_intro",
+        "acknowledge_intro_part2"
+      ]
+    },
+    {
+      "id": "privacy",
+      "label": "Privacy",
+      "title": "Privacy Collection Notice",
+      "copy": {
+        "opening": "GYMFUSION collects the personal information you provide in this form, including identity and contact details, demographic information, service preferences, work-related availability information and usual training availability, for the following purposes:",
+        "collectionOfInformation": "This information is necessary to enable us to assess your eligibility, respond to your enquiry, identify potentially suitable service options and availability, and support the safe and appropriate provision of services should you proceed.",
+        "optionalRequired": "Some questions are optional or provide a ‘Prefer not to say’ option. However, if required information is not provided, we may be unable to complete the EOI process, assess your eligibility, identify suitable service options or contact you regarding your enquiry.",
+        "acknowledgement": "By proceeding, you acknowledge that you have read and understood this Privacy Collection Notice and understand that GYMFUSION will collect, use, store and disclose the personal information you provide for the purposes described in this Notice and our Privacy Policy."
+      },
+      "fields": [
+        "privacy_consent"
+      ]
+    },
+    {
+      "id": "personal",
+      "label": "Details",
+      "title": "Tell us a bit about yourself",
+      "fields": [
+        "first_name",
+        "preferred_name",
+        "last_name",
+        "pronouns",
+        "pronouns_other",
+        "age_band",
+        "sex_at_birth",
+        "sex_at_birth_other",
+        "address_lookup",
+        "res_address",
+        "res_suburb",
+        "res_suburb_other",
+        "res_state",
+        "res_postcode",
+        "postal_address_lookup",
+        "postal_same",
+        "postal_address",
+        "postal_suburb",
+        "postal_suburb_other",
+        "postal_state",
+        "postal_postcode",
+        "email",
+        "confirm_email",
+        "mobile",
+        "confirm_mobile"
+      ]
+    },
+    {
+      "id": "preferences",
+      "label": "Preferences",
+      "title": "Select the option that best describes your interest",
+      "fields": [
+        "training_type",
+        "second_preference",
+        "work_shift"
+      ]
+    },
+    {
+      "id": "availability",
+      "label": "Availability",
+      "title": "Please select all days & times you are usually available",
+      "fields": [
+        "one_to_one_availability",
+        "fusion_availability",
+        "fusion_friday_availability"
+      ]
+    },
+    {
+      "id": "submitted",
+      "label": "Submitted",
+      "title": "Submitted",
+      "fields": []
+    }
+  ],
+  "fields": [
+    {
+      "key": "age_eligibility",
+      "label": "Are you 18 years or older?",
+      "type": "radio",
+      "required": true,
+      "options": [
+        {
+          "value": "18_OR_OVER",
+          "label": "I confirm I am 18 years or older"
+        },
+        {
+          "value": "UNDER_18",
+          "label": "I am under 18 years old"
+        }
+      ]
+    },
+    {
+      "key": "under18_age_band",
+      "label": "Age group",
+      "type": "radio",
+      "required": false,
+      "options": [
+        "16-17",
+        "14-15",
+        "10-13",
+        "Under 10"
+      ]
+    },
+    {
+      "key": "acknowledge_intro",
+      "label": "Part 1 acknowledgement",
+      "type": "checkbox",
+      "required": true
+    },
+    {
+      "key": "acknowledge_intro_part2",
+      "label": "Part 2 acknowledgement",
+      "type": "checkbox",
+      "required": true
+    },
+    {
+      "key": "privacy_consent",
+      "label": "Privacy Collection Notice consent",
+      "type": "checkbox",
+      "required": true
+    },
+    {
+      "key": "first_name",
+      "label": "First Name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "preferred_name",
+      "label": "Preferred Name",
+      "type": "text",
+      "required": false
+    },
+    {
+      "key": "last_name",
+      "label": "Last Name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "pronouns",
+      "label": "Pronouns",
+      "type": "select",
+      "required": false,
+      "options": [
+        "She/Her",
+        "He/Him",
+        "They/Them",
+        "Prefer not to say",
+        "Other (Self-Describe)"
+      ]
+    },
+    {
+      "key": "pronouns_other",
+      "label": "What are your pronouns?",
+      "type": "text",
+      "required": false,
+      "visibility": "shown when pronouns = Other (Self-Describe)"
+    },
+    {
+      "key": "age_band",
+      "label": "Select your age demographic",
+      "type": "select",
+      "required": true,
+      "options": [
+        "18–24",
+        "25–34",
+        "35–44",
+        "45–54",
+        "55–64",
+        "65+"
+      ]
+    },
+    {
+      "key": "sex_at_birth",
+      "label": "What is your sex recorded as at birth?",
+      "helperText": [
+        "Sex recorded at birth helps inform the interpretation of certain pre-exercise screening information, as some physiological factors relevant to exercise and injury risk can differ by sex. This information may be considered alongside your individual health profile, training history and other relevant factors when determining appropriate coaching and exercise modifications.",
+        "Providing your sex recorded at birth is optional. You may select ‘Prefer not to say’ if you do not wish to provide this information. Your response is kept private and is accessible only to authorised staff who require it for relevant screening, programming or coaching purposes."
+      ],
+      "type": "select",
+      "required": true,
+      "options": [
+        "Female",
+        "Male",
+        "Another term",
+        "Prefer not to say"
+      ]
+    },
+    {
+      "key": "sex_at_birth_other",
+      "label": "Another term",
+      "type": "text",
+      "required": false,
+      "visibility": "shown when sex_at_birth = Another term"
+    },
+    {
+      "key": "address_lookup",
+      "label": "Address lookup",
+      "type": "text",
+      "required": false,
+      "visibility": "transport bridge only"
+    },
+    {
+      "key": "res_address",
+      "label": "Residential Street Address",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "res_suburb",
+      "label": "Residential Suburb",
+      "type": "select",
+      "required": true
+    },
+    {
+      "key": "res_suburb_other",
+      "label": "Other (Please specify)",
+      "type": "text",
+      "required": false,
+      "visibility": "shown when res_suburb = Other (Please specify)"
+    },
+    {
+      "key": "res_state",
+      "label": "Residential State",
+      "type": "select",
+      "required": true
+    },
+    {
+      "key": "res_postcode",
+      "label": "Residential Postcode",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "postal_address_lookup",
+      "label": "Postal address lookup",
+      "type": "text",
+      "required": false,
+      "visibility": "transport bridge only"
+    },
+    {
+      "key": "postal_same",
+      "label": "Postal address same as residential",
+      "type": "choice",
+      "required": true
+    },
+    {
+      "key": "postal_address",
+      "label": "Postal Street Address",
+      "type": "text",
+      "required": false
+    },
+    {
+      "key": "postal_suburb",
+      "label": "Postal Suburb",
+      "type": "select",
+      "required": false
+    },
+    {
+      "key": "postal_suburb_other",
+      "label": "Other (Please specify)",
+      "type": "text",
+      "required": false,
+      "visibility": "shown when postal_suburb = Other (Please specify)"
+    },
+    {
+      "key": "postal_state",
+      "label": "Postal State",
+      "type": "select",
+      "required": false
+    },
+    {
+      "key": "postal_postcode",
+      "label": "Postal Postcode",
+      "type": "text",
+      "required": false
+    },
+    {
+      "key": "email",
+      "label": "Email",
+      "type": "email",
+      "required": true
+    },
+    {
+      "key": "confirm_email",
+      "label": "Confirm Email",
+      "type": "email",
+      "required": true
+    },
+    {
+      "key": "mobile",
+      "label": "Mobile",
+      "type": "tel",
+      "required": true
+    },
+    {
+      "key": "confirm_mobile",
+      "label": "Confirm Mobile",
+      "type": "tel",
+      "required": true
+    },
+    {
+      "key": "training_type",
+      "label": "Training type",
+      "type": "select",
+      "required": true,
+      "options": [
+        "1:1 Fitness Coaching",
+        "FUSION Classes",
+        "Both"
+      ]
+    },
+    {
+      "key": "second_preference",
+      "label": "Second preference",
+      "type": "select",
+      "required": false
+    },
+    {
+      "key": "work_shift",
+      "label": "Work shift",
+      "type": "select",
+      "required": true,
+      "options": [
+        "My shift times are consistent each week",
+        "My shift times change on a rotating roster",
+        "My shifts vary week to week",
+        "I work casually and my shifts change frequently",
+        "I am not currently employed",
+        "Prefer not to say"
+      ]
+    },
+    {
+      "key": "one_to_one_availability",
+      "label": "1:1 availability",
+      "type": "multi-select",
+      "required": true
+    },
+    {
+      "key": "fusion_availability",
+      "label": "FUSION availability",
+      "type": "multi-select",
+      "required": true
+    },
+    {
+      "key": "fusion_friday_availability",
+      "label": "Friday availability",
+      "type": "multi-select",
+      "required": true
+    }
+  ]
+}

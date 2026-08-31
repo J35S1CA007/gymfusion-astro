@@ -158,6 +158,9 @@ h1 {
 .stepper {
 	padding: 1rem;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	overflow-x: auto;
+	scroll-snap-type: x proximity;
+	flex-wrap: nowrap;
 }
 
 .stepper-item {
@@ -166,7 +169,18 @@ h1 {
 	gap: 0.75rem;
 	text-align: left;
 	min-width: 15rem;
+	max-width: 18rem;
+	padding: 0.95rem 1rem;
 	cursor: pointer;
+	scroll-snap-align: start;
+	background:
+		linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03)) padding-box,
+		var(--cta-gradient) border-box;
+	border: 1px solid transparent;
+	box-shadow:
+		0 0 0 1px rgba(157, 10, 255, 0.12) inset,
+		0 10px 26px rgba(0, 0, 0, 0.22);
+	border-radius: 1.15rem;
 }
 
 .stepper-item strong,
@@ -174,9 +188,36 @@ h1 {
 	display: block;
 }
 
+.stepper-item strong {
+	font-family: 'Sora', system-ui, sans-serif;
+	font-size: 0.96rem;
+	letter-spacing: 0.02em;
+}
+
+.stepper-item span {
+	margin-top: 0.22rem;
+	font-size: 0.82rem;
+	line-height: 1.4;
+	color: rgba(245, 247, 251, 0.82);
+}
+
+.stepper-item.is-complete {
+	background:
+		linear-gradient(rgba(7, 12, 30, 0.9), rgba(7, 12, 30, 0.9)) padding-box,
+		linear-gradient(111deg, rgba(157, 10, 255, 0.7) 0%, rgba(222, 7, 150, 0.7) 31%, rgba(253, 29, 29, 0.7) 68%, rgba(252, 158, 25, 0.7) 100%) border-box;
+}
+
 .stepper-item.is-active {
-	border-color: rgba(139, 233, 253, 0.5);
-	box-shadow: 0 0 0 1px rgba(139, 233, 253, 0.25) inset;
+	background:
+		linear-gradient(rgba(15, 10, 28, 0.96), rgba(15, 10, 28, 0.96)) padding-box,
+		var(--cta-gradient) border-box;
+	box-shadow:
+		0 0 0 1px rgba(139, 233, 253, 0.22) inset,
+		0 14px 34px rgba(0, 0, 0, 0.34);
+}
+
+.stepper-item.is-future {
+	opacity: 0.92;
 }
 
 .stepper-index {
@@ -185,9 +226,10 @@ h1 {
 	border-radius: 999px;
 	display: inline-grid;
 	place-items: center;
-	background: rgba(139, 233, 253, 0.18);
+	background: rgba(139, 233, 253, 0.14);
 	color: var(--accent);
 	font-weight: 700;
+	flex: none;
 }
 
 .wizard-shell {
@@ -485,6 +527,7 @@ h1 {
 @media (max-width: 900px) {
 	.stepper {
 		flex-direction: column;
+		overflow-x: visible;
 	}
 
 	.stepper-item {

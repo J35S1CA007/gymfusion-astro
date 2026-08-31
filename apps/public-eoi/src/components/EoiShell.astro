@@ -124,7 +124,7 @@ import {
           <p class="eyebrow purple">Privacy Collection Notice</p>
           <h2 id="privacy-title">Privacy Collection Notice</h2>
           <div class="notice-copy">
-            <p>GYMFUSION collects the personal information you provide in this form (including, where applicable, health information) for the following purposes:</p>
+            <p>GYMFUSION collects the personal information you provide in this form, including identity and contact details, demographic information, service preferences, work-related availability information and usual training availability, for the following purposes:</p>
             <ol type="a">
               <li>to verify your identity and maintain accurate records;</li>
               <li>to assess and respond to your enquiry;</li>
@@ -135,8 +135,8 @@ import {
             <p>This collection is undertaken in accordance with the Privacy Act 1988 (Cth), including the Australian Privacy Principles (APPs), and, where applicable, the Health Records Act 2001 (Vic).</p>
             <h3>Collection of Information and Consequences of Non-Disclosure</h3>
             <p>GYMFUSION collects personal and, where relevant, sensitive information (including health information) directly from you.</p>
-            <p>This information is necessary to enable us to assess your eligibility, ensure your safety, and deliver appropriate services in a manner consistent with our duty of care and legal obligations.</p>
-            <p>While some questions in our screening are optional, missing required information, including relevant health or safety details, may limit our ability to adequately assess your application, determine suitability for services, or respond to your needs.</p>
+            <p>This information is necessary to enable us to assess your eligibility, respond to your enquiry, identify potentially suitable service options and availability, and support the safe and appropriate provision of services should you proceed.</p>
+            <p>Some questions are optional or provide a ‘Prefer not to say’ option. However, if required information is not provided, we may be unable to complete the EOI process, assess your eligibility, identify suitable service options or contact you regarding your enquiry.</p>
             <h3>Use and Disclosure of Information</h3>
             <p>GYMFUSION may use and disclose your personal information for the purposes outlined above and in accordance with applicable privacy laws. This may include disclosure to third-party service providers engaged to support our business operations, such as providers of booking systems, billing services, form processing platforms, communication tools, and IT or data storage services.</p>
             <p>All such disclosures are limited to what is reasonably necessary for the administration and delivery of our services and are managed in accordance with applicable privacy and data protection obligations.</p>
@@ -149,7 +149,7 @@ import {
             <p>To make a privacy-related request, please submit a request via our <a href="https://gymfusion.com.au/privacy-policy#get-in-touch" target="_blank" rel="noreferrer">Privacy &amp; Data Protection</a> webpage. Alternatively, email us at <a href="mailto:privacy@gymfusion.com.au">privacy@gymfusion.com.au</a>.</p>
           </div>
           <label class="ack-item privacy-ack-item">
-            <span>By proceeding, you acknowledge that you have read and understood this Privacy Collection Notice and consent to GYMFUSION collecting, using, storing, and disclosing your personal information (including health information, where applicable) in accordance with this Notice, our Privacy Policy, the Privacy Act 1988 (Cth), and the Health Records Act 2001 (Vic).</span>
+            <span>By proceeding, you acknowledge that you have read and understood this Privacy Collection Notice and understand that GYMFUSION will collect, use, store and disclose the personal information you provide for the purposes described in this Notice and our Privacy Policy.</span>
             <span class="ack-control"><input type="checkbox" name="privacy_consent" required /></span>
           </label>
         </div>
@@ -194,7 +194,8 @@ import {
               </select>
             </label>
             <h3>What is your sex recorded as at birth? <strong>*</strong></h3>
-            <p class="helper-copy">Sex recorded at birth helps guide the interpretation of certain pre-exercise screening questions, as some sex-based physiological differences can influence how training is safely and appropriately scaled — including strength capacity, joint and tendon loading, and injury-risk patterns.</p>
+            <p class="helper-copy">Sex recorded at birth helps inform the interpretation of certain pre-exercise screening information, as some physiological factors relevant to exercise and injury risk can differ by sex. This information may be considered alongside your individual health profile, training history and other relevant factors when determining appropriate coaching and exercise modifications.</p>
+            <p class="helper-copy">Providing your sex recorded at birth is optional. You may select ‘Prefer not to say’ if you do not wish to provide this information. Your response is kept private and is accessible only to authorised staff who require it for relevant screening, programming or coaching purposes.</p>
             <label class="field">
               <select name="sex_at_birth" required>
                 <option value=""></option>
@@ -513,6 +514,7 @@ import {
   let state = createEoiPart1State();
   const stepIds = EOI_PART1_STEPS.map((step) => step.id);
   const stepNodes = Object.fromEntries(stepIds.map((id) => [id, form.querySelector(`[data-step="${id}"]`)]));
+  const stepperButtons = Array.from(form.querySelectorAll('[data-jump-step]'));
   const status = form.querySelector('[data-status]');
   const errors = form.querySelector('[data-errors]');
   const backButton = form.querySelector('[data-action="back"]');
@@ -525,15 +527,18 @@ import {
 
   const setCurrentStep = (step) => {
     state.currentStep = step;
+    const activeIndex = stepIds.indexOf(step);
     stepIds.forEach((id) => {
       const node = stepNodes[id];
       if (!node) return;
       node.hidden = id !== step;
       node.classList.toggle('is-active', id === step);
     });
-    form.querySelectorAll('[data-jump-step]').forEach((button) => {
+    stepperButtons.forEach((button, index) => {
       const active = button.getAttribute('data-jump-step') === step;
       button.classList.toggle('is-active', active);
+      button.classList.toggle('is-complete', index < activeIndex);
+      button.classList.toggle('is-future', index > activeIndex);
       if (active) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
     });
