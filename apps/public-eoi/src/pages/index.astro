@@ -19,6 +19,13 @@ const mobileEoiMarkup = mobileEoiBody
   <link slot="head" rel="stylesheet" href="/mobile.css" media="screen and (max-width: 1023px)" />
   <main class="eoi-landing" aria-label="GYMFUSION Expression of Interest">
     <div class="top-strip" data-site-header>
+      <div class="mobile-login-slot">
+        <gf-public-member-nav-mobile
+          class="gf-member-nav-mobile-host"
+          member-state='{"authenticated":false,"displayName":"","loading":false,"ready":true,"dropdownOpen":false,"notice":""}'
+          portal-url="https://portal.gymfusion.com.au"
+        ></gf-public-member-nav-mobile>
+      </div>
       <div class="brand-slot" aria-hidden="true">
         <img
           class="brand-logo"
@@ -56,6 +63,41 @@ const mobileEoiMarkup = mobileEoiBody
           </nav>
         </div>
       </div>
+      <div class="mobile-menu-slot">
+        <button
+          class="mobile-navigation-button"
+          id="gfMobileMenuButton"
+          type="button"
+          aria-label="Open navigation"
+          aria-controls="mobile-site-menu"
+          aria-expanded="false"
+        >
+          <svg class="mobile-navigation-icon" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="mobile-navigation-icon-gradient" x1="2" y1="2" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#9d0aff"></stop>
+                <stop offset="31%" stop-color="#de0796"></stop>
+                <stop offset="68%" stop-color="#fd1d1d"></stop>
+                <stop offset="100%" stop-color="#fc9e19"></stop>
+              </linearGradient>
+            </defs>
+            <path class="line line-top" d="M5 8h18"></path>
+            <path class="line line-middle" d="M5 14h18"></path>
+            <path class="line line-bottom" d="M5 20h18"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="mobile-menu-overlay" data-mobile-menu-overlay id="mobile-site-menu-overlay" hidden aria-hidden="true">
+      <nav class="mobile-site-menu" id="mobile-site-menu" aria-label="Mobile navigation">
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/" data-mobile-menu-link><span>Home</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/our-services" data-mobile-menu-link><span>Our Services</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/privacy-policy" data-mobile-menu-link><span>Privacy Policy</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/accessibility-inclusion-statement" data-mobile-menu-link><span>Accessibility &amp; Inclusion</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/our-policies/" data-mobile-menu-link><span>Our Policies</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/terms-and-conditions" data-mobile-menu-link><span>T&amp;Cs</span></a>
+      </nav>
     </div>
 
     <div class="desktop-chrome desktop-chrome--top" aria-label="Site navigation and promotion">
@@ -108,21 +150,51 @@ const mobileEoiMarkup = mobileEoiBody
         </div>
       </div>
 
-      <section class="country-acknowledgement">
-        <p>
-          <span class="country-acknowledgement__text">
-            We respectfully acknowledge the Yorta Yorta Nation as the First Peoples of the land on which we live and<br>
-            work. We pay our respects to Elders past, present, and emerging, and honour their continuing culture<br>
-            and connection to land and waters.
-          </span>
-        </p>
-      </section>
+    <section class="country-acknowledgement">
+      <p>
+        <span class="country-acknowledgement__text">
+          We respectfully acknowledge the Yorta Yorta<br>
+          Nation as the First Peoples of the land on which we<br>
+          live and work. We pay our respects to Elders past,<br>
+          present, and emerging and honour their continuing<br>
+          culture and connection to land, sky and water.
+        </span>
+      </p>
+    </section>
 
-      <div class="desktop-footer">
-        <nav class="desktop-footer__links footer-links" aria-label="Footer links">
-          <a href="https://www.gymfusion.com.au/eoi" target="_top">EOI</a>
-          <a href="https://www.gymfusion.com.au/our-services" target="_top">Our Services</a>
-          <a href="https://www.gymfusion.com.au/privacy-policy" target="_top">Privacy Policy</a>
+    <div class="mobile-footer-stack" aria-label="Mobile footer links and copyright">
+      <div class="mobile-footer-stack__links">
+        <iframe
+          aria-hidden="true"
+          class="mobile-footer-stack__iframe"
+          loading="eager"
+          src="/assets/mobile%20footer%20assets/footer-links-mobile-html.html"
+          tabindex="-1"
+          title="Footer links"
+        ></iframe>
+      </div>
+      <div class="mobile-footer-stack__divider">
+        <iframe
+          aria-hidden="true"
+          class="mobile-footer-stack__iframe"
+          loading="eager"
+          src="/assets/mobile%20footer%20assets/spiral-divider-line.html"
+          tabindex="-1"
+          title="Divider"
+        ></iframe>
+      </div>
+      <p class="mobile-footer-stack__copyright">
+        <strong>© 2026 GYMFUSION</strong> <span class="mobile-footer-stack__abbr">ABN</span> <span class="mobile-footer-stack__numbers">97 143 803 038</span><br>
+        All rights reserved. No part of this website may be<br>
+        reproduced without prior written permission.
+      </p>
+    </div>
+
+    <div class="desktop-footer">
+      <nav class="desktop-footer__links footer-links" aria-label="Footer links">
+        <a href="https://www.gymfusion.com.au/eoi" target="_top">EOI</a>
+        <a href="https://www.gymfusion.com.au/our-services" target="_top">Our Services</a>
+        <a href="https://www.gymfusion.com.au/privacy-policy" target="_top">Privacy Policy</a>
           <a href="https://www.gymfusion.com.au/accessibility-inclusion-statement" target="_top">Accessibility</a>
           <a href="https://www.gymfusion.com.au/terms-and-conditions" target="_top">T&amp;Cs</a>
           <a href="https://www.gymfusion.com.au/our-policies/" target="_top">Our Policies</a>
@@ -146,12 +218,21 @@ const mobileEoiMarkup = mobileEoiBody
 
 <script>
   import '../lib/gfPublicMemberNav.js';
+  import '../lib/gfPublicMemberNavMobile.js';
 
   const gfHeader = document.querySelector<HTMLElement>('[data-site-header]');
   const gfMenuButton = document.getElementById('gfMenuButton');
   const gfMenuOverlay = gfHeader?.querySelector<HTMLElement>('[data-desktop-menu-overlay]');
   const gfMenuPanel = gfHeader?.querySelector<HTMLElement>('#desktop-site-menu');
+  const gfMobileMenuButton = document.getElementById('gfMobileMenuButton');
+  const gfMobileMenuOverlay = document.querySelector<HTMLElement>('[data-mobile-menu-overlay]');
+  const gfMobileMenuLinks = Array.from(document.querySelectorAll<HTMLElement>('[data-mobile-menu-link]'));
+  const gfMobileMemberNav = document.querySelector<HTMLElement>('.gf-member-nav-mobile-host');
+  const gfMobileBreakpoint = window.matchMedia('(max-width: 1023px)');
   let isMenuOpen = false;
+  let isMobileMenuOpen = false;
+  let mobileMenuRevealFrame: number | null = null;
+  let mobileMenuRevealTimer: number | null = null;
 
   function setMenuOpen(nextOpen: boolean) {
     isMenuOpen = nextOpen;
@@ -162,19 +243,144 @@ const mobileEoiMarkup = mobileEoiBody
     if (gfMenuPanel) gfMenuPanel.hidden = !nextOpen;
   }
 
+  function resetMobileMenuButtons() {
+    gfMobileMenuLinks.forEach((button) => {
+      button.classList.remove('is-visible');
+      button.style.animationDelay = '0ms';
+    });
+  }
+
+  function playMobileMenuButtons() {
+    gfMobileMenuLinks.forEach((button, index) => {
+      button.style.animationDelay = `${index * 200}ms`;
+      button.classList.add('is-visible');
+    });
+  }
+
+  function clearMobileMenuReveal() {
+    if (mobileMenuRevealFrame !== null) {
+      cancelAnimationFrame(mobileMenuRevealFrame);
+      mobileMenuRevealFrame = null;
+    }
+
+    if (mobileMenuRevealTimer !== null) {
+      clearTimeout(mobileMenuRevealTimer);
+      mobileMenuRevealTimer = null;
+    }
+  }
+
+  function setMobileMenuScrollLock(nextOpen: boolean) {
+    document.documentElement.classList.toggle('mobile-site-menu-open', nextOpen);
+    document.body.classList.toggle('mobile-site-menu-open', nextOpen);
+  }
+
+  function closeMobileMemberDropdown() {
+    if (!gfMobileMemberNav) {
+      return;
+    }
+
+    try {
+      const rawState = gfMobileMemberNav.getAttribute('member-state');
+      const state = rawState ? JSON.parse(rawState) : {};
+      gfMobileMemberNav.setAttribute('member-state', JSON.stringify({
+        ...state,
+        dropdownOpen: false,
+      }));
+    } catch {
+      gfMobileMemberNav.setAttribute('member-state', '{"authenticated":false,"displayName":"","loading":false,"ready":true,"dropdownOpen":false,"notice":""}');
+    }
+  }
+
+  function setMobileMenuOpen(nextOpen: boolean) {
+    const shouldOpen = nextOpen && gfMobileBreakpoint.matches;
+    isMobileMenuOpen = shouldOpen;
+    if (gfHeader) gfHeader.dataset.mobileMenuOpen = shouldOpen ? 'true' : 'false';
+    gfMobileMenuButton?.classList.toggle('is-open', shouldOpen);
+    gfMobileMenuButton?.setAttribute('aria-expanded', String(shouldOpen));
+    gfMobileMenuButton?.setAttribute('aria-label', shouldOpen ? 'Close navigation' : 'Open navigation');
+    if (gfMobileMenuOverlay) {
+      gfMobileMenuOverlay.hidden = !shouldOpen;
+      gfMobileMenuOverlay.classList.toggle('is-open', shouldOpen);
+      gfMobileMenuOverlay.setAttribute('aria-hidden', String(!shouldOpen));
+    }
+
+    setMobileMenuScrollLock(shouldOpen);
+    clearMobileMenuReveal();
+
+    if (!shouldOpen) {
+      resetMobileMenuButtons();
+      return;
+    }
+
+    closeMobileMemberDropdown();
+    resetMobileMenuButtons();
+    mobileMenuRevealFrame = requestAnimationFrame(() => {
+      mobileMenuRevealTimer = window.setTimeout(() => {
+        playMobileMenuButtons();
+        mobileMenuRevealTimer = null;
+      }, 180);
+      mobileMenuRevealFrame = null;
+    });
+  }
+
   gfMenuButton?.addEventListener('click', () => setMenuOpen(!isMenuOpen));
   gfHeader?.querySelectorAll<HTMLElement>('.site-menu-link').forEach((link) => {
     link.addEventListener('click', () => setMenuOpen(false));
   });
   gfMenuPanel?.addEventListener('mouseleave', () => setMenuOpen(false));
+  gfMobileMenuButton?.addEventListener('click', () => setMobileMenuOpen(!isMobileMenuOpen));
+  gfMobileMenuLinks.forEach((link) => {
+    link.addEventListener('click', () => setMobileMenuOpen(false));
+  });
+  gfMobileMenuOverlay?.addEventListener('click', (event) => {
+    if (event.target === gfMobileMenuOverlay) {
+      setMobileMenuOpen(false);
+    }
+  });
   document.addEventListener('pointerdown', (event) => {
     if (gfHeader && isMenuOpen && !gfHeader.contains(event.target as Node)) setMenuOpen(false);
   }, true);
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') setMenuOpen(false);
+    if (event.key === 'Escape') {
+      setMenuOpen(false);
+      setMobileMenuOpen(false);
+    }
+  });
+  const handleMobileBreakpointChange = () => {
+    if (!gfMobileBreakpoint.matches) {
+      setMobileMenuOpen(false);
+    }
+  };
+  window.addEventListener('resize', handleMobileBreakpointChange);
+  document.addEventListener('gf-member-nav-intent', (event) => {
+    const host = event.target;
+    if (!(host instanceof HTMLElement) || host.tagName.toLowerCase() !== 'gf-public-member-nav-mobile') {
+      return;
+    }
+
+    const detail = (event as CustomEvent<{ action?: string }>).detail;
+    const portalUrl = host.getAttribute('portal-url') || 'https://portal.gymfusion.com.au';
+    if (detail?.action === 'login' || detail?.action === 'portal') {
+      window.location.assign(portalUrl);
+    }
   });
 
   const iframe = document.querySelector<HTMLIFrameElement>('[data-eoi-embed]');
+  const gfEoiLanding = document.querySelector<HTMLElement>('.eoi-landing');
+  window.addEventListener('message', (event) => {
+    if (!iframe?.contentWindow || event.source !== iframe.contentWindow || event.origin !== window.location.origin) {
+      return;
+    }
+
+    const message = event.data as { type?: string; motionReduced?: boolean };
+    if (message?.type !== 'gf-eoi-accessibility' || typeof message.motionReduced !== 'boolean') {
+      return;
+    }
+
+    if (gfEoiLanding) {
+      gfEoiLanding.dataset.reducedMotion = String(message.motionReduced);
+    }
+  });
   const mobile = window.matchMedia('(max-width: 1023px)').matches;
   if (iframe && !mobile) {
     iframe.src = '/desktop-eoi-part-1.html';
@@ -189,7 +395,7 @@ const mobileEoiMarkup = mobileEoiBody
 </script>
 
   <style>
-  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@100;300;400;500;600;700;800&display=swap');
 
   @font-face {
     font-family: CASmutFill;
@@ -202,7 +408,7 @@ const mobileEoiMarkup = mobileEoiBody
   @font-face {
     font-family: "GamuthSans";
     src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Bold.ttf") format("truetype");
-    font-weight: 700;
+    font-weight: 500;
     font-style: normal;
     font-display: swap;
   }
@@ -275,6 +481,183 @@ const mobileEoiMarkup = mobileEoiBody
     height: auto;
   }
 
+  .mobile-login-slot,
+  .mobile-menu-slot,
+  .mobile-menu-overlay {
+    display: none;
+  }
+
+  .mobile-login-slot {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+    z-index: 3;
+  }
+
+  .mobile-menu-slot {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    align-self: center;
+    z-index: 3;
+  }
+
+  .gf-member-nav-mobile-host {
+    display: block;
+    overflow: visible;
+  }
+
+  .mobile-navigation-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 180ms ease, opacity 180ms ease;
+  }
+
+  .mobile-navigation-button:active {
+    transform: scale(0.92);
+  }
+
+  .mobile-navigation-icon {
+    width: 28px;
+    height: 28px;
+    overflow: visible;
+    fill: none;
+    stroke: url("#mobile-navigation-icon-gradient");
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mobile-navigation-icon .line {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 160ms ease;
+  }
+
+  .mobile-navigation-button.is-open .line-top {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .mobile-navigation-button.is-open .line-middle {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+
+  .mobile-navigation-button.is-open .line-bottom {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .mobile-menu-overlay {
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 88px 20px calc(24px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.68);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 150;
+  }
+
+  .mobile-menu-overlay[hidden] {
+    display: none !important;
+  }
+
+  .mobile-menu-overlay.is-open {
+    display: flex;
+  }
+
+  .mobile-site-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: min(calc(100vw - 24px), 340px);
+    margin: auto;
+    transform: translateY(-130px);
+  }
+
+  .mobile-site-menu__button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100% - 4px);
+    min-height: 64px;
+    margin-left: 4px;
+    padding: 12px 18px;
+    border: 3px solid transparent;
+    background:
+      linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)) padding-box,
+      linear-gradient(100deg, rgba(115, 0, 165, 0.96) 0%, rgba(205, 0, 108, 0.96) 48%, rgba(219, 76, 0, 0.96) 78%, rgba(255, 138, 0, 0.96) 100%) padding-box,
+      linear-gradient(100deg, #9d0aff 0%, #de0796 38%, #fd1d1d 66%, #fc9e19 100%) border-box;
+    color: #ffffff;
+    font-family: "Sora", Arial, Helvetica, sans-serif;
+    font-size: clamp(16px, 4.8vw, 22px);
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: filter 160ms ease, box-shadow 160ms ease;
+    opacity: 0;
+    transform: translateY(2px) scale(0.996);
+    visibility: hidden;
+    pointer-events: none;
+    will-change: opacity, transform;
+  }
+
+  .mobile-site-menu__button span {
+    position: relative;
+    z-index: 2;
+  }
+
+  .mobile-site-menu__button.is-visible {
+    opacity: 1;
+    animation: mobileMenuButtonReveal 1s cubic-bezier(0.2, 0.95, 0.3, 1) both;
+    transform: translateY(0) scale(1);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .mobile-site-menu__button.is-visible:nth-child(1) {
+    animation-name: mobileMenuButtonRevealNoLift;
+  }
+
+  .mobile-site-menu__button:hover {
+    filter: brightness(1.01);
+  }
+
+  .mobile-site-menu__button:active {
+    transform: scale(0.98);
+  }
+
+  @keyframes mobileMenuButtonReveal {
+    0% { opacity: 0; transform: translateY(2px) scale(0.996); }
+    68% { opacity: 1; transform: translateY(-1px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes mobileMenuButtonRevealNoLift {
+    0% { opacity: 0; transform: scale(0.996); }
+    68% { opacity: 1; transform: scale(1.02); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
   .nav-slot {
     position: relative;
     grid-column: 3;
@@ -339,6 +722,10 @@ const mobileEoiMarkup = mobileEoiBody
     animation: gymfusionMarquee 52s linear infinite;
     animation-play-state: running !important;
     will-change: transform;
+  }
+
+  .eoi-landing[data-reduced-motion="true"] .desktop-marquee__track {
+    animation-play-state: paused !important;
   }
 
   .desktop-marquee.is-left .desktop-marquee__track {
@@ -439,6 +826,10 @@ const mobileEoiMarkup = mobileEoiBody
     display: none;
   }
 
+  .mobile-footer-stack {
+    display: none;
+  }
+
   @media (max-width: 1023px) {
     :global(html),
     :global(body) {
@@ -454,18 +845,189 @@ const mobileEoiMarkup = mobileEoiBody
       background: #000 !important;
     }
 
+    :global(html.mobile-site-menu-open),
+    :global(body.mobile-site-menu-open) {
+      overflow: hidden !important;
+      overscroll-behavior: none !important;
+    }
+
     .content-shell {
-      padding: 0.75rem 0.5rem 1rem;
-      place-items: center;
-      height: calc(100svh - 65px);
-      min-height: 0;
+      padding: 35px 0.5rem 35px;
+      place-items: stretch center;
+      align-content: stretch;
+      height: calc(100svh - 145px);
+      min-height: calc(100svh - 145px);
+      flex: none;
+    }
+
+    .eoi-landing {
+      min-height: calc(100svh - 10px);
+      --mobile-header-height: 64px;
+    }
+
+    .top-strip {
+      position: sticky;
+      top: 0;
+      z-index: 160;
+      padding: 0 12px;
+      height: var(--mobile-header-height);
+      min-height: var(--mobile-header-height);
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.58) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .top-strip[data-mobile-menu-open="true"] {
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.82) 100%);
+    }
+
+    .top-strip[data-mobile-menu-open="true"] .mobile-login-slot {
+      pointer-events: none;
+      opacity: 0.45;
+    }
+
+    .desktop-chrome--top {
+      display: none !important;
+    }
+
+    .mobile-login-slot,
+    .mobile-menu-slot {
+      display: grid;
+      align-items: center;
+    }
+
+    .mobile-login-slot {
+      width: max-content;
+      min-width: 0;
+      height: var(--mobile-header-height);
+      transform: translate(-21px, 5px);
+    }
+
+    .mobile-menu-slot {
+      width: 51px;
+      height: 51px;
+      transform: translateX(6px);
+    }
+
+    .gf-member-nav-mobile-host {
+      width: max-content;
+      min-width: 0;
+      height: var(--mobile-header-height);
+      display: block;
+      --mobile-scale: 1;
+    }
+
+    .brand-logo {
+      width: 50px;
+    }
+
+    .mobile-navigation-button {
+      width: 51px;
+      height: 51px;
+    }
+
+    .mobile-navigation-icon {
+      width: 35px;
+      height: 35px;
+    }
+
+    .nav-slot,
+    .menu-slot {
+      display: none !important;
+    }
+
+    .mobile-menu-overlay {
+      display: none;
+      padding: calc(var(--mobile-header-height) + 24px) 20px calc(24px + env(safe-area-inset-bottom));
+    }
+
+    .desktop-chrome--bottom .desktop-marquee {
+      display: none !important;
+    }
+
+    .desktop-chrome--bottom {
+      margin-top: -70px;
+    }
+
+    .mobile-footer-stack {
+      display: grid;
+      width: 100%;
+      justify-items: center;
+      gap: 10px;
+      padding: 0 0 calc(10rem + env(safe-area-inset-bottom));
+      box-sizing: border-box;
+      background: #000;
+    }
+
+    .mobile-footer-stack__divider,
+    .mobile-footer-stack__copyright {
+      width: min(100%, 305px);
+    }
+
+    .mobile-footer-stack__links {
+      width: min(100%, 345px);
+    }
+
+    .mobile-footer-stack__iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .mobile-footer-stack__links {
+      height: 100px;
+      position: relative;
+      top: 5px;
+    }
+
+    .mobile-footer-stack__divider {
+      height: 50px;
+      margin-top: -62px;
+    }
+
+    .mobile-footer-stack__copyright {
+      margin: 0;
+      color: #ffffff;
+      text-align: center;
+      font-family: "GamuthSansLightMobile", "GamuthSans", Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .mobile-footer-stack__copyright strong,
+    .mobile-footer-stack__abbr {
+      font-family: "GamuthSans", Arial, Helvetica, sans-serif;
+      font-weight: 700;
+    }
+
+    .mobile-footer-stack__copyright strong + .mobile-footer-stack__abbr {
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    .mobile-footer-stack__numbers {
+      display: inline-block;
+      margin-left: 6px;
+      font-family: "GamuthSansLightMobile", "GamuthSans", Arial, Helvetica, sans-serif;
+      font-size: calc(1em + 1pt);
+      font-weight: 400;
+    }
+
+    .desktop-footer {
+      display: none !important;
     }
 
     .middle-stage {
-      width: min(300px, calc(100vw - 1rem));
-      max-width: 300px;
-      height: 100%;
-      min-height: 0;
+      width: min(312px, calc(100vw - 1rem));
+      max-width: 312px;
+      height: calc(100% - 3px);
+      min-height: calc(100% - 3px);
+      align-self: stretch;
+      transform: translateY(-3px);
       border: 1px solid transparent;
       border-radius: 34px;
       background:
@@ -475,6 +1037,33 @@ const mobileEoiMarkup = mobileEoiBody
         0 0 0 1px rgba(255, 255, 255, 0.06) inset,
         0 18px 40px rgba(0, 0, 0, 0.36);
       overflow: hidden;
+    }
+
+    .country-acknowledgement {
+      min-height: 136px;
+      padding: 1.25rem 0.75rem 1rem !important;
+      background: url("/assets/acknowledgement%20of%20country%20/ack-of-country-mobile-section-bkg-img.png") center / cover no-repeat !important;
+      align-items: center;
+    }
+
+    .country-acknowledgement::before {
+      content: none !important;
+    }
+
+    .country-acknowledgement p {
+      width: min(100%, 291px) !important;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      margin: 0 auto !important;
+      color: #ffffff !important;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      font-size: 13px !important;
+      line-height: 1.32 !important;
     }
 
     .eoi-embed {
@@ -487,26 +1076,29 @@ const mobileEoiMarkup = mobileEoiBody
       inset: 0;
       width: 100%;
       height: 100%;
-      min-height: 0;
+      min-height: 100%;
       overflow: hidden;
-      border-radius: 0;
+      border-radius: inherit;
     }
 
     :global(.mobile-form-host > div) {
       width: 100%;
       height: 100%;
+      min-height: 100%;
+      border-radius: inherit;
     }
 
     :global(.mobile-form-host > div.page) {
       width: 100% !important;
       height: 100% !important;
       min-width: 0 !important;
-      min-height: 0 !important;
+      min-height: 100% !important;
       max-width: none !important;
       max-height: none !important;
       padding: 0 !important;
       margin: 0 !important;
       background: transparent !important;
+      border-radius: inherit !important;
       overflow: hidden !important;
     }
 
@@ -515,7 +1107,7 @@ const mobileEoiMarkup = mobileEoiBody
       width: 100% !important;
       height: 100% !important;
       min-width: 0 !important;
-      min-height: 0 !important;
+      min-height: 100% !important;
       max-width: none !important;
       max-height: none !important;
       aspect-ratio: auto !important;
@@ -527,9 +1119,14 @@ const mobileEoiMarkup = mobileEoiBody
       overflow: hidden !important;
     }
 
+    :global(.mobile-form-host > div.page > .deck[data-deck-state="cover"]) {
+      transform: none !important;
+    }
+
     :global(.mobile-form-host > div.page > .deck > .deck-track) {
       width: calc(var(--slides) * 100%) !important;
       height: 100% !important;
+      min-height: 100% !important;
       display: flex !important;
       flex-direction: row !important;
       position: relative !important;
@@ -543,15 +1140,16 @@ const mobileEoiMarkup = mobileEoiBody
       max-width: calc(100% / var(--slides)) !important;
       flex: 0 0 calc(100% / var(--slides)) !important;
       height: 100% !important;
-      min-height: 0 !important;
+      min-height: 100% !important;
       max-height: 100% !important;
       position: relative !important;
+      border-radius: inherit !important;
       overflow: hidden !important;
     }
 
     :global(.mobile-form-host > div.page > .deck > .deck-track > .deck-page > .content-scroll) {
       height: 100% !important;
-      min-height: 0 !important;
+      min-height: 100% !important;
       overflow-y: auto !important;
       overflow-x: hidden !important;
     }

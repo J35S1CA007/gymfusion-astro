@@ -70,9 +70,10 @@
       const WELCOME_GIF_URL = "https://static.wixstatic.com/media/f190ff_39dcaaaf6805463f9731fec4f8b7f5a0~mv2.gif";
       const WELCOME_GIF_FALLBACK_URL = "https://i.ibb.co/20Vc05Xg/wobble-gif.gif";
       const WELCOME_STATIC_URL = "https://i.ibb.co/Ndgmj3h7/waving-hand-2d.png";
-      const accessibilityStorageKey = "gymfusion-eoi-wix-shell:display-preferences:v3-default-1208";
-      const accessibilityTextSteps = Object.freeze(["default", "larger", "much-larger"]);
+      const accessibilityTextSteps = Object.freeze(["much-smaller", "smaller", "default", "larger", "much-larger"]);
       const accessibilityTextLabels = Object.freeze({
+        "much-smaller": "Much smaller",
+        smaller: "Smaller",
         default: "Default",
         larger: "Larger",
         "much-larger": "Much larger"
@@ -539,6 +540,8 @@
       const syncAccessibilityButtons = () => {
         const index = Math.max(0, accessibilityTextSteps.indexOf(accessibilityPrefs.text));
         if (accessibilityTextSlider) {
+          accessibilityTextSlider.min = "0";
+          accessibilityTextSlider.max = String(accessibilityTextSteps.length - 1);
           accessibilityTextSlider.value = String(index);
           accessibilityTextSlider.setAttribute("aria-valuetext", accessibilityTextLabels[accessibilityPrefs.text] || accessibilityTextLabels.default);
         }
@@ -577,39 +580,7 @@
         applyAccessibilityTriggerIcon(shouldOpen);
       };
 
-      const normalizeAccessibilityText = (value) => {
-        if (value === "small" || value === "smaller" || value === "much-smaller") return "default";
-        if (value === "large") return "larger";
-        if (accessibilityTextSteps.includes(value)) return value;
-        return defaultAccessibilityPrefs.text;
-      };
-
-      const readAccessibilityPrefs = () => {
-        try {
-          const raw = window.localStorage.getItem(accessibilityStorageKey);
-          if (!raw) return { ...defaultAccessibilityPrefs };
-          const parsed = JSON.parse(raw);
-          return {
-            text: defaultAccessibilityPrefs.text,
-            contrast: Boolean(parsed?.contrast),
-            spacing: Boolean(parsed?.spacing),
-            font: Boolean(parsed?.font),
-            motion: typeof parsed?.motion === "boolean" ? parsed.motion : defaultAccessibilityPrefs.motion
-          };
-        } catch {
-          return { ...defaultAccessibilityPrefs };
-        }
-      };
-
-      const writeAccessibilityPrefs = () => {
-        try {
-          window.localStorage.setItem(accessibilityStorageKey, JSON.stringify(accessibilityPrefs));
-        } catch {
-          // Ignore storage failures.
-        }
-      };
-
-      accessibilityPrefs = readAccessibilityPrefs();
+      accessibilityPrefs = { ...defaultAccessibilityPrefs };
       applyAccessibilityPrefs();
       initializeIconFallbacks();
       initializeMenuIcon();
@@ -705,7 +676,6 @@
         const index = Number(accessibilityTextSlider.value);
         accessibilityPrefs.text = accessibilityTextSteps[index] || defaultAccessibilityPrefs.text;
         applyAccessibilityPrefs();
-        writeAccessibilityPrefs();
       });
 
       accessibilityToggleButtons.forEach((button) => {
@@ -716,14 +686,12 @@
           if (key === "font") accessibilityPrefs.font = !accessibilityPrefs.font;
           if (key === "motion") accessibilityPrefs.motion = !accessibilityPrefs.motion;
           applyAccessibilityPrefs();
-          writeAccessibilityPrefs();
         });
       });
 
       accessibilityReset?.addEventListener("click", () => {
         accessibilityPrefs = { ...defaultAccessibilityPrefs };
         applyAccessibilityPrefs();
-        writeAccessibilityPrefs();
       });
 
       document.addEventListener("click", (event) => {

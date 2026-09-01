@@ -3,7 +3,7 @@
 
     @font-face {
       font-family: "OpenDyslexic";
-      src: url("https://cdn.jsdelivr.net/fontsource/fonts/opendyslexic@latest/latin-400-normal.woff2") format("woff2");
+      src: url("https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff") format("woff");
       font-weight: 400;
       font-style: normal;
       font-display: swap;
@@ -11,7 +11,7 @@
 
     @font-face {
       font-family: "OpenDyslexicAdjusted";
-      src: url("https://cdn.jsdelivr.net/fontsource/fonts/opendyslexic@latest/latin-400-normal.woff2") format("woff2");
+      src: url("https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff") format("woff");
       font-weight: 400;
       font-style: normal;
       font-display: swap;
@@ -3239,4 +3239,148 @@
 .page[data-deck-state="form"] .bottom-accessibility-toolbar {
   margin: 0 !important;
   border-radius: 0 0 18px 18px !important;
+}
+
+/* Desktop accessibility states: bounded text scaling and explicit palettes. */
+body[data-a11y-text="smaller"] {
+  --a11y-copy-size: 0.855rem;
+  --a11y-label-size: 0.738rem;
+  --a11y-heading-size: 0.9rem;
+  font-size: 1em !important;
+}
+
+body[data-a11y-text="small"] {
+  --a11y-copy-size: 0.9025rem;
+  --a11y-label-size: 0.779rem;
+  --a11y-heading-size: 0.95rem;
+  font-size: 1em !important;
+}
+
+body[data-a11y-text="default"] {
+  --a11y-copy-size: 0.95rem;
+  --a11y-label-size: 0.82rem;
+  --a11y-heading-size: 1rem;
+  font-size: 1em !important;
+}
+
+body[data-a11y-text="large"] {
+  --a11y-copy-size: 1.02125rem;
+  --a11y-label-size: 0.8815rem;
+  --a11y-heading-size: 1.075rem;
+  font-size: 1em !important;
+}
+
+body[data-a11y-text="larger"] {
+  --a11y-copy-size: 1.0925rem;
+  --a11y-label-size: 0.943rem;
+  --a11y-heading-size: 1.15rem;
+  font-size: 1em !important;
+}
+
+body[data-a11y-text]:not([data-a11y-text="default"]) .content-page :is(
+  p,
+  li,
+  input,
+  select,
+  textarea,
+  .check-copy,
+  .helper-copy,
+  .option-choice,
+  .selection-summary
+) {
+  font-size: var(--a11y-copy-size) !important;
+}
+
+body[data-a11y-text]:not([data-a11y-text="default"]) .content-page :is(
+  label,
+  .label-note,
+  .field label,
+  .preview-step span
+) {
+  font-size: var(--a11y-label-size) !important;
+}
+
+body[data-a11y-text]:not([data-a11y-text="default"]) .content-page :is(
+  h3,
+  h4,
+  .section-title,
+  .availability-section-title,
+  .preview-step strong
+) {
+  font-size: var(--a11y-heading-size) !important;
+}
+
+body[data-a11y-spacing="expanded"] .content-page :is(
+  p,
+  li,
+  label,
+  input,
+  select,
+  textarea,
+  .check-copy,
+  .helper-copy,
+  .option-choice,
+  .selection-summary,
+  .preview-step span
+) {
+  letter-spacing: 0.035em !important;
+  word-spacing: 0.12em !important;
+  line-height: 1.7 !important;
+}
+
+body[data-a11y-spacing="expanded"] .content-page :is(
+  h3,
+  h4,
+  strong,
+  button,
+  .eyebrow
+) {
+  letter-spacing: 0.045em !important;
+  word-spacing: 0.08em !important;
+  line-height: 1.4 !important;
+}
+
+body[data-a11y-contrast="high"] {
+  --a11y-contrast-background: #000000;
+  --a11y-contrast-text: #ffffff;
+  --a11y-contrast-accent: #ffea00;
+  --text: var(--a11y-contrast-text) !important;
+  --muted: var(--a11y-contrast-text) !important;
+  --line: rgba(255, 255, 255, 0.82) !important;
+  --line-strong: #ffffff !important;
+  --accent: var(--a11y-contrast-accent) !important;
+}
+
+body[data-a11y-contrast="high"] :is(
+  .content-page,
+  .toolbar,
+  .bottom-accessibility-toolbar,
+  .accessibility-panel,
+  .card,
+  .info-tile,
+  .field-box,
+  .textarea-box,
+  .select-field,
+  .option-choice,
+  .check-row,
+  .availability-slot
+) {
+  background: var(--a11y-contrast-background) !important;
+  background-color: var(--a11y-contrast-background) !important;
+  color: var(--a11y-contrast-text) !important;
+  border-color: var(--a11y-contrast-text) !important;
+}
+
+body[data-a11y-contrast="high"] .content-page :is(p, li, label, strong, span) {
+  color: var(--a11y-contrast-text) !important;
+}
+
+body[data-a11y-contrast="high"] :is(
+  a,
+  .eyebrow,
+  .section-title,
+  .availability-section-title,
+  .a11y-section-label
+) {
+  color: var(--a11y-contrast-accent) !important;
 }

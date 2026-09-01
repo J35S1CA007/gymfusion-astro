@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "check": "astro check",
+    "test:accessibility": "node scripts/accessibility-tools-tests.mjs",
     "test:phase2": "node scripts/eoi-astro-phase2-tests.mjs",
     "preview": "astro preview",
     "astro": "astro"

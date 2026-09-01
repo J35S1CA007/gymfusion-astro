@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wix Gym Gallery Embed</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .carousel {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(1);
+        will-change: opacity;
+      }
+
+      .slide.is-active {
+        opacity: 1;
+        z-index: 2;
+      }
+
+      .slide.photo-1 {
+        object-position: center 48%;
+      }
+
+      .slide.photo-2 {
+        object-position: center 46%;
+      }
+
+      .slide.photo-3 {
+        object-position: center 54%;
+      }
+
+      .slide.photo-4 {
+        object-position: center 84%;
+      }
+
+      .fade-black-layer {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 5;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="carousel" aria-label="Auto-scrolling gym gallery">
+      <img
+        class="slide photo-1 is-active"
+        src="https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/taylor-garage-imgs/taylor-cam-handstand-img-skills.png"
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        fetchpriority="high"
+      />
+      <img
+        class="slide photo-2"
+        src="https://static.wixstatic.com/media/f190ff_eae553c651074e20aaff3a16fbca78f1~mv2.png/v1/fill/w_900,h_900,al_c,q_85,enc_auto/f190ff_eae553c651074e20aaff3a16fbca78f1~mv2.png"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+      />
+      <img
+        class="slide photo-3"
+        src="https://static.wixstatic.com/media/f190ff_05e1c9cd8a1c4e5791b1a8ccb07e5d77~mv2.png/v1/fill/w_900,h_900,al_c,q_85,enc_auto/f190ff_05e1c9cd8a1c4e5791b1a8ccb07e5d77~mv2.png"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+      />
+      <img
+        class="slide photo-4"
+        src="https://static.wixstatic.com/media/f190ff_a37c46ff1dde455bbf687a1a039f91cb~mv2.jpg/v1/fill/w_900,h_900,al_c,q_85,enc_auto/f190ff_a37c46ff1dde455bbf687a1a039f91cb~mv2.jpg"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+      />
+      <div class="fade-black-layer" id="fade-black-layer" aria-hidden="true"></div>
+    </section>
+
+    <script>
+      (() => {
+        const cadenceMs = 300
+        const transitionMs = 800
+        const blackPeak = 0.48
+        const fadeRestScale = 1.02
+
+        const carousel = document.querySelector('.carousel')
+        const slides = [...document.querySelectorAll('.slide')]
+        const fadeLayer = document.getElementById('fade-black-layer')
+
+        if (!carousel || slides.length < 2 || !fadeLayer) return
+
+        let index = 0
+        let timerId = null
+        let transitioning = false
+        let isPaused = false
+
+        const stop = () => {
+          if (timerId) {
+            clearTimeout(timerId)
+            timerId = null
+          }
+        }
+
+        const transitionTo = async (nextIndex) => {
+          if (transitioning || nextIndex === index) return
+          transitioning = true
+
+          const from = slides[index]
+          const to = slides[nextIndex]
+
+          from.style.zIndex = '2'
+          to.style.zIndex = '3'
+          to.style.opacity = '0'
+          to.classList.add('is-active')
+
+          const animations = [
+            from.animate(
+              [
+                { opacity: 1, transform: `scale(${fadeRestScale})` },
+                { opacity: 0, transform: `scale(${fadeRestScale + 0.015})` }
+              ],
+              { duration: transitionMs, easing: 'ease-in-out', fill: 'forwards' }
+            ),
+            to.animate(
+              [
+                { opacity: 0, transform: 'scale(0.985)' },
+                { opacity: 1, transform: 'scale(1)', offset: 0.72 },
+                { opacity: 1, transform: `scale(${fadeRestScale})` }
+              ],
+              { duration: transitionMs, easing: 'ease-in-out', fill: 'forwards' }
+            ),
+            fadeLayer.animate(
+              [
+                { opacity: 0 },
+                { opacity: blackPeak, offset: 0.5 },
+                { opacity: 0 }
+              ],
+              { duration: transitionMs, easing: 'ease-in-out', fill: 'forwards' }
+            )
+          ]
+
+          await Promise.all(animations.map((a) => a.finished.catch(() => undefined)))
+
+          from.classList.remove('is-active')
+          from.style.opacity = '0'
+          from.style.transform = 'translate3d(0, 0, 0) scale(1)'
+          from.style.zIndex = '1'
+
+          to.style.opacity = '1'
+          to.style.transform = `translate3d(0, 0, 0) scale(${fadeRestScale})`
+          to.style.zIndex = '2'
+          fadeLayer.style.opacity = '0'
+
+          index = nextIndex
+          transitioning = false
+        }
+
+        const loop = async () => {
+          if (isPaused || document.hidden) return
+
+          const nextIndex = (index + 1) % slides.length
+          await transitionTo(nextIndex)
+          if (isPaused || document.hidden) return
+          timerId = window.setTimeout(loop, Math.max(0, cadenceMs - transitionMs))
+        }
+
+        const start = () => {
+          stop()
+          if (isPaused || document.hidden) return
+          slides.forEach((slide, slideIndex) => {
+            slide.style.transform =
+              slideIndex === 0
+                ? `translate3d(0, 0, 0) scale(${fadeRestScale})`
+                : 'translate3d(0, 0, 0) scale(1)'
+          })
+          timerId = window.setTimeout(loop, cadenceMs)
+        }
+
+        carousel.addEventListener('mouseenter', () => {
+          isPaused = true
+          stop()
+        })
+        carousel.addEventListener('mouseleave', () => {
+          isPaused = false
+          start()
+        })
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) stop()
+          else if (!isPaused) start()
+        })
+
+        start()
+      })()
+    </script>
+
+  <script>
+    (() => {
+      const EMBED_ID = "images-of-skills-html-embed";
+      const registry = window.__GYMFUSION_READY_PROTOCOL__ || (window.__GYMFUSION_READY_PROTOCOL__ = {});
+
+      if (registry[EMBED_ID]) {
+        registry[EMBED_ID].markReady();
+        return;
+      }
+
+      let ready = false;
+      let sent = false;
+
+      const emit = (force = false) => {
+        if (!ready || (!force && sent) || window.parent === window) {
+          return;
+        }
+
+        sent = true;
+
+        try {
+          window.parent.postMessage(
+            {
+              type: "GYMFUSION_READY",
+              version: 1,
+              embedId: EMBED_ID,
+            },
+            "*"
+          );
+        } catch {
+          // Ignore cross-origin failures outside a supported iframe context.
+        }
+      };
+
+      const markReady = () => {
+        if (ready) {
+          return;
+        }
+
+        ready = true;
+        emit();
+      };
+
+      const onMessage = (event) => {
+        const data = event.data;
+
+        if (!data || typeof data !== "object") {
+          return;
+        }
+
+        if (data.type === "GYMFUSION_READY_REQUEST" && data.version === 1) {
+          emit(true);
+        }
+      };
+
+      window.addEventListener("message", onMessage);
+      registry[EMBED_ID] = { markReady, onMessage };
+
+      if (document.readyState === "complete") {
+        markReady();
+      } else {
+        window.addEventListener("load", markReady, { once: true });
+      }
+    })();
+  </script>
+</body>
+</html>

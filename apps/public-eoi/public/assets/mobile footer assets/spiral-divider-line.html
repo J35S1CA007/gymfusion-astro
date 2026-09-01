@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>GYMFUSION Divider Line</title>
+  <style>
+    :root {
+      --pill-border-gradient: linear-gradient(111deg, #9a20fa 0%, #9a20fa 22%, rgba(222, 7, 150, 1) 38%, rgba(253, 29, 29, 1) 68%, rgba(252, 158, 25, 1) 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      background: transparent !important;
+      overflow: hidden;
+    }
+
+    body {
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .divider-wrap {
+      width: 100%;
+      max-width: 100vw;
+      padding: 13px clamp(18px, 9vw, 36px);
+      background: transparent !important;
+    }
+
+    .divider-mark {
+      width: min(64vw, 240px);
+      height: 44px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(8px, 3vw, 14px);
+    }
+
+    .divider-line {
+      flex: 1 1 0;
+      height: 2px;
+      min-width: 0;
+      background: var(--pill-border-gradient);
+      box-shadow: -2px 0 6px rgba(154, 32, 250, 0.4), 0 -2px 6px rgba(154, 32, 250, 0.26), 2px 0 6px rgba(253, 29, 29, 0.26), 0 2px 6px rgba(252, 158, 25, 0.32);
+    }
+
+    .divider-icon {
+      flex: 0 0 auto;
+      width: clamp(30px, 12vw, 44px);
+      height: clamp(30px, 12vw, 44px);
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(-2px 0 6px rgba(154, 32, 250, 0.45)) drop-shadow(0 0 6px rgba(222, 7, 150, 0.25)) drop-shadow(2px 0 6px rgba(252, 158, 25, 0.35));
+    }
+  </style>
+</head>
+<body>
+  <div class="divider-wrap" role="presentation" aria-hidden="true">
+    <div class="divider-mark">
+      <span class="divider-line" aria-hidden="true"></span>
+      <img
+        class="divider-icon"
+        src="https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-astro@main/apps/public-eoi/public/assets/logo/gf-spiral-logo.png"
+        alt=""
+        onerror="this.onerror=null; this.src='https://i.ibb.co/0RznTS4Q/gymfusion-spiral-3d.png';"
+      />
+      <span class="divider-line" aria-hidden="true"></span>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const EMBED_ID = "line-html";
+  const registry = window.__GYMFUSION_READY_PROTOCOL__ || (window.__GYMFUSION_READY_PROTOCOL__ = {});
+
+  if (registry[EMBED_ID]) {
+    registry[EMBED_ID].markReady();
+    return;
+  }
+
+  let ready = false;
+  let sent = false;
+
+  const emit = (force = false) => {
+    if (!ready || (!force && sent) || window.parent === window) {
+      return;
+    }
+
+    sent = true;
+
+    try {
+      window.parent.postMessage(
+        {
+          type: "GYMFUSION_READY",
+          version: 1,
+          embedId: EMBED_ID,
+        },
+        "*"
+      );
+    } catch {
+      // Ignore cross-origin failures outside a supported iframe context.
+    }
+  };
+
+  const markReady = () => {
+    ready = true;
+    emit();
+  };
+
+  const onMessage = (event) => {
+    const data = event.data;
+    if (!data || typeof data !== "object") {
+      return;
+    }
+
+    if (data.type === "GYMFUSION_READY_REQUEST" && data.version === 1) {
+      emit(true);
+    }
+  };
+
+  window.addEventListener("message", onMessage);
+  registry[EMBED_ID] = { markReady, onMessage };
+  markReady();
+})();
+</script>
+</body>
+</html>

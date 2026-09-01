@@ -76,7 +76,6 @@
           backup: "https://i.ibb.co/Ndgmj3h7/waving-hand-2d.png"
         }
       });
-      const accessibilityStorageKey = "gymfusion-eoi-wix-shell:display-preferences:v3-default-1208";
       const accessibilityTextSteps = Object.freeze(["smaller", "small", "default", "large", "larger"]);
       const accessibilityTextLabels = Object.freeze({
         smaller: "Much smaller",
@@ -90,7 +89,7 @@
         contrast: false,
         spacing: false,
         font: false,
-        motion: window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false
+        motion: false
       });
 
       let accessibilityPrefs = { ...defaultAccessibilityPrefs };
@@ -288,6 +287,14 @@
         });
       };
 
+      const notifyHostMotionPreference = () => {
+        if (window.parent === window) return;
+        window.parent.postMessage({
+          type: "gf-eoi-accessibility",
+          motionReduced: accessibilityPrefs.motion
+        }, window.location.origin);
+      };
+
       const applyAccessibilityPrefs = () => {
         document.body.dataset.a11yText = accessibilityPrefs.text;
         accessibilityPrefs.contrast ? (document.body.dataset.a11yContrast = "high") : delete document.body.dataset.a11yContrast;
@@ -296,6 +303,7 @@
         accessibilityPrefs.motion ? (document.body.dataset.a11yMotion = "reduced") : delete document.body.dataset.a11yMotion;
         syncAccessibilityButtons();
         syncBrandIcon();
+        notifyHostMotionPreference();
       };
 
       const toggleAccessibilityPanel = (forceOpen) => {
@@ -306,32 +314,7 @@
         applyAccessibilityTriggerIcon(shouldOpen);
       };
 
-      const readAccessibilityPrefs = () => {
-        try {
-          const raw = window.localStorage.getItem(accessibilityStorageKey);
-          if (!raw) return { ...defaultAccessibilityPrefs };
-          const parsed = JSON.parse(raw);
-          return {
-            text: accessibilityTextSteps.includes(parsed?.text) ? parsed.text : defaultAccessibilityPrefs.text,
-            contrast: Boolean(parsed?.contrast),
-            spacing: Boolean(parsed?.spacing),
-            font: Boolean(parsed?.font),
-            motion: typeof parsed?.motion === "boolean" ? parsed.motion : defaultAccessibilityPrefs.motion
-          };
-        } catch {
-          return { ...defaultAccessibilityPrefs };
-        }
-      };
-
-      const writeAccessibilityPrefs = () => {
-        try {
-          window.localStorage.setItem(accessibilityStorageKey, JSON.stringify(accessibilityPrefs));
-        } catch {
-          // Ignore storage failures.
-        }
-      };
-
-      accessibilityPrefs = readAccessibilityPrefs();
+      accessibilityPrefs = { ...defaultAccessibilityPrefs };
       applyAccessibilityPrefs();
       initializeIconFallbacks();
       initializeMenuIcon();
@@ -348,7 +331,6 @@
         const index = Number(accessibilityTextSlider.value);
         accessibilityPrefs.text = accessibilityTextSteps[index] || defaultAccessibilityPrefs.text;
         applyAccessibilityPrefs();
-        writeAccessibilityPrefs();
       });
 
       accessibilityToggleButtons.forEach((button) => {
@@ -359,14 +341,12 @@
           if (key === "font") accessibilityPrefs.font = !accessibilityPrefs.font;
           if (key === "motion") accessibilityPrefs.motion = !accessibilityPrefs.motion;
           applyAccessibilityPrefs();
-          writeAccessibilityPrefs();
         });
       });
 
       accessibilityReset?.addEventListener("click", () => {
         accessibilityPrefs = { ...defaultAccessibilityPrefs };
         applyAccessibilityPrefs();
-        writeAccessibilityPrefs();
       });
 
       document.addEventListener("click", (event) => {
