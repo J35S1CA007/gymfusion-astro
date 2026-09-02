@@ -2606,7 +2606,7 @@
 */
 :root{
   --pill-border-gradient: linear-gradient(111deg, #9a20fa 0%, #9a20fa 22%, rgba(222, 7, 150, 1) 38%, rgba(253, 29, 29, 1) 68%, rgba(252, 158, 25, 1) 100%);
-  --menu-icon-url: url("https://i.ibb.co/LhkK3KR3/menu-icon-graident.png");
+  --menu-icon-url: url("/assets/desktop-eoi-part-1-assets/menu-icon.png");
 }
 
 /* Make the start/cover frame use the same desktop frame footprint as Slides 1-6. */
@@ -3383,4 +3383,21 @@ body[data-a11y-contrast="high"] :is(
   .a11y-section-label
 ) {
   color: var(--a11y-contrast-accent) !important;
+}
+
+/* Keep form-field rhythm consistent without altering the desktop grid layout. */
+.content-page .field-grid,
+.step-page[aria-label="Personal details"] .address-field-grid,
+.step-page[aria-label="Personal details"] .address-field-grid[style] {
+  row-gap: 14px !important;
+}
+
+.content-page .field,
+.step-page[aria-label="Personal details"] .address-field-grid .field {
+  row-gap: 8px !important;
+}
+
+.content-page .field-grid > .field,
+.step-page[aria-label="Personal details"] .address-field-grid > .field {
+  margin-top: 0 !important;
 }

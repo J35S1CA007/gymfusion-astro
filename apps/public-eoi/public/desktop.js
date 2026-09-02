@@ -29,51 +29,52 @@
       const emailWarningStay = document.querySelector("[data-email-warning-stay]");
       const emailWarningCopy = document.querySelector("[data-email-warning-copy]");
       const emailWarningOpen = document.querySelector("[data-email-warning-open]");
+      const validationAnnouncer = document.getElementById("validation-announcer");
       const brandIcon = document.querySelector("[data-brand-icon]");
       const brandIconImage = document.querySelector("[data-brand-icon-img]");
       const iconResolutionCache = new Map();
       const ICON_SOURCE_MAP = Object.freeze({
         "accessibility-support-outline": {
-          primary: "https://static.wixstatic.com/shapes/f190ff_7eed619bcf3a42a094f4a0974ff9f264.svg",
-          backup: "https://i.ibb.co/0Vqzhkvj/accessibility-support-outline.jpg"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg"
         },
         "accessibility-support": {
-          primary: "https://static.wixstatic.com/shapes/f190ff_f6504a91a37e4dffb7f39c76006ea7bc.svg",
-          backup: "https://i.ibb.co/PvL33dMG/accessibility-support.jpg"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg"
         },
         "details-person": {
-          primary: "https://static.wixstatic.com/media/f190ff_d13860367e19415691b39b85f1654b31~mv2.png",
-          backup: "https://i.ibb.co/WbHDVnw/privacy-sheild-graident-02.png"
+          primary: "/assets/desktop-eoi-part-1-assets/details-icon.png",
+          backup: "/assets/desktop-eoi-part-1-assets/details-icon.png"
         },
         "privacy-shield": {
-          primary: "https://static.wixstatic.com/media/f190ff_bf643654b5c644f39e71cbf22c7d6a63~mv2.png",
-          backup: "https://i.ibb.co/WbHDVnw/privacy-sheild-graident-02.png"
+          primary: "/assets/desktop-eoi-part-1-assets/privacy-icon.png",
+          backup: "/assets/desktop-eoi-part-1-assets/privacy-icon.png"
         },
         "preferences-icon": {
-          primary: "https://static.wixstatic.com/media/f190ff_6c7575f77891403ea93e9b5f3d2cd481~mv2.png",
-          backup: "https://i.ibb.co/Xr3sSB0h/preferences-graident-01.png"
+          primary: "/assets/desktop-eoi-part-1-assets/preferences-icon.png",
+          backup: "/assets/desktop-eoi-part-1-assets/preferences-icon.png"
         },
         "availability-calendar": {
-          primary: "wix:image://v1/f190ff_90b1edf5634840239b6226e633c8a655~mv2.png/event-date-and-time-symbol-svgrepo-com.png#originWidth=800&originHeight=800",
-          backup: "https://i.ibb.co/rRvxnZHp/event-date-and-time-symbol-svgrepo-com.png"
+          primary: "/assets/desktop-eoi-part-1-assets/event-date-and-time-icon.png",
+          backup: "/assets/desktop-eoi-part-1-assets/event-date-and-time-icon.png"
         },
         "thank-you": {
-          primary: "https://static.wixstatic.com/shapes/f190ff_d3609fbdc4a040dc86ac52943903ac37.svg",
-          backup: "https://i.ibb.co/XZVByDgg/thankyou-icon.png"
+          primary: "/assets/desktop-eoi-part-1-assets/thank-you-icon.svg",
+          backup: "/assets/desktop-eoi-part-1-assets/thank-you-icon.svg"
         },
         "menu-gradient": {
-          primary: "wix:image://v1/f190ff_13af7084cf044d788591fd478fce6d1d~mv2.png/menu-icon-graident.png#originWidth=800&originHeight=800",
-          backup: "https://i.ibb.co/LhkK3KR3/menu-icon-graident.png"
+          primary: "/assets/desktop-eoi-part-1-assets/menu-icon.png",
+          backup: "/assets/desktop-eoi-part-1-assets/menu-icon.png"
         }
       });
       const BRAND_ICON_SOURCES = Object.freeze({
         animated: {
           primary: "https://static.wixstatic.com/media/f190ff_39dcaaaf6805463f9731fec4f8b7f5a0~mv2.gif",
-          backup: "https://i.ibb.co/20Vc05Xg/wobble-gif.gif"
+          backup: "/assets/desktop-eoi-part-1-assets/handwave-fallback-icon.png"
         },
         static: {
-          primary: "https://static.wixstatic.com/media/f190ff_43b866ebee26445aab34780da9b07548~mv2.png",
-          backup: "https://i.ibb.co/Ndgmj3h7/waving-hand-2d.png"
+          primary: "/assets/desktop-eoi-part-1-assets/handwave-fallback-icon.png",
+          backup: "/assets/desktop-eoi-part-1-assets/handwave-fallback-icon.png"
         }
       });
       const accessibilityTextSteps = Object.freeze(["smaller", "small", "default", "large", "larger"]);
@@ -95,6 +96,11 @@
       let accessibilityPrefs = { ...defaultAccessibilityPrefs };
       let brandAnimationTimer = null;
       let hasPlayedBrandAnimation = false;
+      const validationDescribedBy = new WeakMap();
+      const activeModalState = {
+        element: null,
+        trigger: null
+      };
 
       const loadImageSource = (src) =>
         new Promise((resolve, reject) => {
@@ -123,6 +129,148 @@
         return loadImageSource(sourceSet.primary)
           .then(() => sourceSet.primary)
           .catch(() => loadImageSource(sourceSet.backup).then(() => sourceSet.backup).catch(() => null));
+      };
+
+      const slugifyValidationKey = (value) =>
+        String(value || "validation")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+
+      const announceValidation = (message) => {
+        if (!validationAnnouncer) return;
+        validationAnnouncer.textContent = "";
+        if (!message) return;
+        window.requestAnimationFrame(() => {
+          validationAnnouncer.textContent = message;
+        });
+      };
+
+      const rememberValidationDescription = (element) => {
+        if (!element || validationDescribedBy.has(element)) return;
+        validationDescribedBy.set(element, element.getAttribute("aria-describedby") || "");
+      };
+
+      const setValidationDescription = (element, ids = []) => {
+        if (!element) return;
+        rememberValidationDescription(element);
+        const original = validationDescribedBy.get(element) || "";
+        const values = new Set(original.split(/\s+/).filter(Boolean));
+        ids.filter(Boolean).forEach((id) => values.add(id));
+        if (values.size) {
+          element.setAttribute("aria-describedby", Array.from(values).join(" "));
+        }
+        element.setAttribute("aria-invalid", "true");
+      };
+
+      const clearValidationDescription = (element) => {
+        if (!element) return;
+        if (validationDescribedBy.has(element)) {
+          const original = validationDescribedBy.get(element);
+          if (original) element.setAttribute("aria-describedby", original);
+          else element.removeAttribute("aria-describedby");
+          validationDescribedBy.delete(element);
+        } else {
+          element.removeAttribute("aria-describedby");
+        }
+        element.removeAttribute("aria-invalid");
+      };
+
+      const setValidationState = (target, message, describedByIds = []) => {
+        if (!target) return;
+        const nodes = [
+          target,
+          ...(typeof target.querySelectorAll === "function"
+            ? Array.from(target.querySelectorAll("input, select, textarea, button"))
+            : [])
+        ];
+        nodes.forEach((node) => setValidationDescription(node, describedByIds));
+        announceValidation(message);
+      };
+
+      const clearValidationState = (target) => {
+        if (!target) return;
+        const nodes = [
+          target,
+          ...(typeof target.querySelectorAll === "function"
+            ? Array.from(target.querySelectorAll("input, select, textarea, button"))
+            : [])
+        ];
+        nodes.forEach((node) => clearValidationDescription(node));
+      };
+
+      const getModalFocusableElements = (modal) =>
+        Array.from(modal?.querySelectorAll?.("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])") || [])
+          .filter((element) => !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true" && element.offsetParent !== null);
+
+      const openModal = (modal, trigger) => {
+        if (!modal) return;
+        activeModalState.element = modal;
+        activeModalState.trigger = trigger instanceof HTMLElement ? trigger : (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+        modal.hidden = false;
+        window.requestAnimationFrame(() => {
+          modal.classList.add("active");
+          (getModalFocusableElements(modal)[0] || modal).focus?.({ preventScroll: true });
+        });
+      };
+
+      const closeModal = (modal) => {
+        if (!modal) return;
+        modal.classList.remove("active");
+        const trigger = modal === activeModalState.element ? activeModalState.trigger : null;
+        if (modal === activeModalState.element) {
+          activeModalState.element = null;
+          activeModalState.trigger = null;
+        }
+        window.setTimeout(() => {
+          if (!modal.classList.contains("active")) {
+            modal.hidden = true;
+            if (trigger instanceof HTMLElement && trigger.isConnected) {
+              trigger.focus({ preventScroll: true });
+            }
+          }
+        }, 220);
+      };
+
+      const trapActiveModalFocus = (event) => {
+        const modal = activeModalState.element;
+        if (!modal || modal.hidden) return;
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          if (modal === menuWarningModal) closeMenuWarning();
+          else if (modal === emailWarningModal) closeEmailWarning();
+          return;
+        }
+
+        if (event.key !== "Tab") return;
+
+        const focusables = getModalFocusableElements(modal);
+        if (!focusables.length) {
+          event.preventDefault();
+          modal.focus?.({ preventScroll: true });
+          return;
+        }
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+        if (event.shiftKey && active === first) {
+          event.preventDefault();
+          last.focus({ preventScroll: true });
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault();
+          first.focus({ preventScroll: true });
+        }
+      };
+
+      const keepFocusInsideModal = (event) => {
+        const modal = activeModalState.element;
+        if (!modal || modal.hidden) return;
+        if (modal.contains(event.target)) return;
+        const [firstFocusable] = getModalFocusableElements(modal);
+        (firstFocusable || modal).focus?.({ preventScroll: true });
       };
 
       const showBrandFallback = () => {
@@ -403,13 +551,13 @@
 
       const closeMenuWarning = () => {
         if (!menuWarningModal) return;
-        menuWarningModal.hidden = true;
+        closeModal(menuWarningModal);
         pendingMenuDestinationUrl = "";
       };
 
       const closeEmailWarning = () => {
         if (!emailWarningModal) return;
-        emailWarningModal.hidden = true;
+        closeModal(emailWarningModal);
         pendingEmailAddress = "";
       };
 
@@ -418,8 +566,7 @@
         pendingEmailAddress = String(address || "").trim();
         emailWarningAddress.textContent = pendingEmailAddress;
         closeSiteMenu();
-        emailWarningModal.hidden = false;
-        emailWarningStay?.focus();
+        openModal(emailWarningModal, document.activeElement instanceof HTMLElement ? document.activeElement : null);
       };
 
       const copyTextToClipboard = async (text) => {
@@ -438,8 +585,7 @@
         pendingMenuDestinationUrl = url;
         menuWarningDestination.textContent = label || "this page";
         closeSiteMenu();
-        menuWarningModal.hidden = false;
-        menuWarningStay?.focus();
+        openModal(menuWarningModal, document.activeElement instanceof HTMLElement ? document.activeElement : null);
       };
 
       siteMenuButtons.forEach((button) => {
@@ -473,6 +619,9 @@
         closeEmailWarning();
         if (address) window.location.href = `mailto:${address}`;
       });
+
+      document.addEventListener("keydown", trapActiveModalFocus, true);
+      document.addEventListener("focusin", keepFocusInsideModal, true);
 
       document.querySelectorAll('a[href^="mailto:"]').forEach((link) => {
         link.addEventListener("click", (event) => {
@@ -605,7 +754,11 @@
         deck.querySelectorAll(".availability-grid.is-invalid").forEach((grid) => grid.classList.remove("is-invalid"));
         deck.querySelectorAll(".select-field.is-invalid").forEach((field) => field.classList.remove("is-invalid"));
         deck.querySelectorAll(".option-grid.is-invalid").forEach((grid) => grid.classList.remove("is-invalid"));
+        deck.querySelectorAll("[aria-invalid='true'], [data-validation-original-describedby]").forEach((node) => {
+          clearValidationDescription(node);
+        });
         deck.querySelectorAll(".option-group-error").forEach((error) => error.remove());
+        announceValidation("");
       };
 
       const isValidationBypassed = (input) => {
@@ -622,11 +775,20 @@
         return false;
       };
 
-      const markInvalid = (selector) => {
+      const markInvalid = (selector, message) => {
         const field = deck.querySelector(selector);
         if (!field) return;
-        const target = field.closest(".field") || field.closest(".availability-grid") || field;
+        const target = field.closest(".field") || field.closest(".availability-grid") || field.closest(".gradient-check") || field;
+        const errorNode = target.querySelector?.(".form-error") || (target.nextElementSibling?.classList?.contains("form-error") ? target.nextElementSibling : null);
+        const describedByIds = [];
+        if (errorNode) {
+          if (!errorNode.id) {
+            errorNode.id = `validation-${slugifyValidationKey(selector)}-error`;
+          }
+          describedByIds.push(errorNode.id);
+        }
         target.classList.add("is-invalid");
+        setValidationState(target, message, describedByIds);
         if (!firstInvalidTarget) firstInvalidTarget = target;
       };
 
@@ -642,7 +804,7 @@
         hasDirtyProgress = false;
       };
 
-      const markOptionGroupInvalid = (selector) => {
+      const markOptionGroupInvalid = (selector, message = "Please select a response") => {
         const button = deck.querySelector(selector);
         const grid = button?.closest?.(".option-grid");
         if (!grid) return;
@@ -650,9 +812,13 @@
         if (!grid.nextElementSibling?.classList?.contains("option-group-error")) {
           const error = document.createElement("div");
           error.className = "option-group-error";
-          error.textContent = "Please select a response";
+          error.id = `validation-${slugifyValidationKey(selector)}-error`;
+          error.textContent = message;
           grid.insertAdjacentElement("afterend", error);
         }
+        const errorNode = grid.nextElementSibling?.classList?.contains("option-group-error") ? grid.nextElementSibling : null;
+        const describedByIds = errorNode?.id ? [errorNode.id] : [];
+        setValidationState(grid, message, describedByIds);
         if (!firstInvalidTarget) firstInvalidTarget = grid;
       };
 
@@ -660,6 +826,7 @@
         const grid = button?.closest?.(".option-grid");
         if (!grid) return;
         grid.classList.remove("is-invalid");
+        clearValidationState(grid);
         const next = grid.nextElementSibling;
         if (next?.classList?.contains("option-group-error")) next.remove();
       };
@@ -696,7 +863,7 @@
         const pendingLookups = new Map();
         const callLog = [];
         const debounceMs = 300;
-        const timeoutMs = 8000;
+        const timeoutMs = 1200;
         const maxCallsPerMinute = 25;
 
         const normalize = (value) => String(value ?? "").replace(/\s+/g, " ").trim();
@@ -832,8 +999,8 @@
           if (lookup && street) setControlValue(street, lookup.value);
         };
         const primeLookupMode = (mode) => {
-          setLookupMode(mode, true, true);
-          setManualMode(mode, false, false);
+          setLookupMode(mode, true, false);
+          setManualMode(mode, true, true);
         };
         const revealManualFallback = (mode) => {
           const list = mode === "postal" ? postalList : residentialList;
@@ -848,7 +1015,7 @@
           getLookupWrapper(mode)?.scrollIntoView?.({ behavior: "smooth", block: "start" });
         };
         const showFilledAddressFieldsAfterSelection = (mode) => {
-          setLookupMode(mode, true, true);
+          setLookupMode(mode, true, false);
           setManualMode(mode, true, true);
         };
         const hideList = (list) => {
@@ -1065,7 +1232,10 @@
           if (!showOneToOne) {
             clearMatrixSelections('[data-matrix-group="one_to_one_morning"]');
             const grid = deck.querySelector('[aria-label="1:1 availability matrix"]');
-            if (grid) grid.classList.remove("is-invalid");
+            if (grid) {
+              grid.classList.remove("is-invalid");
+              clearValidationState(grid);
+            }
           }
         }
         if (fusionCard) {
@@ -1075,8 +1245,14 @@
             clearMatrixSelections('[data-matrix-group="fusion_friday"]');
             const grid = deck.querySelector('[aria-label="Fusion classes availability"]');
             const friday = deck.querySelector('[aria-label="Fusion Friday morning availability"]');
-            if (grid) grid.classList.remove("is-invalid");
-            if (friday) friday.classList.remove("is-invalid");
+            if (grid) {
+              grid.classList.remove("is-invalid");
+              clearValidationState(grid);
+            }
+            if (friday) {
+              friday.classList.remove("is-invalid");
+              clearValidationState(friday);
+            }
           }
         }
         updateSelectionSummaries();
@@ -1123,11 +1299,13 @@
             control.value = "";
             control.required = false;
             control.closest(".field")?.classList.remove("is-invalid");
+            clearValidationDescription(control);
             return;
           }
           if (!otherWrapper) control.required = true;
         });
         if (!showPostal) {
+          clearValidationState(postalFields);
           postalFields.querySelectorAll("[data-other-field]").forEach((field) => {
             field.style.display = "none";
           });
@@ -1147,8 +1325,10 @@
           });
           card.querySelectorAll(".option-grid.is-invalid").forEach((grid) => {
             grid.classList.remove("is-invalid");
+            clearValidationState(grid);
             if (grid.nextElementSibling?.classList?.contains("option-group-error")) grid.nextElementSibling.remove();
           });
+          clearValidationState(card);
         }
         updateAvailabilityVisibility();
       };
@@ -1157,14 +1337,35 @@
         clearErrors();
 
         if (index === 1) {
+          const ageEligibility = deck.querySelector('input[name="age_eligibility_confirmation"]:checked');
+          if (!hasValue(ageEligibility)) {
+            const target = ageEligibility?.closest(".gradient-check") || deck.querySelector("[data-age-eligibility-card]") || ageEligibility;
+            setValidationState(target, "Please confirm your age eligibility.");
+            target.classList.add("is-invalid");
+            firstInvalidTarget = target;
+            return false;
+          }
+          if (String(ageEligibility.value || "") === "UNDER_18") {
+            return true;
+          }
           const missing = Array.from(deck.querySelectorAll("[data-intro-ack]")).find((checkbox) => !hasValue(checkbox));
-          if (missing) firstInvalidTarget = missing.closest(".gradient-check") || missing;
+          if (missing) {
+            const target = missing.closest(".gradient-check") || missing;
+            setValidationState(target, "Please confirm both acknowledgements.");
+            target.classList.add("is-invalid");
+            firstInvalidTarget = target;
+          }
           return !missing;
         }
 
         if (index === 2) {
           const consent = deck.querySelector('input[name="privacy_consent"]');
-          if (!hasValue(consent)) firstInvalidTarget = consent?.closest(".gradient-check") || consent;
+          if (!hasValue(consent)) {
+            const target = consent?.closest(".gradient-check") || consent;
+            setValidationState(target, "Please confirm the privacy notice.");
+            target.classList.add("is-invalid");
+            firstInvalidTarget = target;
+          }
           return hasValue(consent);
         }
 
@@ -1188,79 +1389,79 @@
           let valid = true;
 
           if (!hasValue(firstName)) {
-            markInvalid('[data-field="first_name"]');
+            markInvalid('[data-field="first_name"]', "First name is required.");
             valid = false;
           }
           if (!hasValue(lastName)) {
-            markInvalid('[data-field="last_name"]');
+            markInvalid('[data-field="last_name"]', "Last name is required.");
             valid = false;
           }
           if (!hasValue(ageBand)) {
-            markInvalid('select[name="age_band"]');
+            markInvalid('select[name="age_band"]', "Age band is required.");
             valid = false;
           }
           if (!hasValue(sexAtBirth)) {
-            markInvalid('select[name="sex_at_birth"]');
+            markInvalid('select[name="sex_at_birth"]', "Please select a response.");
             valid = false;
           }
           if (!hasValue(resAddress)) {
-            markInvalid('input[name="res_address"]');
+            markInvalid('input[name="res_address"]', "Street address is required.");
             valid = false;
           }
           if (!hasValue(resSuburb)) {
-            markInvalid('select[name="res_suburb"]');
+            markInvalid('select[name="res_suburb"]', "Suburb is required.");
             valid = false;
           }
           if (!hasValue(resState)) {
-            markInvalid('select[name="res_state"]');
+            markInvalid('select[name="res_state"]', "State is required.");
             valid = false;
           }
           if (resSuburb && resSuburb.value.startsWith("Other") && !hasValue(resSuburbOther)) {
-            markInvalid('input[name="res_suburb_other"]');
+            markInvalid('input[name="res_suburb_other"]', "Please specify your suburb.");
             valid = false;
           }
           if (resState && resState.value.startsWith("Other") && !hasValue(resStateOther)) {
-            markInvalid('input[name="res_state_other"]');
+            markInvalid('input[name="res_state_other"]', "Please specify your state.");
             valid = false;
           }
           if (!hasValue(resPostcode)) {
-            markInvalid('input[name="res_postcode"]');
+            markInvalid('input[name="res_postcode"]', "Postcode is required.");
             valid = false;
           }
           if (sexAtBirth && sexAtBirth.value.startsWith("Another term") && !hasValue(sexAtBirthOther)) {
-            markInvalid('input[name="sex_at_birth_other"]');
+            markInvalid('input[name="sex_at_birth_other"]', "Please specify your response.");
             valid = false;
           }
           if (!postalSame) {
-            markOptionGroupInvalid('[data-choice-group="postal_same"]');
+            markOptionGroupInvalid('[data-choice-group="postal_same"]', "Please select a response.");
             valid = false;
           }
           if (!hasValue(email) || !email.checkValidity()) {
-            markInvalid('[data-field="email"]');
+            markInvalid('[data-field="email"]', "A valid email address is required.");
             valid = false;
           }
           if (!hasValue(confirmEmail) || !confirmEmail.checkValidity()) {
-            markInvalid('[data-field="confirm_email"]');
+            markInvalid('[data-field="confirm_email"]', "A valid email address is required.");
             valid = false;
           }
           const normalizedEmail = String(email?.value || "").trim().toLowerCase();
           const normalizedConfirmEmail = String(confirmEmail?.value || "").trim().toLowerCase();
           if (normalizedEmail && normalizedConfirmEmail && normalizedEmail !== normalizedConfirmEmail) {
-            markInvalid('[data-field="confirm_email"]');
+            markInvalid('[data-field="confirm_email"]', "Email addresses must match.");
             valid = false;
           }
           if (!hasValue(mobile) || !isValidMobile(mobile)) {
-            markInvalid('[data-field="mobile"]');
+            markInvalid('[data-field="mobile"]', "Enter a 10-digit mobile number.");
             valid = false;
           }
           if (!hasValue(confirmMobile) || !isValidMobile(confirmMobile)) {
-            markInvalid('[data-field="confirm_mobile"]');
+            markInvalid('[data-field="confirm_mobile"]', "Enter a 10-digit mobile number.");
             valid = false;
           }
           const normalizedMobile = String(mobile?.value || "").replace(/\D/g, "");
           const normalizedConfirmMobile = String(confirmMobile?.value || "").replace(/\D/g, "");
           if (normalizedMobile && normalizedConfirmMobile && normalizedMobile !== normalizedConfirmMobile) {
-            markInvalid('[data-field="confirm_mobile"]');
+            markInvalid('[data-field="confirm_mobile"]', "Mobile numbers must match.");
             valid = false;
           }
 
@@ -1274,27 +1475,27 @@
             const postalStateOther = deck.querySelector('input[name="postal_state_other"]');
 
             if (!hasValue(postalAddress)) {
-              markInvalid('input[name="postal_address"]');
+              markInvalid('input[name="postal_address"]', "Postal address is required.");
               valid = false;
             }
             if (!hasValue(postalSuburb)) {
-              markInvalid('select[name="postal_suburb"]');
+              markInvalid('select[name="postal_suburb"]', "Suburb is required.");
               valid = false;
             }
             if (!hasValue(postalState)) {
-              markInvalid('select[name="postal_state"]');
+              markInvalid('select[name="postal_state"]', "State is required.");
               valid = false;
             }
             if (postalSuburb && postalSuburb.value.startsWith("Other") && !hasValue(postalSuburbOther)) {
-              markInvalid('input[name="postal_suburb_other"]');
+              markInvalid('input[name="postal_suburb_other"]', "Please specify your postal suburb.");
               valid = false;
             }
             if (postalState && postalState.value.startsWith("Other") && !hasValue(postalStateOther)) {
-              markInvalid('input[name="postal_state_other"]');
+              markInvalid('input[name="postal_state_other"]', "Please specify your postal state.");
               valid = false;
             }
             if (!hasValue(postalPostcode)) {
-              markInvalid('input[name="postal_postcode"]');
+              markInvalid('input[name="postal_postcode"]', "Postcode is required.");
               valid = false;
             }
           }
@@ -1310,15 +1511,15 @@
           const secondPreferenceRequired = secondPreferenceCard && secondPreferenceCard.style.display !== "none";
           let valid = true;
           if (!trainingType) {
-            markOptionGroupInvalid('[data-option-group="training-type"]');
+            markOptionGroupInvalid('[data-option-group="training-type"]', "Please select a training type.");
             valid = false;
           }
           if (secondPreferenceRequired && !secondPreference) {
-            markOptionGroupInvalid('[data-choice-group="second_preference"]');
+            markOptionGroupInvalid('[data-choice-group="second_preference"]', "Please select a response.");
             valid = false;
           }
           if (!workShift) {
-            markOptionGroupInvalid('[data-choice-group="work_shift"]');
+            markOptionGroupInvalid('[data-choice-group="work_shift"]', "Please select a response.");
             valid = false;
           }
           return valid;
@@ -1332,6 +1533,7 @@
           });
           if (firstVisibleGrid) {
             firstVisibleGrid.classList.add("is-invalid");
+            setValidationState(firstVisibleGrid, "Please select at least one availability slot.");
             firstInvalidTarget = firstVisibleGrid;
           }
           return false;
@@ -1381,7 +1583,10 @@
         button.setAttribute("aria-pressed", button.classList.contains("is-selected") ? "true" : "false");
         syncAvailabilitySlotLabel(button);
         const grid = button.closest(".availability-grid");
-        if (grid) grid.classList.remove("is-invalid");
+        if (grid) {
+          grid.classList.remove("is-invalid");
+          clearValidationState(grid);
+        }
         updateSelectionSummaries();
       };
 
@@ -1401,6 +1606,10 @@
 
       deck.querySelectorAll("[data-action='next']").forEach((button) => {
         button.addEventListener("click", () => {
+          if (current === 1 && getAgeEligibilityValue() === "UNDER_18") {
+            window.location.assign("https://www.gymfusion.com.au/eoi");
+            return;
+          }
           markProgressDirty();
           if (!validateStep(current)) {
             scrollToFirstInvalid();
@@ -1426,8 +1635,10 @@
           if (control.type === "checkbox" || control.type === "radio") control.checked = false;
           else if (control.tagName === "SELECT") control.selectedIndex = 0;
           else control.value = "";
+          clearValidationDescription(control);
         });
         deck.querySelectorAll(".is-selected, .is-invalid").forEach((item) => item.classList.remove("is-selected", "is-invalid"));
+        deck.querySelectorAll("[aria-invalid='true'], [data-validation-original-describedby]").forEach((node) => clearValidationDescription(node));
         deck.querySelectorAll("[aria-pressed='true']").forEach((item) => item.setAttribute("aria-pressed", "false"));
         deck.querySelectorAll("[data-matrix-group]").forEach((button) => syncAvailabilitySlotLabel(button));
         updateIntroConfirm();
@@ -1436,6 +1647,8 @@
         updatePostalVisibility("Yes");
         updateSecondPreferenceVisibility();
         updateSelectionSummaries();
+        sessionStorage.removeItem("gymfusion_eoi_part1_submission_id");
+        delete window.__GYMFUSION_EOI_PART1_SUBMISSION_ID__;
         maxUnlockedProgressStep = 0;
         maxUnlockedSlideIndex = 0;
         recompletedProgressSteps.clear();
@@ -1507,6 +1720,7 @@
           markProgressDirty();
           const field = control.closest(".field");
           if (field) field.classList.remove("is-invalid");
+          clearValidationState(field || control.closest(".option-grid") || control.closest(".availability-grid") || control);
         });
         control.addEventListener("change", () => {
           markProgressDirty();
@@ -1515,11 +1729,15 @@
           if (control.classList.contains("select-field")) {
             control.classList.remove("is-invalid");
           }
+          clearValidationState(field || control.closest(".option-grid") || control.closest(".availability-grid") || control);
         });
       });
 
       const introCheckboxes = Array.from(deck.querySelectorAll("[data-intro-ack]"));
+      const ageEligibilityInputs = Array.from(deck.querySelectorAll('input[name="age_eligibility_confirmation"]'));
       const introConfirm = deck.querySelector("[data-intro-confirm]");
+      const under18HandoffActions = deck.querySelector("[data-under18-handoff-actions]");
+      const under18HandoffButton = deck.querySelector("[data-under18-handoff]");
       const privacyCheckbox = deck.querySelector('input[name="privacy_consent"]');
       const privacyConfirm = deck.querySelector("[data-privacy-confirm]");
       const autoScrolledFooters = new Set();
@@ -1561,12 +1779,23 @@
         });
       };
 
+      const getAgeEligibilityValue = () => String(deck.querySelector('input[name="age_eligibility_confirmation"]:checked')?.value || "");
       const updateIntroConfirm = () => {
         if (!introCheckboxes.length || !introConfirm) return;
-        const isVisible = introCheckboxes.every((checkbox) => checkbox.checked);
-        introConfirm.classList.toggle("is-hidden", !isVisible);
-        introConfirm.closest(".footer-actions")?.classList.toggle("is-revealed", isVisible);
-        if (isVisible) {
+        const ageEligibility = getAgeEligibilityValue();
+        const isAdult = ageEligibility === "18_OR_OVER";
+        const isUnder18 = ageEligibility === "UNDER_18";
+        const adultReady = isAdult && introCheckboxes.every((checkbox) => checkbox.checked);
+        introConfirm.classList.toggle("is-hidden", !adultReady);
+        introConfirm.closest(".footer-actions")?.classList.toggle("is-revealed", adultReady);
+        if (under18HandoffActions) {
+          under18HandoffActions.classList.toggle("is-hidden", !isUnder18);
+          under18HandoffActions.classList.toggle("is-revealed", isUnder18);
+        }
+        if (under18HandoffButton) {
+          under18HandoffButton.disabled = !isUnder18;
+        }
+        if (adultReady || isUnder18) {
           scrollCurrentPageToFooterOnce("intro");
         }
       };
@@ -1598,7 +1827,13 @@
         const input = field.querySelector("input");
         if (input) {
           input.required = show;
-          if (!show) input.value = "";
+          if (!show) {
+            input.value = "";
+            clearValidationDescription(input);
+          }
+        }
+        if (!show) {
+          clearValidationState(field);
         }
       };
       const pronounsSelect = deck.querySelector('select[name="pronouns"]');
@@ -1609,14 +1844,30 @@
         pronounsOtherField.style.display = show ? "grid" : "none";
         if (!show) {
           const input = pronounsOtherField.querySelector('input[name="pronouns_other"]');
-          if (input) input.value = "";
+          if (input) {
+            input.value = "";
+            clearValidationDescription(input);
+          }
+          clearValidationState(pronounsOtherField);
         }
       };
 
-      const part1SubmitEndpoint = window.EOI_PART1_SUBMIT_URL || (window.location.protocol === "file:" ? "" : `${window.location.origin}/_functions/eoi_part1_submit`);
+      const part1SubmitEndpoint = window.EOI_PART1_SUBMIT_URL || (window.location.protocol === "file:" ? "" : "https://www.gymfusion.com.au/_functions/eoi_part1_submit");
       const buildSubmissionId = () => {
         if (window.crypto?.randomUUID) return window.crypto.randomUUID();
         return `submission_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      };
+      const getOrCreateSubmissionId = () => {
+        const key = "gymfusion_eoi_part1_submission_id";
+        const existing = String(window.__GYMFUSION_EOI_PART1_SUBMISSION_ID__ || sessionStorage.getItem(key) || "").trim();
+        if (existing) {
+          window.__GYMFUSION_EOI_PART1_SUBMISSION_ID__ = existing;
+          return existing;
+        }
+        const next = buildSubmissionId();
+        window.__GYMFUSION_EOI_PART1_SUBMISSION_ID__ = next;
+        sessionStorage.setItem(key, next);
+        return next;
       };
       const getPersistedEpisodeId = () =>
         String(window.__GYMFUSION_EOI_EPISODE_ID__ || sessionStorage.getItem("gymfusion_eoi_episode_id") || contextParams.get("episode_id") || "").trim();
@@ -1632,7 +1883,10 @@
             fields[name] = Boolean(control.checked);
             return;
           }
-          if (control.type === "radio") return;
+          if (control.type === "radio") {
+            if (control.checked) fields[name] = String(control.value || "").trim();
+            return;
+          }
           fields[name] = String(control.value || "").trim();
         });
 
@@ -1654,20 +1908,13 @@
         };
 
         return {
-          submissionId: buildSubmissionId(),
+          submissionId: getOrCreateSubmissionId(),
           formId: "eoi_part1",
           submittedAt: new Date().toISOString(),
-          wixMemberId: null,
-          episodeId: getPersistedEpisodeId() || null,
           email: fields.email || "",
           fields,
           selections,
           availability,
-          rawPayload: {
-            fields,
-            selections,
-            availability,
-          },
         };
       };
 
@@ -1682,7 +1929,7 @@
           body: JSON.stringify(payload),
         });
         const json = await response.json().catch(() => ({}));
-        if (!response.ok || json?.ok === false) {
+        if (!response.ok || json?.ok !== true) {
           throw new Error(json?.error || `Submission failed (${response.status})`);
         }
         if (json?.episodeId) {
@@ -1696,6 +1943,10 @@
       const finalSubmitButton = deck.querySelector("[data-availability-submit]");
       if (finalSubmitButton) {
         finalSubmitButton.addEventListener("click", async () => {
+          if (current === 1 && getAgeEligibilityValue() === "UNDER_18") {
+            window.location.assign("https://www.gymfusion.com.au/eoi");
+            return;
+          }
           if (!validateStep(current)) {
             scrollToFirstInvalid();
             return;
@@ -1716,6 +1967,12 @@
           }
         });
       }
+
+      ageEligibilityInputs.forEach((input) => input.addEventListener("change", updateIntroConfirm));
+      under18HandoffButton?.addEventListener("click", () => {
+        window.location.assign("https://www.gymfusion.com.au/eoi");
+      });
+
       introCheckboxes.forEach((checkbox) => checkbox.addEventListener("change", updateIntroConfirm));
       if (privacyCheckbox) {
         privacyCheckbox.addEventListener("change", updatePrivacyConfirm);
@@ -1745,8 +2002,8 @@
 
 /* WixForge v9 cover image automatic fallback */
 (function () {
-  var primarySrc = "wix:image://v1/f190ff_5920c695956e45eba273f3c6af95fcf1~mv2.png/give-your-body-a-chance-hero.png#originWidth=1672&originHeight=941";
-  var fallbackSrc = "https://i.ibb.co/S7Pm909Y/give-your-body-a-chance-hero.png";
+  var primarySrc = "/assets/desktop-eoi-part-1-assets/give-your-body-a-chance-hero.png";
+  var fallbackSrc = "/assets/desktop-eoi-part-1-assets/give-your-body-a-chance-hero.png";
 
   function useFallback(img) {
     if (!img || img.dataset.fallbackApplied === "true") return;

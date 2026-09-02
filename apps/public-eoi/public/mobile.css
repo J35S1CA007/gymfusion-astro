@@ -39,7 +39,7 @@
       --slides: 7;
       --cta-gradient: linear-gradient(111deg, rgba(157, 10, 255, 1) 0%, rgba(222, 7, 150, 1) 31%, rgba(253, 29, 29, 1) 68%, rgba(252, 158, 25, 1) 100%);
       --pill-border-gradient: linear-gradient(111deg, #9a20fa 0%, #9a20fa 22%, rgba(222, 7, 150, 1) 38%, rgba(253, 29, 29, 1) 68%, rgba(252, 158, 25, 1) 100%);
-      --menu-icon-url: url("https://i.ibb.co/LhkK3KR3/menu-icon-graident.png");
+      --menu-icon-url: url("/assets/mobile-eoi-part-1-form-assets/icons/menu-icon.png");
     }
 
     * {
@@ -215,8 +215,8 @@
 
     .a11y-chip,
     .a11y-reset {
-      min-height: 36px;
-      padding: 7px 10px;
+      min-height: 44px;
+      padding: 10px 12px;
       border: 1px solid transparent;
       border-radius: 18px;
       background:
@@ -240,7 +240,7 @@
       align-items: center;
       gap: 10px;
       min-width: 0;
-      padding-right: 10px;
+      padding-right: 12px;
     }
 
     .a11y-chip[data-a11y-toggle]::after {
@@ -456,6 +456,19 @@
 
     body[data-a11y-motion="reduced"] .cyber-cta {
       animation: cta-breathe 2.2s ease-in-out infinite !important;
+    }
+
+    .page .accessibility-panel .a11y-chip,
+    .page .accessibility-panel .a11y-reset,
+    .page .accessibility-panel [data-a11y-toggle] {
+      height: auto !important;
+      min-height: 44px !important;
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
+    }
+
+    .page .accessibility-panel [data-a11y-toggle] {
+      grid-template-columns: minmax(0, 1fr) 44px !important;
     }
 
     .deck {
@@ -3383,17 +3396,17 @@
 
     .a11y-chip[data-a11y-toggle] {
       width: 100%;
-      min-height: 34px !important;
-      padding: 6px 9px !important;
+      min-height: 44px !important;
+      padding: 8px 10px !important;
       border-radius: 999px !important;
       text-align: left;
-      grid-template-columns: minmax(0, 1fr) 34px !important;
+      grid-template-columns: minmax(0, 1fr) 44px !important;
       font-size: min(12.8px, 16.08px) !important;
     }
 
     .a11y-chip[data-a11y-toggle]::after {
-      width: 34px !important;
-      height: 18px !important;
+      width: 44px !important;
+      height: 22px !important;
       border-color: rgba(255, 255, 255, 0.22) !important;
       background:
         radial-gradient(circle at 9px 50%, #f6fbff 0 5px, transparent 6px),
@@ -3424,8 +3437,8 @@
     }
 
     .a11y-reset {
-      min-height: 34px !important;
-      padding: 6px 9px !important;
+      min-height: 44px !important;
+      padding: 8px 10px !important;
     }
 
     .page[data-deck-state="form"] .accessibility-panel {
@@ -3579,7 +3592,7 @@
 
     .a11y-chip[data-a11y-toggle] {
       width: 100%;
-      min-height: 38px;
+      min-height: 44px;
       border-radius: 999px;
     }
 
@@ -5634,4 +5647,21 @@
     body[data-a11y-contrast="high"] .page .preview-copy,
     body[data-a11y-contrast="high"] .page .selection-summary {
       color: #ffffff !important;
+    }
+
+    /* Keep form-field rhythm consistent without altering the mobile layout. */
+    .content-page .field-grid,
+    .step-page[aria-label="Personal details"] .field-grid,
+    .step-page[aria-label="Personal details"] .field-grid[style] {
+      row-gap: 14px !important;
+    }
+
+    .content-page .field,
+    .step-page[aria-label="Personal details"] .field {
+      row-gap: 8px !important;
+    }
+
+    .content-page .field-grid > .field,
+    .step-page[aria-label="Personal details"] .field-grid > .field {
+      margin-top: 0 !important;
     }

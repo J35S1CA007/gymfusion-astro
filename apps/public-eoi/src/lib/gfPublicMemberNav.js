@@ -924,8 +924,11 @@ export function registerPublicMemberNavElement() {
       this.attachShadow({ mode: "open" });
       this._memberState = parseMemberState(null);
       this._dropdownOpen = false;
+      this._restoreToggleFocus = false;
+      this._suppressFocusOut = false;
       this._viewport = resolveViewport(window);
       this._onClick = this._onClick.bind(this);
+      this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
       this._onDocPointerDown = this._onDocPointerDown.bind(this);
       this._onKeyDown = this._onKeyDown.bind(this);
       this._onFocusOut = this._onFocusOut.bind(this);
@@ -941,6 +944,7 @@ export function registerPublicMemberNavElement() {
       this._render();
       this.addEventListener("keydown", this._onKeyDown);
       this.addEventListener("focusout", this._onFocusOut);
+      document.addEventListener("keydown", this._onDocumentKeyDown, true);
       window.addEventListener("pointerdown", this._onDocPointerDown, true);
       window.addEventListener("resize", this._onResize);
     }
@@ -949,6 +953,7 @@ export function registerPublicMemberNavElement() {
       this._connected = false;
       this.removeEventListener("keydown", this._onKeyDown);
       this.removeEventListener("focusout", this._onFocusOut);
+      document.removeEventListener("keydown", this._onDocumentKeyDown, true);
       window.removeEventListener("pointerdown", this._onDocPointerDown, true);
       window.removeEventListener("resize", this._onResize);
     }
@@ -975,6 +980,8 @@ export function registerPublicMemberNavElement() {
     }
 
     _render() {
+      const restoreToggleFocus = this._restoreToggleFocus;
+      this._restoreToggleFocus = false;
       this.shadowRoot.innerHTML = buildMemberNavMarkup({
         ...this._memberState,
         dropdownOpen: this._dropdownOpen,
@@ -983,6 +990,25 @@ export function registerPublicMemberNavElement() {
         window,
       });
       this._bindActionListeners();
+      this._syncDropdownPresentation(this._dropdownOpen);
+      if (restoreToggleFocus) {
+        this.shadowRoot.querySelector('[data-action="toggle-menu"]')?.focus({ preventScroll: true });
+      }
+    }
+
+    _syncDropdownPresentation(isOpen) {
+      const panel = this.shadowRoot.querySelector('.gf-nav__panel');
+      const toggle = this.shadowRoot.querySelector('[data-action="toggle-menu"]');
+      const dropdown = this.shadowRoot.querySelector('.gf-nav__dropdown');
+
+      panel?.classList.toggle('is-open', isOpen);
+      if (toggle instanceof HTMLElement) {
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        toggle.setAttribute('aria-label', isOpen ? 'Close member menu' : 'Open member menu');
+      }
+      if (dropdown instanceof HTMLElement) {
+        dropdown.hidden = !isOpen;
+      }
     }
 
     _bindActionListeners() {
@@ -1006,9 +1032,31 @@ export function registerPublicMemberNavElement() {
       }
 
       this._dropdownOpen = false;
+      this._syncDropdownPresentation(false);
       this.setAttribute(STATE_ATTRIBUTE, JSON.stringify({
         ...this._memberState,
         dropdownOpen: false,
+      }));
+    }
+
+    _toggleDropdown() {
+      if (!this._memberState.authenticated) {
+        return;
+      }
+
+      this._restoreToggleFocus = true;
+      const nextOpen = !this._dropdownOpen;
+      this._dropdownOpen = nextOpen;
+      if (nextOpen) {
+        this._suppressFocusOut = true;
+        queueMicrotask(() => {
+          this._suppressFocusOut = false;
+        });
+      }
+      this._syncDropdownPresentation(this._dropdownOpen);
+      this.setAttribute(STATE_ATTRIBUTE, JSON.stringify({
+        ...this._memberState,
+        dropdownOpen: this._dropdownOpen,
       }));
     }
 
@@ -1028,15 +1076,7 @@ export function registerPublicMemberNavElement() {
       }
 
       if (action === "toggle-menu") {
-        if (!this._memberState.authenticated) {
-          return;
-        }
-
-        this._dropdownOpen = !this._dropdownOpen;
-        this.setAttribute(STATE_ATTRIBUTE, JSON.stringify({
-          ...this._memberState,
-          dropdownOpen: this._dropdownOpen,
-        }));
+        this._toggleDropdown();
         return;
       }
 
@@ -1059,15 +1099,49 @@ export function registerPublicMemberNavElement() {
       this._closeDropdown();
     }
 
+    _onDocumentKeyDown(event) {
+      if (document.activeElement !== this) {
+        return;
+      }
+
+      const activeAction = this.shadowRoot?.activeElement?.getAttribute?.("data-action");
+      if (activeAction !== "toggle-menu") {
+        return;
+      }
+
+      if (event?.key === "Enter" || event?.key === " ") {
+        event.preventDefault();
+        event.stopPropagation();
+        this._toggleDropdown();
+        return;
+      }
+
+      if (event?.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        this._restoreToggleFocus = true;
+        this._closeDropdown();
+      }
+    }
+
     _onKeyDown(event) {
       if (event?.key === "Escape") {
+        this._restoreToggleFocus = true;
         this._closeDropdown();
       }
     }
 
     _onFocusOut(event) {
+      if (this._suppressFocusOut) {
+        return;
+      }
+
       const nextTarget = event?.relatedTarget;
-      if (nextTarget && this.contains(nextTarget)) {
+      if (nextTarget && (this.contains(nextTarget) || this.shadowRoot?.contains(nextTarget))) {
+        return;
+      }
+
+      if (document.activeElement === this || this.shadowRoot?.contains(document.activeElement)) {
         return;
       }
 

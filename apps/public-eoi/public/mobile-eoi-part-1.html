@@ -58,6 +58,7 @@ Do not modify protected architecture without explicit instruction.
 <p class="a11y-note">These settings only change this form and only save your display preferences. They do not save form answers.</p>
 <button aria-label="Reset accessibility Settings" class="a11y-reset" id="a11y-reset" type="button">Reset Settings</button>
 </div>
+<div aria-atomic="true" aria-live="polite" class="sr-only" id="validation-announcer"></div>
 </div>
 <div class="deck-track">
 <section aria-label="Start screen" class="deck-page cover-page">
@@ -219,6 +220,41 @@ Do not modify protected architecture without explicit instruction.
 <span class="line-break">of next steps!</span>
 </p>
 </article>
+<article class="card" data-age-eligibility-card="">
+<div class="eyebrow">Age eligibility</div>
+<h3>Are you 18 years or older? <span class="required">*</span></h3>
+<div class="helper-copy" style="margin-top: 14px;">
+                    If you are 18 or over, you can continue in this public EOI flow. If you are under 18, you will be routed to the live Wix intake instead.
+                  </div>
+<label class="gradient-check" style="cursor: pointer;">
+<div class="check-copy">
+                      I confirm I am 18 years or older
+                    </div>
+<div class="yes-no">
+<span aria-hidden="true" class="gradient-check-box">
+<input data-age-eligibility-choice="" name="age_eligibility_confirmation" required="" type="radio" value="18_OR_OVER"/>
+<span class="check-mark"></span>
+</span>
+</div>
+</label>
+<label class="gradient-check" style="cursor: pointer;">
+<div class="check-copy">
+                      I am under 18 years old
+                    </div>
+<div class="yes-no">
+<span aria-hidden="true" class="gradient-check-box">
+<input data-age-eligibility-choice="" name="age_eligibility_confirmation" required="" type="radio" value="UNDER_18"/>
+<span class="check-mark"></span>
+</span>
+</div>
+</label>
+<p class="helper-copy is-hidden" data-under18-handoff-copy="">
+                    Under 18? Continue on the live Wix form.
+                  </p>
+<div class="footer-actions intro-actions is-hidden" data-under18-handoff-actions="">
+<button class="btn secondary" data-under18-handoff="" type="button">Continue on Wix</button>
+</div>
+</article>
 <div aria-label="Introductory information" class="info-tiles">
 <article class="card info-tile tile-purple">
 <h4>ABOUT THIS APPLICATION</h4>
@@ -235,7 +271,7 @@ Do not modify protected architecture without explicit instruction.
 <p>Upon submission of this form, you will receive an email inviting you to activate and set up your GYMFUSION Portal account.</p>
 <p><strong>Inside the Portal:</strong></p>
 <ul>
-<li>Access and complete Part 2, the remaining three Expression of Interest forms.</li>
+<li>Access and complete Parts 2, 3 and 4, the remaining Expression of Interest forms.</li>
 <li>All remaining forms must be completed within <strong>14 days</strong> of submitting Part 1 (this form).</li>
 <li>
                         The process is delivered in structured, manageable stages to reduce the need to complete a lengthy assessment in one sitting.
@@ -404,7 +440,7 @@ Do not modify protected architecture without explicit instruction.
                     All such disclosures are limited to what is reasonably necessary for the administration and delivery of our services and are managed in accordance with applicable privacy and data protection obligations.
                   </div>
 <div class="helper-copy">
-                    Some of these service providers may be located overseas. Where this occurs, GYMFUSION takes reasonable steps to ensure that overseas recipients handle personal information in a manner consistent with Australian privacy laws. Further details are available in our <a class="notice-link" href="https://gymfusion.com.au/privacy" rel="noreferrer" target="_blank">Privacy Policy</a>.
+                    Some of these service providers may be located overseas. Where this occurs, GYMFUSION takes reasonable steps to ensure that overseas recipients handle personal information in a manner consistent with Australian privacy laws. Further details are available in our <a class="notice-link" href="https://www.gymfusion.com.au/privacy-policy" rel="noreferrer" target="_blank">Privacy Policy</a>.
                   </div>
 <h3 class="section-title" style="margin-top: 20px;">Data Security and Handling of Health Information</h3>
 <div class="helper-copy" style="margin-top: 0;">
@@ -576,7 +612,7 @@ Do not modify protected architecture without explicit instruction.
 <option>35–44</option>
 <option>45–54</option>
 <option>55–64</option>
-<option>64+</option>
+<option>65+</option>
 </select>
 <h3 class="section-title" style="margin-top: 18px;">What is your sex recorded as at birth? <span class="required">*</span></h3>
 <div class="helper-copy">
@@ -604,7 +640,7 @@ Do not modify protected architecture without explicit instruction.
 <div class="field address-lookup-field" style="grid-column: 1 / -1;">
 <label>Address <span class="required">*</span></label>
 <div class="field-box address-lookup-box">
-<input aria-autocomplete="list" aria-controls="address-lookup-results" autocomplete="off" class="field-input" id="address-lookup" name="address_lookup" placeholder="742 Evergreen Terrace" required="" type="text"/>
+<input aria-autocomplete="list" aria-controls="address-lookup-results" autocomplete="off" class="field-input" id="address-lookup" name="address_lookup" placeholder="742 Evergreen Terrace" type="text"/>
 <ul class="address-lookup-dropdown" hidden="" id="address-lookup-results" role="listbox"></ul>
 </div>
 </div>
@@ -665,7 +701,7 @@ Do not modify protected architecture without explicit instruction.
 </div>
 <div class="field" data-address-manual="residential" style="display: none;">
 <label>Post Code <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" id="form-postcode" inputmode="numeric" name="res_postcode" type="number"/></div>
+<div class="field-box"><input class="field-input" id="form-postcode" inputmode="numeric" maxlength="4" name="res_postcode" pattern="[0-9]{4}" type="text"/></div>
 </div>
 </div>
 <h3 class="section-title" style="margin-top: 18px;">Is your postal address the same as your residential address? <span class="required">*</span></h3>
@@ -678,7 +714,7 @@ Do not modify protected architecture without explicit instruction.
 <div class="field address-lookup-field" style="grid-column: 1 / -1;">
 <label>Address <span class="required">*</span></label>
 <div class="field-box address-lookup-box">
-<input aria-autocomplete="list" aria-controls="postal-address-lookup-results" autocomplete="off" class="field-input" id="postal-address-lookup" name="postal_address_lookup" placeholder="P.O. Box 9911" required="" type="text"/>
+<input aria-autocomplete="list" aria-controls="postal-address-lookup-results" autocomplete="off" class="field-input" id="postal-address-lookup" name="postal_address_lookup" placeholder="P.O. Box 9911" type="text"/>
 <ul class="address-lookup-dropdown" hidden="" id="postal-address-lookup-results" role="listbox"></ul>
 </div>
 </div>
@@ -739,7 +775,7 @@ Do not modify protected architecture without explicit instruction.
 </div>
 <div class="field" data-address-manual="postal" style="display: none;">
 <label>Post Code <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" id="form-postal-postcode" inputmode="numeric" name="postal_postcode" type="number"/></div>
+<div class="field-box"><input class="field-input" id="form-postal-postcode" inputmode="numeric" maxlength="4" name="postal_postcode" pattern="[0-9]{4}" type="text"/></div>
 </div>
 </div>
 </div>

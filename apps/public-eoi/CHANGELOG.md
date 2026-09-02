@@ -1,6 +1,8 @@
 # Change Log
 
 ## Unreleased
+- Repaired the active Public EOI member login/nav routing for desktop and mobile, split login and portal destinations, and refreshed the active EOI copy, age band, privacy link, and local asset fallbacks.
+- Normalized field-row and label-to-control spacing across the mobile and desktop Public EOI forms without changing their responsive layouts.
 - Reset mobile and desktop accessibility settings on refresh, defaulted reduced motion to off, paused desktop marquees when enabled, and repaired desktop contrast, spacing, dyslexia font, and bounded text scaling.
 - Switched the mobile dyslexia accessibility font to the `open-dyslexic` npm package served by jsDelivr without changing desktop behavior.
 - Widened and solidified the mobile accessibility panel, restored five text-size levels, and corrected its contrast, spacing, and reduced-motion controls without changing desktop behavior.

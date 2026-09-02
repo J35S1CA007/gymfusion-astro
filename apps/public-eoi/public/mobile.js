@@ -32,44 +32,46 @@
       const emailWarningStay = document.querySelector("[data-email-warning-stay]");
       const emailWarningCopy = document.querySelector("[data-email-warning-copy]");
       const emailWarningOpen = document.querySelector("[data-email-warning-open]");
+      const coverGalleryFrame = document.querySelector('.cover-page iframe.carousel');
+      const validationAnnouncer = document.getElementById("validation-announcer");
       const iconResolutionCache = new Map();
       const ICON_SOURCE_MAP = Object.freeze({
         "accessibility-support-outline": {
-          primary: "./GYMFUSION_EOI_Part_1_Form_Mobile_files/accessibility-button-icon.svg",
-          backup: "https://static.wixstatic.com/shapes/f190ff_7eed619bcf3a42a094f4a0974ff9f264.svg"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg"
         },
         "accessibility-support": {
-          primary: "https://static.wixstatic.com/shapes/f190ff_f6504a91a37e4dffb7f39c76006ea7bc.svg",
-          backup: "https://i.ibb.co/PvL33dMG/accessibility-support.jpg"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg"
         },
         "details-person": {
-          primary: "https://static.wixstatic.com/media/f190ff_d13860367e19415691b39b85f1654b31~mv2.png",
-          backup: "https://i.ibb.co/WbHDVnw/privacy-sheild-graident-02.png"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/details-icon.png",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/details-icon.png"
         },
         "privacy-shield": {
-          primary: "https://static.wixstatic.com/media/f190ff_bf643654b5c644f39e71cbf22c7d6a63~mv2.png",
-          backup: "https://i.ibb.co/WbHDVnw/privacy-sheild-graident-02.png"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/privacy-icon.png",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/privacy-icon.png"
         },
         "preferences-icon": {
-          primary: "https://static.wixstatic.com/media/f190ff_6c7575f77891403ea93e9b5f3d2cd481~mv2.png",
-          backup: "https://i.ibb.co/Xr3sSB0h/preferences-graident-01.png"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/preferences-icon.png",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/preferences-icon.png"
         },
         "availability-calendar": {
-          primary: "https://i.ibb.co/rRvxnZHp/event-date-and-time-symbol-svgrepo-com.png",
-          backup: "https://i.ibb.co/rRvxnZHp/event-date-and-time-symbol-svgrepo-com.png"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/event-date-and-time-symbol-svgrepo-com.png",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/event-date-and-time-symbol-svgrepo-com.png"
         },
         "thank-you": {
-          primary: "https://static.wixstatic.com/shapes/f190ff_d3609fbdc4a040dc86ac52943903ac37.svg",
-          backup: "https://i.ibb.co/XZVByDgg/thankyou-icon.png"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/thank-you-icon.svg",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/thank-you-icon.svg"
         },
         "menu-gradient": {
-          primary: "https://i.ibb.co/LhkK3KR3/menu-icon-graident.png",
-          backup: "https://i.ibb.co/LhkK3KR3/menu-icon-graident.png"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/menu-icon.png",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/menu-icon.png"
         }
       });
       const WELCOME_GIF_URL = "https://static.wixstatic.com/media/f190ff_39dcaaaf6805463f9731fec4f8b7f5a0~mv2.gif";
-      const WELCOME_GIF_FALLBACK_URL = "https://i.ibb.co/20Vc05Xg/wobble-gif.gif";
-      const WELCOME_STATIC_URL = "https://i.ibb.co/Ndgmj3h7/waving-hand-2d.png";
+      const WELCOME_GIF_FALLBACK_URL = "/assets/mobile-eoi-part-1-form-assets/icons/handwave-fallback-icon.png";
+      const WELCOME_STATIC_URL = "/assets/mobile-eoi-part-1-form-assets/icons/handwave-fallback-icon.png";
       const accessibilityTextSteps = Object.freeze(["much-smaller", "smaller", "default", "larger", "much-larger"]);
       const accessibilityTextLabels = Object.freeze({
         "much-smaller": "Much smaller",
@@ -98,8 +100,155 @@
       let hasDirtyProgress = false;
       let submissionCompleted = false;
       const originalMenuAnchors = new Map();
+      const validationDescribedBy = new WeakMap();
+      const activeModalState = {
+        element: null,
+        trigger: null
+      };
 
       const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+      const slugifyValidationKey = (value) =>
+        String(value || "validation")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+
+      const announceValidation = (message) => {
+        if (!validationAnnouncer) return;
+        validationAnnouncer.textContent = "";
+        if (!message) return;
+        window.requestAnimationFrame(() => {
+          validationAnnouncer.textContent = message;
+        });
+      };
+
+      const rememberValidationDescription = (element) => {
+        if (!element || validationDescribedBy.has(element)) return;
+        validationDescribedBy.set(element, element.getAttribute("aria-describedby") || "");
+      };
+
+      const setValidationDescription = (element, ids = []) => {
+        if (!element) return;
+        rememberValidationDescription(element);
+        const original = validationDescribedBy.get(element) || "";
+        const values = new Set(original.split(/\s+/).filter(Boolean));
+        ids.filter(Boolean).forEach((id) => values.add(id));
+        if (values.size) {
+          element.setAttribute("aria-describedby", Array.from(values).join(" "));
+        }
+        element.setAttribute("aria-invalid", "true");
+      };
+
+      const clearValidationDescription = (element) => {
+        if (!element) return;
+        if (validationDescribedBy.has(element)) {
+          const original = validationDescribedBy.get(element);
+          if (original) element.setAttribute("aria-describedby", original);
+          else element.removeAttribute("aria-describedby");
+          validationDescribedBy.delete(element);
+        } else {
+          element.removeAttribute("aria-describedby");
+        }
+        element.removeAttribute("aria-invalid");
+      };
+
+      const setValidationState = (target, message, describedByIds = []) => {
+        if (!target) return;
+        const nodes = [
+          target,
+          ...(typeof target.querySelectorAll === "function"
+            ? Array.from(target.querySelectorAll("input, select, textarea, button"))
+            : [])
+        ];
+        nodes.forEach((node) => setValidationDescription(node, describedByIds));
+        announceValidation(message);
+      };
+
+      const clearValidationState = (target) => {
+        if (!target) return;
+        const nodes = [
+          target,
+          ...(typeof target.querySelectorAll === "function"
+            ? Array.from(target.querySelectorAll("input, select, textarea, button"))
+            : [])
+        ];
+        nodes.forEach((node) => clearValidationDescription(node));
+      };
+
+      const getModalFocusableElements = (modal) =>
+        Array.from(modal?.querySelectorAll?.("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])") || [])
+          .filter((element) => !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true" && element.offsetParent !== null);
+
+      const openModal = (modal, trigger) => {
+        if (!modal) return;
+        activeModalState.element = modal;
+        activeModalState.trigger = trigger instanceof HTMLElement ? trigger : (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+        modal.hidden = false;
+        window.requestAnimationFrame(() => {
+          modal.classList.add("active");
+          (getModalFocusableElements(modal)[0] || modal).focus?.({ preventScroll: true });
+        });
+      };
+
+      const closeModal = (modal) => {
+        if (!modal) return;
+        modal.classList.remove("active");
+        const trigger = modal === activeModalState.element ? activeModalState.trigger : null;
+        if (modal === activeModalState.element) {
+          activeModalState.element = null;
+          activeModalState.trigger = null;
+        }
+        window.setTimeout(() => {
+          if (!modal.classList.contains("active")) {
+            modal.hidden = true;
+            if (trigger instanceof HTMLElement && trigger.isConnected) {
+              trigger.focus({ preventScroll: true });
+            }
+          }
+        }, 220);
+      };
+
+      const trapActiveModalFocus = (event) => {
+        const modal = activeModalState.element;
+        if (!modal || modal.hidden) return;
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          if (modal === menuWarningModal) closeMenuWarning();
+          else if (modal === emailWarningModal) closeEmailWarning();
+          return;
+        }
+
+        if (event.key !== "Tab") return;
+
+        const focusables = getModalFocusableElements(modal);
+        if (!focusables.length) {
+          event.preventDefault();
+          modal.focus?.({ preventScroll: true });
+          return;
+        }
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+        if (event.shiftKey && active === first) {
+          event.preventDefault();
+          last.focus({ preventScroll: true });
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault();
+          first.focus({ preventScroll: true });
+        }
+      };
+
+      const keepFocusInsideModal = (event) => {
+        const modal = activeModalState.element;
+        if (!modal || modal.hidden) return;
+        if (modal.contains(event.target)) return;
+        const [firstFocusable] = getModalFocusableElements(modal);
+        (firstFocusable || modal).focus?.({ preventScroll: true });
+      };
 
       if (siteMenuLayer && siteMenuLayer.parentElement !== document.body) {
         document.body.appendChild(siteMenuLayer);
@@ -293,11 +442,7 @@
         pendingMenuDestinationUrl = url;
         pendingMenuDestinationLabel = formatMenuDestinationLabel(label);
         menuWarningDestination.textContent = pendingMenuDestinationLabel;
-        menuWarningModal.hidden = false;
-        window.requestAnimationFrame(() => {
-          menuWarningModal.classList.add("active");
-          menuWarningStay?.focus();
-        });
+        openModal(menuWarningModal, document.activeElement instanceof HTMLElement ? document.activeElement : null);
         closeSiteMenus();
       };
 
@@ -305,32 +450,18 @@
         if (!emailWarningModal || !emailWarningAddress) return;
         pendingEmailAddress = String(address || "").trim();
         emailWarningAddress.textContent = pendingEmailAddress;
-        emailWarningModal.hidden = false;
-        window.requestAnimationFrame(() => {
-          emailWarningModal.classList.add("active");
-          emailWarningStay?.focus();
-        });
+        openModal(emailWarningModal, document.activeElement instanceof HTMLElement ? document.activeElement : null);
         closeSiteMenus();
       };
 
       const closeMenuWarning = () => {
         if (!menuWarningModal) return;
-        menuWarningModal.classList.remove("active");
-        window.setTimeout(() => {
-          if (!menuWarningModal.classList.contains("active")) {
-            menuWarningModal.hidden = true;
-          }
-        }, 220);
+        closeModal(menuWarningModal);
       };
 
       const closeEmailWarning = () => {
         if (!emailWarningModal) return;
-        emailWarningModal.classList.remove("active");
-        window.setTimeout(() => {
-          if (!emailWarningModal.classList.contains("active")) {
-            emailWarningModal.hidden = true;
-          }
-        }, 220);
+        closeModal(emailWarningModal);
       };
 
       const confirmMenuNavigation = () => {
@@ -561,6 +692,19 @@
         });
       };
 
+      const notifyGalleryMotionPreference = () => {
+        if (!coverGalleryFrame) return;
+        coverGalleryFrame.dataset.reducedMotion = String(accessibilityPrefs.motion);
+        try {
+          coverGalleryFrame.contentWindow?.postMessage?.({
+            type: "gf-eoi-gallery-motion",
+            motionReduced: accessibilityPrefs.motion
+          }, window.location.origin);
+        } catch {
+          // Same-origin preview can still fail if the frame is not ready yet.
+        }
+      };
+
       const applyAccessibilityPrefs = () => {
         document.body.dataset.a11yText = accessibilityPrefs.text;
         accessibilityPrefs.contrast ? (document.body.dataset.a11yContrast = "high") : delete document.body.dataset.a11yContrast;
@@ -569,6 +713,7 @@
         accessibilityPrefs.motion ? (document.body.dataset.a11yMotion = "reduced") : delete document.body.dataset.a11yMotion;
         syncAccessibilityButtons();
         syncBrandIcon();
+        notifyGalleryMotionPreference();
       };
 
       const toggleAccessibilityPanel = (forceOpen) => {
@@ -671,6 +816,9 @@
           closeEmailWarning();
         }
       });
+
+      document.addEventListener("keydown", trapActiveModalFocus, true);
+      document.addEventListener("focusin", keepFocusInsideModal, true);
 
       accessibilityTextSlider?.addEventListener("input", () => {
         const index = Number(accessibilityTextSlider.value);
@@ -831,14 +979,27 @@
         deck.querySelectorAll(".availability-grid.is-invalid").forEach((grid) => grid.classList.remove("is-invalid"));
         deck.querySelectorAll(".select-field.is-invalid").forEach((field) => field.classList.remove("is-invalid"));
         deck.querySelectorAll(".option-grid.is-invalid").forEach((grid) => grid.classList.remove("is-invalid"));
+        deck.querySelectorAll("[aria-invalid='true'], [data-validation-original-describedby]").forEach((node) => {
+          clearValidationDescription(node);
+        });
         deck.querySelectorAll(".option-group-error").forEach((error) => error.remove());
+        announceValidation("");
       };
 
-      const markInvalid = (selector) => {
+      const markInvalid = (selector, message) => {
         const field = deck.querySelector(selector);
         if (!field) return;
-        const target = field.closest(".field") || field.closest(".availability-grid") || field;
+        const target = field.closest(".field") || field.closest(".availability-grid") || field.closest(".gradient-check") || field;
+        const errorNode = target.querySelector?.(".form-error") || (target.nextElementSibling?.classList?.contains("form-error") ? target.nextElementSibling : null);
+        const describedByIds = [];
+        if (errorNode) {
+          if (!errorNode.id) {
+            errorNode.id = `validation-${slugifyValidationKey(selector)}-error`;
+          }
+          describedByIds.push(errorNode.id);
+        }
         target.classList.add("is-invalid");
+        setValidationState(target, message, describedByIds);
         if (!firstInvalidTarget) firstInvalidTarget = target;
       };
 
@@ -846,13 +1007,14 @@
         const grid = button?.closest?.(".option-grid");
         if (!grid) return;
         grid.classList.remove("is-invalid");
+        clearValidationState(grid);
         const next = grid.nextElementSibling;
         if (next?.classList?.contains("option-group-error")) {
           next.remove();
         }
       };
 
-      const markOptionGroupInvalid = (selector) => {
+      const markOptionGroupInvalid = (selector, message = "Please select a response") => {
         const button = deck.querySelector(selector);
         const grid = button?.closest?.(".option-grid");
         if (!grid) return;
@@ -860,9 +1022,13 @@
         if (!grid.nextElementSibling?.classList?.contains("option-group-error")) {
           const error = document.createElement("div");
           error.className = "option-group-error";
-          error.textContent = "Please select a response";
+          error.id = `validation-${slugifyValidationKey(selector)}-error`;
+          error.textContent = message;
           grid.insertAdjacentElement("afterend", error);
         }
+        const errorNode = grid.nextElementSibling?.classList?.contains("option-group-error") ? grid.nextElementSibling : null;
+        const describedByIds = errorNode?.id ? [errorNode.id] : [];
+        setValidationState(grid, message, describedByIds);
         if (!firstInvalidTarget) firstInvalidTarget = grid;
       };
 
@@ -920,7 +1086,10 @@
           if (!showOneToOne) {
             clearMatrixSelections('[data-matrix-group="one_to_one_morning"]');
             const grid = deck.querySelector('[aria-label="1:1 availability matrix"]');
-            if (grid) grid.classList.remove("is-invalid");
+            if (grid) {
+              grid.classList.remove("is-invalid");
+              clearValidationState(grid);
+            }
           }
         }
         if (fusionCard) {
@@ -930,8 +1099,14 @@
             clearMatrixSelections('[data-matrix-group="fusion_friday"]');
             const grid = deck.querySelector('[aria-label="Fusion classes availability"]');
             const friday = deck.querySelector('[aria-label="Fusion Friday morning availability"]');
-            if (grid) grid.classList.remove("is-invalid");
-            if (friday) friday.classList.remove("is-invalid");
+            if (grid) {
+              grid.classList.remove("is-invalid");
+              clearValidationState(grid);
+            }
+            if (friday) {
+              friday.classList.remove("is-invalid");
+              clearValidationState(friday);
+            }
           }
         }
         updateSelectionSummaries();
@@ -975,12 +1150,16 @@
             control.value = "";
             control.setCustomValidity?.("");
             control.closest(".field")?.classList.remove("is-invalid");
+            clearValidationDescription(control);
             return;
           }
           if (!isOtherControl) {
             control.required = true;
           }
         });
+        if (!showPostal) {
+          clearValidationState(postalFields);
+        }
 
         postalFields.querySelectorAll("[data-other-field]").forEach((field) => {
           const select = postalFields.querySelector(`select[data-other-target="${field.getAttribute("data-other-field")}"]`);
@@ -996,7 +1175,11 @@
               input.value = "";
               input.setCustomValidity?.("");
               input.closest(".field")?.classList.remove("is-invalid");
+              clearValidationDescription(input);
             }
+          }
+          if (!shouldShow) {
+            clearValidationState(field);
           }
         });
       };
@@ -1010,6 +1193,7 @@
         if (!show) {
           card.querySelectorAll(".option-grid.is-invalid").forEach((grid) => {
             grid.classList.remove("is-invalid");
+            clearValidationState(grid);
             if (grid.nextElementSibling?.classList?.contains("option-group-error")) {
               grid.nextElementSibling.remove();
             }
@@ -1018,6 +1202,7 @@
             btn.classList.remove("is-selected");
             btn.setAttribute("aria-pressed", "false");
           });
+          clearValidationState(card);
         }
         updateAvailabilityVisibility();
       };
@@ -1041,9 +1226,22 @@
         clearErrors();
 
         if (index === 1) {
+          const ageEligibility = deck.querySelector('input[name="age_eligibility_confirmation"]:checked');
+          if (!hasValue(ageEligibility)) {
+            const target = ageEligibility?.closest(".gradient-check") || deck.querySelector("[data-age-eligibility-card]") || ageEligibility;
+            markInvalid('[data-age-eligibility-card]', "Please confirm your age eligibility.");
+            firstInvalidTarget = target;
+            return false;
+          }
+          if (String(ageEligibility.value || "") === "UNDER_18") {
+            return true;
+          }
           const missingCheckbox = Array.from(deck.querySelectorAll("[data-intro-ack]")).find((checkbox) => !hasValue(checkbox));
           if (missingCheckbox) {
-            firstInvalidTarget = missingCheckbox.closest(".gradient-check") || missingCheckbox;
+            const target = missingCheckbox.closest(".gradient-check") || missingCheckbox;
+            setValidationState(target, "Please confirm both acknowledgements.");
+            target.classList.add("is-invalid");
+            firstInvalidTarget = target;
             return false;
           }
           return true;
@@ -1052,7 +1250,10 @@
         if (index === 2) {
           const privacyConsent = deck.querySelector('input[name="privacy_consent"]');
           if (!hasValue(privacyConsent)) {
-            firstInvalidTarget = privacyConsent?.closest(".gradient-check") || privacyConsent;
+            const target = privacyConsent?.closest(".gradient-check") || privacyConsent;
+            setValidationState(target, "Please confirm the privacy notice.");
+            target.classList.add("is-invalid");
+            firstInvalidTarget = target;
             return false;
           }
           return true;
@@ -1078,79 +1279,79 @@
           let valid = true;
 
           if (!hasValue(firstName)) {
-            markInvalid('[data-field="first_name"]');
+            markInvalid('[data-field="first_name"]', "First name is required.");
             valid = false;
           }
           if (!hasValue(lastName)) {
-            markInvalid('[data-field="last_name"]');
+            markInvalid('[data-field="last_name"]', "Last name is required.");
             valid = false;
           }
           if (!hasValue(ageBand)) {
-            markInvalid('select[name="age_band"]');
+            markInvalid('select[name="age_band"]', "Age band is required.");
             valid = false;
           }
           if (!hasValue(sexAtBirth)) {
-            markInvalid('select[name="sex_at_birth"]');
+            markInvalid('select[name="sex_at_birth"]', "Please select a response.");
             valid = false;
           }
           if (!hasValue(resAddress)) {
-            markInvalid('input[name="res_address"]');
+            markInvalid('input[name="res_address"]', "Street address is required.");
             valid = false;
           }
           if (!hasValue(resSuburb)) {
-            markInvalid('select[name="res_suburb"]');
+            markInvalid('select[name="res_suburb"]', "Suburb is required.");
             valid = false;
           }
           if (!hasValue(resState)) {
-            markInvalid('select[name="res_state"]');
+            markInvalid('select[name="res_state"]', "State is required.");
             valid = false;
           }
           if (resSuburb && resSuburb.value.startsWith("Other") && !hasValue(resSuburbOther)) {
-            markInvalid('input[name="res_suburb_other"]');
+            markInvalid('input[name="res_suburb_other"]', "Please specify your suburb.");
             valid = false;
           }
           if (resState && resState.value.startsWith("Other") && !hasValue(resStateOther)) {
-            markInvalid('input[name="res_state_other"]');
+            markInvalid('input[name="res_state_other"]', "Please specify your state.");
             valid = false;
           }
           if (!hasValue(resPostcode)) {
-            markInvalid('input[name="res_postcode"]');
+            markInvalid('input[name="res_postcode"]', "Postcode is required.");
             valid = false;
           }
           if (sexAtBirth && sexAtBirth.value.startsWith("Another term") && !hasValue(sexAtBirthOther)) {
-            markInvalid('input[name="sex_at_birth_other"]');
+            markInvalid('input[name="sex_at_birth_other"]', "Please specify your response.");
             valid = false;
           }
           if (!postalSame) {
-            markOptionGroupInvalid('[data-choice-group="postal_same"]');
+            markOptionGroupInvalid('[data-choice-group="postal_same"]', "Please select a response.");
             valid = false;
           }
           if (!hasValue(email) || !email.checkValidity()) {
-            markInvalid('[data-field="email"]');
+            markInvalid('[data-field="email"]', "A valid email address is required.");
             valid = false;
           }
           if (!hasValue(confirmEmail) || !confirmEmail.checkValidity()) {
-            markInvalid('[data-field="confirm_email"]');
+            markInvalid('[data-field="confirm_email"]', "A valid email address is required.");
             valid = false;
           }
           const normalizedEmail = String(email?.value || "").trim().toLowerCase();
           const normalizedConfirmEmail = String(confirmEmail?.value || "").trim().toLowerCase();
           if (normalizedEmail && normalizedConfirmEmail && normalizedEmail !== normalizedConfirmEmail) {
-            markInvalid('[data-field="confirm_email"]');
+            markInvalid('[data-field="confirm_email"]', "Email addresses must match.");
             valid = false;
           }
           if (!hasValue(mobile) || !isValidMobile(mobile)) {
-            markInvalid('[data-field="mobile"]');
+            markInvalid('[data-field="mobile"]', "Enter a 10-digit mobile number.");
             valid = false;
           }
           if (!hasValue(confirmMobile) || !isValidMobile(confirmMobile)) {
-            markInvalid('[data-field="confirm_mobile"]');
+            markInvalid('[data-field="confirm_mobile"]', "Enter a 10-digit mobile number.");
             valid = false;
           }
           const normalizedMobile = String(mobile?.value || "").replace(/\D/g, "");
           const normalizedConfirmMobile = String(confirmMobile?.value || "").replace(/\D/g, "");
           if (normalizedMobile && normalizedConfirmMobile && normalizedMobile !== normalizedConfirmMobile) {
-            markInvalid('[data-field="confirm_mobile"]');
+            markInvalid('[data-field="confirm_mobile"]', "Mobile numbers must match.");
             valid = false;
           }
 
@@ -1164,27 +1365,27 @@
             const postalStateOther = deck.querySelector('input[name="postal_state_other"]');
 
             if (!hasValue(postalAddress)) {
-              markInvalid('input[name="postal_address"]');
+              markInvalid('input[name="postal_address"]', "Postal address is required.");
               valid = false;
             }
             if (!hasValue(postalSuburb)) {
-              markInvalid('select[name="postal_suburb"]');
+              markInvalid('select[name="postal_suburb"]', "Suburb is required.");
               valid = false;
             }
             if (!hasValue(postalState)) {
-              markInvalid('select[name="postal_state"]');
+              markInvalid('select[name="postal_state"]', "State is required.");
               valid = false;
             }
             if (postalSuburb && postalSuburb.value.startsWith("Other") && !hasValue(postalSuburbOther)) {
-              markInvalid('input[name="postal_suburb_other"]');
+              markInvalid('input[name="postal_suburb_other"]', "Please specify your postal suburb.");
               valid = false;
             }
             if (postalState && postalState.value.startsWith("Other") && !hasValue(postalStateOther)) {
-              markInvalid('input[name="postal_state_other"]');
+              markInvalid('input[name="postal_state_other"]', "Please specify your postal state.");
               valid = false;
             }
             if (!hasValue(postalPostcode)) {
-              markInvalid('input[name="postal_postcode"]');
+              markInvalid('input[name="postal_postcode"]', "Postcode is required.");
               valid = false;
             }
           }
@@ -1200,15 +1401,15 @@
           const secondPreferenceRequired = secondPreferenceCard && secondPreferenceCard.style.display !== "none";
           let valid = true;
           if (!trainingType) {
-            markOptionGroupInvalid('[data-option-group="training-type"]');
+            markOptionGroupInvalid('[data-option-group="training-type"]', "Please select a training type.");
             valid = false;
           }
           if (secondPreferenceRequired && !secondPreference) {
-            markOptionGroupInvalid('[data-choice-group="second_preference"]');
+            markOptionGroupInvalid('[data-choice-group="second_preference"]', "Please select a response.");
             valid = false;
           }
           if (!workShift) {
-            markOptionGroupInvalid('[data-choice-group="work_shift"]');
+            markOptionGroupInvalid('[data-choice-group="work_shift"]', "Please select a response.");
             valid = false;
           }
           return valid;
@@ -1222,6 +1423,7 @@
           });
           if (firstVisibleGrid) {
             firstVisibleGrid.classList.add("is-invalid");
+            setValidationState(firstVisibleGrid, "Please select at least one availability slot.");
             firstInvalidTarget = firstVisibleGrid;
           }
           return false;
@@ -1273,7 +1475,10 @@
         button.setAttribute("aria-pressed", button.classList.contains("is-selected") ? "true" : "false");
         syncAvailabilitySlotLabel(button);
         const grid = button.closest(".availability-grid");
-        if (grid) grid.classList.remove("is-invalid");
+        if (grid) {
+          grid.classList.remove("is-invalid");
+          clearValidationState(grid);
+        }
         updateSelectionSummaries();
       };
 
@@ -1317,6 +1522,7 @@
           markProgressDirty();
           const field = control.closest(".field");
           if (field) field.classList.remove("is-invalid");
+          clearValidationState(field || control.closest(".option-grid") || control.closest(".availability-grid") || control);
         });
         control.addEventListener("change", () => {
           markProgressDirty();
@@ -1325,11 +1531,15 @@
           if (control.classList.contains("select-field")) {
             control.classList.remove("is-invalid");
           }
+          clearValidationState(field || control.closest(".option-grid") || control.closest(".availability-grid") || control);
         });
       });
 
       const introCheckboxes = Array.from(deck.querySelectorAll("[data-intro-ack]"));
+      const ageEligibilityInputs = Array.from(deck.querySelectorAll('input[name="age_eligibility_confirmation"]'));
       const introConfirm = deck.querySelector("[data-intro-confirm]");
+      const under18HandoffActions = deck.querySelector("[data-under18-handoff-actions]");
+      const under18HandoffButton = deck.querySelector("[data-under18-handoff]");
       const privacyCheckbox = deck.querySelector('input[name="privacy_consent"]');
       const privacyConfirm = deck.querySelector("[data-privacy-confirm]");
       const scrollIdleTimers = new WeakMap();
@@ -1404,29 +1614,6 @@
         return true;
       };
 
-      const resetCheckboxSlide = (targetIndex) => {
-        if (targetIndex === 1) {
-          introCheckboxes.forEach((checkbox) => {
-            checkbox.checked = false;
-          });
-          introConfirm?.classList.add("is-hidden");
-          introConfirm?.closest(".footer-actions")?.classList.remove("is-revealed");
-          pages[targetIndex]?.querySelectorAll(".is-invalid").forEach((item) => item.classList.remove("is-invalid"));
-          if (privacyCheckbox) {
-            privacyCheckbox.checked = false;
-            privacyConfirm?.classList.add("is-hidden");
-            privacyConfirm?.closest(".footer-actions")?.classList.remove("is-revealed");
-            pages[2]?.querySelectorAll(".is-invalid").forEach((item) => item.classList.remove("is-invalid"));
-          }
-        }
-        if (targetIndex === 2 && privacyCheckbox) {
-          privacyCheckbox.checked = false;
-          privacyConfirm?.classList.add("is-hidden");
-          privacyConfirm?.closest(".footer-actions")?.classList.remove("is-revealed");
-          pages[targetIndex]?.querySelectorAll(".is-invalid").forEach((item) => item.classList.remove("is-invalid"));
-        }
-      };
-
       const resetEntryScroll = (targetIndex) => {
         if (targetIndex <= 0) return;
         requestAnimationFrame(() => {
@@ -1473,9 +1660,6 @@
         }
         syncDeckState(targetIndex);
         setSlide(targetIndex);
-        if (targetIndex === 1 || targetIndex === 2) {
-          resetCheckboxSlide(targetIndex);
-        }
         resetEntryScroll(targetIndex);
         scrollActiveStepperIntoView(targetIndex);
       };
@@ -1493,12 +1677,13 @@
           } else {
             control.value = "";
           }
-          control.removeAttribute("aria-invalid");
+          clearValidationDescription(control);
         });
 
         deck.querySelectorAll(".is-selected").forEach((el) => el.classList.remove("is-selected"));
         deck.querySelectorAll(".is-invalid").forEach((el) => el.classList.remove("is-invalid"));
         deck.querySelectorAll(".option-grid.is-invalid, .availability-grid.is-invalid").forEach((el) => el.classList.remove("is-invalid"));
+        deck.querySelectorAll("[aria-invalid='true'], [data-validation-original-describedby]").forEach((node) => clearValidationDescription(node));
 
         deck.querySelectorAll("[aria-pressed='true']").forEach((el) => el.setAttribute("aria-pressed", "false"));
         deck.querySelectorAll("[aria-selected='true']").forEach((el) => el.setAttribute("aria-selected", "false"));
@@ -1540,6 +1725,8 @@
         updateSecondPreferenceVisibility();
         updateAvailabilityVisibility();
         updateSelectionSummaries();
+        sessionStorage.removeItem("gymfusion_eoi_part1_submission_id");
+        delete window.__GYMFUSION_EOI_PART1_SUBMISSION_ID__;
         deck.querySelectorAll(".preview-step").forEach((step, index) => {
           step.classList.toggle("is-active", index === 0);
           step.classList.toggle("is-complete", false);
@@ -1549,13 +1736,26 @@
         submissionCompleted = false;
       };
 
+      const getAgeEligibilityValue = () => String(deck.querySelector('input[name="age_eligibility_confirmation"]:checked')?.value || "");
       const updateIntroConfirm = (shouldAutoScroll = false) => {
         if (!introCheckboxes.length || !introConfirm) return;
-        const isVisible = introCheckboxes.every((checkbox) => checkbox.checked);
-        introConfirm.classList.toggle("is-hidden", !isVisible);
-        introConfirm.closest(".footer-actions")?.classList.toggle("is-revealed", isVisible);
+        const ageEligibility = getAgeEligibilityValue();
+        const isAdult = ageEligibility === "18_OR_OVER";
+        const isUnder18 = ageEligibility === "UNDER_18";
+        const adultReady = isAdult && introCheckboxes.every((checkbox) => checkbox.checked);
+        introConfirm.classList.toggle("is-hidden", !adultReady);
+        introConfirm.closest(".footer-actions")?.classList.toggle("is-revealed", adultReady);
+        if (under18HandoffActions) {
+          under18HandoffActions.classList.toggle("is-hidden", !isUnder18);
+          under18HandoffActions.classList.toggle("is-revealed", isUnder18);
+        }
+        if (under18HandoffButton) {
+          under18HandoffButton.disabled = !isUnder18;
+        }
         if (!shouldAutoScroll) return;
-        if (!isVisible) {
+        if (isUnder18) {
+          scrollCurrentPageToFooter();
+        } else if (!adultReady) {
           scrollToNextUncheckedCheckbox(introCheckboxes);
         } else {
           scrollCurrentPageToFooter();
@@ -1590,6 +1790,9 @@
 
       deck.querySelectorAll("[data-action='next']").forEach((button) => {
         button.addEventListener("click", () => {
+          if (button.hasAttribute("data-availability-submit")) {
+            return;
+          }
           markProgressDirty();
           if (!validateStep(current)) {
             scrollToFirstInvalid();
@@ -1668,8 +1871,12 @@
             input.value = "";
             input.setCustomValidity?.("");
             input.closest(".field")?.classList.remove("is-invalid");
+            clearValidationDescription(input);
           }
         });
+        if (!show) {
+          clearValidationState(field);
+        }
       };
       const pronounsSelect = deck.querySelector('select[name="pronouns"]');
       const pronounsOtherField = deck.querySelector('[data-field="pronouns_other"]');
@@ -1688,14 +1895,30 @@
             input.value = "";
             input.setCustomValidity("");
             input.closest(".field")?.classList.remove("is-invalid");
+            clearValidationDescription(input);
           }
+        }
+        if (!show) {
+          clearValidationState(pronounsOtherField);
         }
       };
 
-      const part1SubmitEndpoint = window.EOI_PART1_SUBMIT_URL || (window.location.protocol === "file:" ? "" : `${window.location.origin}/_functions/eoi_part1_submit`);
+      const part1SubmitEndpoint = window.EOI_PART1_SUBMIT_URL || (window.location.protocol === "file:" ? "" : "https://www.gymfusion.com.au/_functions/eoi_part1_submit");
       const buildSubmissionId = () => {
         if (window.crypto?.randomUUID) return window.crypto.randomUUID();
         return `submission_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      };
+      const getOrCreateSubmissionId = () => {
+        const key = "gymfusion_eoi_part1_submission_id";
+        const existing = String(window.__GYMFUSION_EOI_PART1_SUBMISSION_ID__ || sessionStorage.getItem(key) || "").trim();
+        if (existing) {
+          window.__GYMFUSION_EOI_PART1_SUBMISSION_ID__ = existing;
+          return existing;
+        }
+        const next = buildSubmissionId();
+        window.__GYMFUSION_EOI_PART1_SUBMISSION_ID__ = next;
+        sessionStorage.setItem(key, next);
+        return next;
       };
       const getPersistedEpisodeId = () =>
         String(window.__GYMFUSION_EOI_EPISODE_ID__ || sessionStorage.getItem("gymfusion_eoi_episode_id") || contextParams.get("episode_id") || "").trim();
@@ -1711,7 +1934,10 @@
             fields[name] = Boolean(control.checked);
             return;
           }
-          if (control.type === "radio") return;
+          if (control.type === "radio") {
+            if (control.checked) fields[name] = String(control.value || "").trim();
+            return;
+          }
           fields[name] = String(control.value || "").trim();
         });
 
@@ -1733,20 +1959,15 @@
         };
 
         return {
-          submissionId: buildSubmissionId(),
+          submissionId: getOrCreateSubmissionId(),
           formId: "eoi_part1",
+          formPart: "PART_1",
+          formVersion: 1,
           submittedAt: new Date().toISOString(),
-          wixMemberId: null,
-          episodeId: getPersistedEpisodeId() || null,
           email: fields.email || "",
           fields,
           selections,
           availability,
-          rawPayload: {
-            fields,
-            selections,
-            availability,
-          },
         };
       };
 
@@ -1761,7 +1982,7 @@
           body: JSON.stringify(payload),
         });
         const json = await response.json().catch(() => ({}));
-        if (!response.ok || json?.ok === false) {
+        if (!response.ok || json?.ok !== true) {
           throw new Error(json?.error || `Submission failed (${response.status})`);
         }
         if (json?.episodeId) {
@@ -1777,6 +1998,13 @@
       const finalSubmitButton = deck.querySelector("[data-availability-submit]");
       if (finalSubmitButton) {
         finalSubmitButton.addEventListener("click", async () => {
+          if (finalSubmitButton.hasAttribute("data-action") && finalSubmitButton.getAttribute("data-action") === "next") {
+            const ageEligibility = getAgeEligibilityValue();
+            if (current === 1 && ageEligibility === "UNDER_18") {
+              window.location.assign("https://www.gymfusion.com.au/eoi");
+              return;
+            }
+          }
           if (!validateStep(current)) {
             scrollToFirstInvalid();
             return;
@@ -1795,10 +2023,14 @@
         });
       }
 
+      under18HandoffButton?.addEventListener("click", () => {
+        window.location.assign("https://www.gymfusion.com.au/eoi");
+      });
+
       const initAddressAutofill = () => {
         const debounceMs = 300;
         const maxCallsPerMinute = 25;
-        const timeoutMs = 8000;
+        const timeoutMs = 1200;
         const callLog = [];
         const pendingLookups = new Map();
 
@@ -1911,8 +2143,8 @@
         };
 
         const primeLookupMode = (mode) => {
-          setLookupMode(mode, true, true);
-          setManualMode(mode, false, false);
+          setLookupMode(mode, true, false);
+          setManualMode(mode, true, true);
         };
 
         const revealManualFallback = (mode) => {
@@ -1932,7 +2164,7 @@
         };
 
         const showFilledAddressFieldsAfterSelection = (mode) => {
-          setLookupMode(mode, true, true);
+          setLookupMode(mode, true, false);
           setManualMode(mode, true, true);
         };
 
@@ -2139,6 +2371,10 @@
       initAddressAutofill();
 
       introCheckboxes.forEach((checkbox) => checkbox.addEventListener("change", () => {
+        markProgressDirty();
+        updateIntroConfirm(true);
+      }));
+      ageEligibilityInputs.forEach((input) => input.addEventListener("change", () => {
         markProgressDirty();
         updateIntroConfirm(true);
       }));

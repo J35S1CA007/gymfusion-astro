@@ -23,7 +23,8 @@ const mobileEoiMarkup = mobileEoiBody
         <gf-public-member-nav-mobile
           class="gf-member-nav-mobile-host"
           member-state='{"authenticated":false,"displayName":"","loading":false,"ready":true,"dropdownOpen":false,"notice":""}'
-          portal-url="https://portal.gymfusion.com.au"
+          portal-url="https://portal.gymfusion.com.au/members"
+          login-url="https://portal.gymfusion.com.au/login"
         ></gf-public-member-nav-mobile>
       </div>
       <div class="brand-slot" aria-hidden="true">
@@ -39,7 +40,8 @@ const mobileEoiMarkup = mobileEoiBody
         <gf-public-member-nav
           class="gf-member-nav-host"
           member-state='{"authenticated":false,"displayName":"","loading":false,"ready":true,"dropdownOpen":false,"notice":""}'
-          portal-url="https://portal.gymfusion.com.au"
+          portal-url="https://portal.gymfusion.com.au/members"
+          login-url="https://portal.gymfusion.com.au/login"
           login-lightbox-name="Login"
         ></gf-public-member-nav>
       </div>
@@ -58,7 +60,7 @@ const mobileEoiMarkup = mobileEoiBody
             <a class="site-menu-link" href="https://www.gymfusion.com.au/our-services"><span class="site-menu-link__label">Our Services</span></a>
             <a class="site-menu-link" href="https://www.gymfusion.com.au/privacy-policy"><span class="site-menu-link__label">Privacy Policy</span></a>
             <a class="site-menu-link" href="https://www.gymfusion.com.au/accessibility-inclusion-statement"><span class="site-menu-link__label">Accessibility &amp; Inclusion</span></a>
-            <a class="site-menu-link" href="https://www.gymfusion.com.au/our-policies/"><span class="site-menu-link__label">Our Policies</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/our-policies"><span class="site-menu-link__label">Our Policies</span></a>
             <a class="site-menu-link" href="https://www.gymfusion.com.au/terms-and-conditions"><span class="site-menu-link__label">T&amp;Cs</span></a>
           </nav>
         </div>
@@ -95,7 +97,7 @@ const mobileEoiMarkup = mobileEoiBody
         <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/our-services" data-mobile-menu-link><span>Our Services</span></a>
         <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/privacy-policy" data-mobile-menu-link><span>Privacy Policy</span></a>
         <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/accessibility-inclusion-statement" data-mobile-menu-link><span>Accessibility &amp; Inclusion</span></a>
-        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/our-policies/" data-mobile-menu-link><span>Our Policies</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/our-policies" data-mobile-menu-link><span>Our Policies</span></a>
         <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/terms-and-conditions" data-mobile-menu-link><span>T&amp;Cs</span></a>
       </nav>
     </div>
@@ -197,7 +199,7 @@ const mobileEoiMarkup = mobileEoiBody
         <a href="https://www.gymfusion.com.au/privacy-policy" target="_top">Privacy Policy</a>
           <a href="https://www.gymfusion.com.au/accessibility-inclusion-statement" target="_top">Accessibility</a>
           <a href="https://www.gymfusion.com.au/terms-and-conditions" target="_top">T&amp;Cs</a>
-          <a href="https://www.gymfusion.com.au/our-policies/" target="_top">Our Policies</a>
+          <a href="https://www.gymfusion.com.au/our-policies" target="_top">Our Policies</a>
         </nav>
 
         <div class="desktop-footer__identity">
@@ -354,14 +356,26 @@ const mobileEoiMarkup = mobileEoiBody
   window.addEventListener('resize', handleMobileBreakpointChange);
   document.addEventListener('gf-member-nav-intent', (event) => {
     const host = event.target;
-    if (!(host instanceof HTMLElement) || host.tagName.toLowerCase() !== 'gf-public-member-nav-mobile') {
+    if (!(host instanceof HTMLElement)) {
       return;
     }
 
     const detail = (event as CustomEvent<{ action?: string }>).detail;
-    const portalUrl = host.getAttribute('portal-url') || 'https://portal.gymfusion.com.au';
-    if (detail?.action === 'login' || detail?.action === 'portal') {
+    const action = detail?.action;
+    const loginUrl = host.getAttribute('login-url') || 'https://portal.gymfusion.com.au/login';
+    const portalUrl = host.getAttribute('portal-url') || 'https://portal.gymfusion.com.au/members';
+    if (action === 'login') {
+      window.location.assign(loginUrl);
+      return;
+    }
+
+    if (action === 'portal') {
       window.location.assign(portalUrl);
+      return;
+    }
+
+    if (action === 'logout') {
+      window.location.assign(loginUrl);
     }
   });
 

@@ -114,6 +114,7 @@
         const carousel = document.querySelector('.carousel')
         const slides = [...document.querySelectorAll('.slide')]
         const fadeLayer = document.getElementById('fade-black-layer')
+        const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
 
         if (!carousel || slides.length < 2 || !fadeLayer) return
 
@@ -121,6 +122,7 @@
         let timerId = null
         let transitioning = false
         let isPaused = false
+        let reducedMotion = Boolean(reducedMotionQuery.matches || window.frameElement?.dataset?.reducedMotion === 'true')
 
         const stop = () => {
           if (timerId) {
@@ -129,8 +131,40 @@
           }
         }
 
+        const cancelActiveAnimations = () => {
+          slides.forEach((slide) => {
+            slide.getAnimations().forEach((animation) => animation.cancel())
+          })
+          fadeLayer.getAnimations().forEach((animation) => animation.cancel())
+        }
+
+        const showStaticFrame = () => {
+          stop()
+          cancelActiveAnimations()
+          transitioning = false
+          index = 0
+          slides.forEach((slide, slideIndex) => {
+            slide.classList.toggle('is-active', slideIndex === 0)
+            slide.style.opacity = slideIndex === 0 ? '1' : '0'
+            slide.style.transform = slideIndex === 0 ? `translate3d(0, 0, 0) scale(${fadeRestScale})` : 'translate3d(0, 0, 0) scale(1)'
+            slide.style.zIndex = slideIndex === 0 ? '2' : '1'
+          })
+          fadeLayer.style.opacity = '0'
+          carousel.dataset.reducedMotion = 'true'
+        }
+
+        const syncReducedMotion = (nextReducedMotion) => {
+          reducedMotion = Boolean(nextReducedMotion)
+          if (reducedMotion) {
+            showStaticFrame()
+            return
+          }
+          carousel.dataset.reducedMotion = 'false'
+          start()
+        }
+
         const transitionTo = async (nextIndex) => {
-          if (transitioning || nextIndex === index) return
+          if (reducedMotion || transitioning || nextIndex === index) return
           transitioning = true
 
           const from = slides[index]
@@ -169,6 +203,11 @@
 
           await Promise.all(animations.map((a) => a.finished.catch(() => undefined)))
 
+          if (reducedMotion) {
+            transitioning = false
+            return
+          }
+
           from.classList.remove('is-active')
           from.style.opacity = '0'
           from.style.transform = 'translate3d(0, 0, 0) scale(1)'
@@ -184,17 +223,22 @@
         }
 
         const loop = async () => {
-          if (isPaused || document.hidden) return
+          if (reducedMotion || isPaused || document.hidden) return
 
           const nextIndex = (index + 1) % slides.length
           await transitionTo(nextIndex)
-          if (isPaused || document.hidden) return
+          if (reducedMotion || isPaused || document.hidden) return
           timerId = window.setTimeout(loop, Math.max(0, cadenceMs - transitionMs))
         }
 
         const start = () => {
           stop()
-          if (isPaused || document.hidden) return
+          if (reducedMotion || isPaused || document.hidden) {
+            if (reducedMotion) {
+              showStaticFrame()
+            }
+            return
+          }
           slides.forEach((slide, slideIndex) => {
             slide.style.transform =
               slideIndex === 0
@@ -203,6 +247,18 @@
           })
           timerId = window.setTimeout(loop, cadenceMs)
         }
+
+        reducedMotionQuery.addEventListener?.('change', () => {
+          syncReducedMotion(reducedMotionQuery.matches || window.frameElement?.dataset?.reducedMotion === 'true')
+        })
+
+        window.addEventListener('message', (event) => {
+          if (event.origin !== window.location.origin) return
+          if (event.data?.type !== 'gf-eoi-gallery-motion' || typeof event.data.motionReduced !== 'boolean') return
+          syncReducedMotion(event.data.motionReduced)
+        })
+
+        syncReducedMotion(reducedMotion)
 
         carousel.addEventListener('mouseenter', () => {
           isPaused = true
