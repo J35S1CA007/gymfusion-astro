@@ -155,11 +155,9 @@ const mobileEoiMarkup = mobileEoiBody
     <section class="country-acknowledgement">
       <p>
         <span class="country-acknowledgement__text">
-          We respectfully acknowledge the Yorta Yorta<br>
-          Nation as the First Peoples of the land on which we<br>
-          live and work. We pay our respects to Elders past,<br>
-          present, and emerging and honour their continuing<br>
-          culture and connection to land, sky and water.
+          We respectfully acknowledge the Yorta Yorta Nation as the First Peoples of the land on which we live and<br>
+          work. We pay our respects to Elders past, present, and emerging and honour their continuing culture and<br>
+          connection to land, sky and water.
         </span>
       </p>
     </section>
@@ -1182,19 +1180,25 @@ const mobileEoiMarkup = mobileEoiBody
     padding: 2rem 1.5rem;
     box-sizing: border-box;
     isolation: isolate;
-    background: url("/assets/ack-of-country-desktop-section-bkg-img.jpg") center / cover no-repeat;
+    background: url("/assets/acknowledgement%20of%20country%20/ack-of-country-desktop-section-bkg-img.jpg") center / cover no-repeat;
   }
 
   .country-acknowledgement::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 624px;
-    height: 73px;
-    transform: translate(-50%, -50%);
-    z-index: 0;
-    border-radius: 8px;
+    content: none;
+  }
+
+  .country-acknowledgement p {
+    position: relative;
+    isolation: isolate;
+    z-index: 1;
+    margin: 0;
+    width: 700px;
+    height: 86px;
+    padding: 0;
+    box-sizing: border-box;
+    border-radius: 0;
+    display: grid;
+    place-items: center;
     background:
       radial-gradient(circle at 67.568359375% 60.56640625000001%, rgba(0,0,0,0.54) 0%, 17.5%, rgba(0,0,0,0) 35%),
       radial-gradient(circle at 48.914388020833336% 45.123697916666664%, rgba(0,0,0,0.48) 0%, 17.5%, rgba(0,0,0,0) 35%),
@@ -1207,43 +1211,44 @@ const mobileEoiMarkup = mobileEoiBody
       radial-gradient(circle at 6.560872395833334% 97.01171875%, #000000 0%, 17.5%, rgba(0,0,0,0) 35%),
       radial-gradient(circle at 67.87923177083334% 5.338541666666666%, rgba(111,1,144,0.45) 0%, 17.5%, rgba(111,1,144,0) 35%),
       radial-gradient(circle at 27.449544270833332% 5.354817708333334%, rgba(111,1,144,0.46) 0%, 17.5%, rgba(111,1,144,0) 35%),
-      radial-gradient(circle at 91.2646484375% 78.80859375%, rgba(111,1,144,0.87) 0%, 21.599999999999998%, rgba(111,1,144,0) 72%),
+      radial-gradient(circle at 91.2646484375% 78.80859375%, rgba(111,1,144,0.87) 0%, 21.6%, rgba(111,1,144,0) 72%),
       radial-gradient(circle at 7.838541666666667% 0%, rgba(111,1,144,0.5) 0%, 6%, rgba(111,1,144,0) 20%),
       radial-gradient(circle at 49.794921875% 0%, rgba(111,1,144,0.66) 0%, 10.2%, rgba(111,1,144,0) 34%),
       radial-gradient(circle at 91.24348958333334% 7.652994791666666%, #6F0190 0%, 8.7%, rgba(111,1,144,0) 29%),
       radial-gradient(circle at 48.9013671875% 49.521484375%, rgba(255,255,255,0) 0%, 100%, rgba(255,255,255,0) 100%);
-    pointer-events: none;
-  }
-
-  .country-acknowledgement p {
-    position: relative;
-    isolation: isolate;
-    z-index: 1;
-    margin: 0;
-    width: 624px;
-    height: 73px;
-    padding: 0 1.25rem;
-    box-sizing: border-box;
-    border-radius: 8px;
-    display: grid;
-    place-items: center;
-    background: rgba(10, 8, 15, 0.75);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     color: rgba(255, 247, 238, 0.9);
     font-family: "GamuthSansLightMobile", "GamuthSans", Arial, Helvetica, sans-serif;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     text-align: center;
-    line-height: 1.35;
+    line-height: 1.18;
     overflow: hidden;
+  }
+
+  .country-acknowledgement p::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 0;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.17), rgba(0, 0, 0, 0.36)),
+      radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.35) 100%);
+    box-shadow: inset 0 0 34px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    z-index: 0;
   }
 
   .country-acknowledgement__text {
     position: relative;
     z-index: 1;
-    display: block;
-    width: 100%;
+    display: grid;
+    place-items: center;
+    width: 647px;
+    height: 67px;
+    margin: 0 auto;
+    text-align: center;
   }
 
   .desktop-footer {

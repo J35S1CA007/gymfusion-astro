@@ -1606,6 +1606,10 @@
       margin-top: 16px;
     }
 
+    .age-eligibility-copy {
+      margin-top: 3px !important;
+    }
+
     .helper strong,
     .notice strong,
     .note strong {
@@ -4104,6 +4108,10 @@
       margin-top: 7px !important;
     }
 
+    .card[data-age-eligibility-card] > .age-eligibility-copy {
+      margin-top: 3px !important;
+    }
+
     .gradient-check {
       grid-template-columns: minmax(0, 1fr) auto !important;
       gap: 8px !important;
@@ -4387,7 +4395,7 @@
     }
 
     .cover-page .cyber-cta {
-      transform: translateY(-126px) !important;
+      transform: translateY(-6px) !important;
       animation: cta-cover-breathe 2.8s ease-in-out infinite !important;
       box-shadow:
         0 0 10px rgba(103, 238, 240, 0.42),
@@ -4400,7 +4408,7 @@
     .cover-page .cyber-cta:hover,
     .cover-page .cyber-cta:focus-visible,
     .cover-page .cyber-cta:active {
-      transform: translateY(-124px) !important;
+      transform: translateY(-4px) !important;
     }
 
     .cover-page .cyber-cta::before {
