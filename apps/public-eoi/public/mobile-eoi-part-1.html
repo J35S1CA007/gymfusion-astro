@@ -114,6 +114,69 @@ Do not modify protected architecture without explicit instruction.
 <button class="cyber-cta" data-action="start" type="button">START NOW</button>
 </div>
 </section>
+<section aria-label="Age eligibility" class="deck-page content-page gate-page">
+<div class="content-scroll age-gate-scroll">
+<div class="page-shell age-gate-shell">
+<article class="card age-gate-card" data-age-eligibility-panel="">
+<div class="age-gate-view" data-age-eligibility-view="gate">
+<div class="eyebrow purple">ONE QUICK THING</div>
+<h3 class="page-title age-gate-title">
+<span>Let's get started with your</span>
+<span>Expression of Interest</span>
+</h3>
+<p class="preview-copy age-gate-copy age-gate-question">Which age group are you in?</p>
+<div class="age-gate-choice-grid age-gate-choice-grid--mobile" data-age-eligibility-options="">
+<button class="btn secondary age-gate-choice" data-age-eligibility-choice="" data-value="18_OR_OVER" type="button">I am 18 or older</button>
+<button class="btn secondary age-gate-choice" data-age-eligibility-choice="" data-value="UNDER_18" type="button">I am under 18</button>
+</div>
+</div>
+<div class="under18-panel is-hidden" data-under18-soft-exit="">
+<div class="eyebrow purple">Future service planning</div>
+<h3 class="under18-title" style="font-size: 21px !important;"><span>Thanks for your interest</span><span>in GYMFUSION</span></h3>
+<p class="helper-copy under18-copy">Our current services are specifically designed for people aged 18 years and over, so you can’t continue with an Expression of Interest at this time.</p>
+<p class="helper-copy under18-copy">We’d still like to understand interest from younger people in our community. If you’d like, you can tell us your age group below. This information will only be used to help inform future service planning.</p>
+<fieldset class="under18-age-band-fieldset">
+<legend>Age group (optional)</legend>
+<div class="under18-age-band-grid under18-age-band-grid--mobile">
+<button class="btn secondary under18-age-band-option" data-under18-age-band="" data-value="16-17" type="button">16–17</button>
+<button class="btn secondary under18-age-band-option" data-under18-age-band="" data-value="14-15" type="button">14–15</button>
+<button class="btn secondary under18-age-band-option" data-under18-age-band="" data-value="10-13" type="button">10–13</button>
+<button class="btn secondary under18-age-band-option" data-under18-age-band="" data-value="Under 10" type="button">Under 10</button>
+<button class="btn secondary under18-age-band-option" data-under18-age-band="" data-value="PREFER_NOT_TO_SAY" type="button">Prefer not to say</button>
+</div>
+</fieldset>
+<div class="under18-turnstile-block">
+<div class="under18-turnstile-host" data-under18-turnstile=""></div>
+<p class="helper-copy is-hidden" data-under18-turnstile-message=""></p>
+</div>
+<div class="footer-actions under18-actions is-revealed" data-under18-actions="">
+<button class="btn primary" data-under18-submit="" type="button">SUBMIT</button>
+<button class="btn secondary" data-under18-home="" data-under18-home-exit="" type="button">Return to Homepage</button>
+</div>
+</div>
+<div aria-live="polite" class="under18-state is-hidden" data-under18-processing="" role="status">
+<div aria-hidden="true" class="turnstile-spinner"></div>
+<p>Please Wait... we are securely recording your response!</p>
+</div>
+<div aria-live="polite" class="under18-state is-hidden" data-under18-success="" role="status">
+<h3>Received</h3>
+<p>We’ve recorded your response ◡̈</p>
+<div class="footer-actions is-revealed">
+<button class="btn secondary" data-under18-home="" type="button">Return to Homepage</button>
+</div>
+</div>
+<div aria-live="polite" class="under18-state is-hidden" data-under18-failure="" role="status">
+<h3>We couldn’t record your response</h3>
+<p>Your information has not been recorded. Please try again.</p>
+<div class="footer-actions is-revealed">
+<button class="btn primary" data-under18-retry="" type="button">TRY AGAIN</button>
+<button class="btn secondary" data-under18-home="" type="button">Return to Homepage</button>
+</div>
+</div>
+</article>
+</div>
+</div>
+<div aria-label="Accessibility toolbar" class="bottom-accessibility-toolbar"></div></section>
 <section aria-label="Acknowledgement" class="deck-page content-page">
 <div class="toolbar">
 <button aria-controls="site-menu-step-1" aria-expanded="false" aria-label="Open site menu" class="toolbar-menu-button" data-site-menu-toggle="" type="button">
@@ -219,41 +282,6 @@ Do not modify protected architecture without explicit instruction.
 <span class="line-break">tick the checkbox to confirm your</span>
 <span class="line-break">of next steps!</span>
 </p>
-</article>
-<article class="card" data-age-eligibility-card="">
-<div class="eyebrow">Age eligibility</div>
-<h3>Are you 18 years or older? <span class="required">*</span></h3>
-<div class="helper-copy age-eligibility-copy">
-                    If you are 18 or over, you can continue in this public EOI flow. If you are under 18, you will be routed to the live Wix intake instead.
-                  </div>
-<label class="gradient-check" style="cursor: pointer;">
-<div class="check-copy">
-                      I confirm I am 18 years or older
-                    </div>
-<div class="yes-no">
-<span aria-hidden="true" class="gradient-check-box">
-<input data-age-eligibility-choice="" name="age_eligibility_confirmation" required="" type="radio" value="18_OR_OVER"/>
-<span class="check-mark"></span>
-</span>
-</div>
-</label>
-<label class="gradient-check" style="cursor: pointer;">
-<div class="check-copy">
-                      I am under 18 years old
-                    </div>
-<div class="yes-no">
-<span aria-hidden="true" class="gradient-check-box">
-<input data-age-eligibility-choice="" name="age_eligibility_confirmation" required="" type="radio" value="UNDER_18"/>
-<span class="check-mark"></span>
-</span>
-</div>
-</label>
-<p class="helper-copy is-hidden" data-under18-handoff-copy="">
-                    Under 18? Continue on the live Wix form.
-                  </p>
-<div class="footer-actions intro-actions is-hidden" data-under18-handoff-actions="">
-<button class="btn secondary" data-under18-handoff="" type="button">Continue on Wix</button>
-</div>
 </article>
 <div aria-label="Introductory information" class="info-tiles">
 <article class="card info-tile tile-purple">

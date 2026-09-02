@@ -10,6 +10,7 @@ const mobileEoiMarkup = mobileEoiBody
   .replace(/\s*<script[^>]*src=["']\.\/mobile\.js["'][^>]*><\/script>\s*$/i, '')
   .replace(/^\s*<main\b/, '<div')
   .replace(/<\/main>\s*$/, '</div>');
+const under18TurnstileSiteKey = String(import.meta.env.PUBLIC_UNDER18_TURNSTILE_SITE_KEY ?? '').trim();
 ---
 
 <Layout
@@ -126,11 +127,17 @@ const mobileEoiMarkup = mobileEoiBody
         <iframe
           class="eoi-embed"
           data-eoi-embed
+          data-under18-turnstile-site-key={under18TurnstileSiteKey}
           title="GYMFUSION Expression of Interest Part 1"
           loading="eager"
           referrerpolicy="no-referrer"
         ></iframe>
-        <div class="mobile-form-host" aria-label="Mobile EOI form" set:html={mobileEoiMarkup}></div>
+        <div
+          class="mobile-form-host"
+          aria-label="Mobile EOI form"
+          data-under18-turnstile-site-key={under18TurnstileSiteKey}
+          set:html={mobileEoiMarkup}
+        ></div>
       </div>
     </section>
 
@@ -379,6 +386,22 @@ const mobileEoiMarkup = mobileEoiBody
 
   const iframe = document.querySelector<HTMLIFrameElement>('[data-eoi-embed]');
   const gfEoiLanding = document.querySelector<HTMLElement>('.eoi-landing');
+  const mobileFormHost = document.querySelector<HTMLElement>('.mobile-form-host');
+  const under18TurnstileSiteKey = String(
+    iframe?.dataset.under18TurnstileSiteKey || mobileFormHost?.dataset.under18TurnstileSiteKey || ''
+  ).trim();
+  const pageParams = new URLSearchParams(window.location.search);
+  const desktopParams = new URLSearchParams();
+  if (under18TurnstileSiteKey) {
+    desktopParams.set('under18_turnstile_site_key', under18TurnstileSiteKey);
+  }
+  const previewUnder18State = String(pageParams.get('preview_under18_state') || '').trim();
+  if (previewUnder18State) {
+    desktopParams.set('preview_under18_state', previewUnder18State);
+  }
+  const desktopEoiUrl = desktopParams.size
+    ? `/desktop-eoi-part-1.html?${desktopParams.toString()}`
+    : '/desktop-eoi-part-1.html';
   window.addEventListener('message', (event) => {
     if (!iframe?.contentWindow || event.source !== iframe.contentWindow || event.origin !== window.location.origin) {
       return;
@@ -395,7 +418,7 @@ const mobileEoiMarkup = mobileEoiBody
   });
   const mobile = window.matchMedia('(max-width: 1023px)').matches;
   if (iframe && !mobile) {
-    iframe.src = '/desktop-eoi-part-1.html';
+    iframe.src = desktopEoiUrl;
   }
   if (mobile) {
     const mobileScript = document.createElement('script');
@@ -598,7 +621,7 @@ const mobileEoiMarkup = mobileEoiBody
     gap: 16px;
     width: min(calc(100vw - 24px), 340px);
     margin: auto;
-    transform: translateY(-130px);
+    transform: none;
   }
 
   .mobile-site-menu__button {
@@ -966,7 +989,7 @@ const mobileEoiMarkup = mobileEoiBody
       width: 100%;
       justify-items: center;
       gap: 10px;
-      padding: 0 0 calc(10rem + env(safe-area-inset-bottom));
+      padding: 0 0 calc(2rem + env(safe-area-inset-bottom));
       box-sizing: border-box;
       background: #000;
     }
@@ -1076,6 +1099,14 @@ const mobileEoiMarkup = mobileEoiBody
       border-radius: 0 !important;
       font-size: 13px !important;
       line-height: 1.32 !important;
+    }
+
+    .country-acknowledgement__text {
+      width: 100% !important;
+      height: auto !important;
+      display: block !important;
+      margin: 0 !important;
+      text-align: center !important;
     }
 
     .eoi-embed {

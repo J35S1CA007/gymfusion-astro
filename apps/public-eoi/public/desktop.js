@@ -633,6 +633,31 @@
 
       const pages = Array.from(deck.querySelectorAll(".deck-page"));
       const pageRoot = document.querySelector(".page");
+      const SLIDES = Object.freeze({
+        cover: 0,
+        ageGate: 1,
+        intro: 2,
+        privacy: 3,
+        personal: 4,
+        preferences: 5,
+        availability: 6,
+        submitted: 7
+      });
+      const ADULT_AGE_ELIGIBILITY_VALUE = "18_OR_OVER";
+      const UNDER_18_AGE_ELIGIBILITY_VALUE = "UNDER_18";
+      const UNDER_18_PREFER_NOT_TO_SAY_VALUE = "PREFER_NOT_TO_SAY";
+      const UNDER18_HOMEPAGE_URL = "https://www.gymfusion.com.au/";
+      const LOCAL_PREVIEW_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"];
+      const UNDER18_SUBMIT_URL =
+        window.EOI_UNDER18_SUBMIT_URL ||
+        (LOCAL_PREVIEW_HOSTS.includes(window.location.hostname)
+          ? "/api/preview/under18-service-demand-submit"
+          : "https://www.gymfusion.com.au/_functions/under18_service_demand_submit");
+      const UNDER18_TURNSTILE_TEST_SITE_KEY = "1x00000000000000000000AA";
+      const LOCAL_PREVIEW_UNDER18_STATE =
+        LOCAL_PREVIEW_HOSTS.includes(window.location.hostname)
+          ? String(contextParams.get("preview_under18_state") || "").trim().toLowerCase()
+          : "";
       let current = 0;
       let firstInvalidTarget = null;
       let maxUnlockedProgressStep = 0;
@@ -688,19 +713,19 @@
         return Number.parseInt(label, 10);
       };
 
-      const getProgressStepForSlide = (slideIndex) => Math.min(Math.max(slideIndex, 1), 6);
-
-      const getPreviewStepTargetIndex = (stepIndex) => stepIndex;
-
-      const canNavigateByPreviewStep = (targetIndex) => {
-        if (current === 2 && targetIndex === 1) return true;
-        return current >= 3 && targetIndex <= maxUnlockedSlideIndex;
+      const getProgressStepForSlide = (slideIndex) => {
+        if (slideIndex < SLIDES.intro) return 0;
+        return Math.min(Math.max(slideIndex - 1, 1), 6);
       };
+
+      const getPreviewStepTargetIndex = (stepIndex) => stepIndex + 1;
+
+      const canNavigateByPreviewStep = (targetIndex) => current >= SLIDES.privacy && targetIndex <= maxUnlockedSlideIndex;
 
       const syncPreviewSteps = () => {
         const activeProgressStep = getProgressStepForSlide(current);
-        const hasReachedStepThree = maxUnlockedSlideIndex >= 3;
-        const showStartReturnLocks = hasReachedStepThree && current === 1;
+        const hasReachedStepThree = maxUnlockedSlideIndex >= SLIDES.personal;
+        const showStartReturnLocks = hasReachedStepThree && current === SLIDES.intro;
         const showRevisitUnlocks = hasReachedStepThree && current < maxUnlockedSlideIndex;
         deck.querySelectorAll(".preview-step").forEach((step) => {
           const stepIndex = getPreviewStepIndex(step);
@@ -731,7 +756,7 @@
 
       const setSlide = (index) => {
         current = Math.max(0, Math.min(index, pages.length - 1));
-        if (current === 0) {
+        if (current === SLIDES.cover) {
           maxUnlockedProgressStep = 0;
           maxUnlockedSlideIndex = 0;
         } else {
@@ -739,7 +764,7 @@
           maxUnlockedSlideIndex = Math.max(maxUnlockedSlideIndex, current);
         }
         deck.style.setProperty("--slide-index", String(current));
-        const deckState = current === 0 ? "cover" : "form";
+        const deckState = current === SLIDES.cover ? "cover" : "form";
         deck.setAttribute("data-deck-state", deckState);
         pageRoot?.setAttribute("data-deck-state", deckState);
         syncBrandIcon();
@@ -1336,18 +1361,7 @@
       const validateStep = (index) => {
         clearErrors();
 
-        if (index === 1) {
-          const ageEligibility = deck.querySelector('input[name="age_eligibility_confirmation"]:checked');
-          if (!hasValue(ageEligibility)) {
-            const target = ageEligibility?.closest(".gradient-check") || deck.querySelector("[data-age-eligibility-card]") || ageEligibility;
-            setValidationState(target, "Please confirm your age eligibility.");
-            target.classList.add("is-invalid");
-            firstInvalidTarget = target;
-            return false;
-          }
-          if (String(ageEligibility.value || "") === "UNDER_18") {
-            return true;
-          }
+        if (index === SLIDES.intro) {
           const missing = Array.from(deck.querySelectorAll("[data-intro-ack]")).find((checkbox) => !hasValue(checkbox));
           if (missing) {
             const target = missing.closest(".gradient-check") || missing;
@@ -1358,7 +1372,7 @@
           return !missing;
         }
 
-        if (index === 2) {
+        if (index === SLIDES.privacy) {
           const consent = deck.querySelector('input[name="privacy_consent"]');
           if (!hasValue(consent)) {
             const target = consent?.closest(".gradient-check") || consent;
@@ -1369,7 +1383,7 @@
           return hasValue(consent);
         }
 
-        if (index === 3) {
+        if (index === SLIDES.personal) {
           const firstName = deck.querySelector('input[name="first_name"]');
           const lastName = deck.querySelector('input[name="last_name"]');
           const ageBand = deck.querySelector('select[name="age_band"]');
@@ -1503,7 +1517,7 @@
           return valid;
         }
 
-        if (index === 4) {
+        if (index === SLIDES.preferences) {
           const trainingType = deck.querySelector('[data-option-group="training-type"].is-selected');
           const secondPreferenceCard = deck.querySelector('[data-conditional-card="second-preference"]');
           const secondPreference = deck.querySelector('[data-choice-group="second_preference"].is-selected');
@@ -1525,7 +1539,7 @@
           return valid;
         }
 
-      if (index === 5) {
+      if (index === SLIDES.availability) {
           if (deck.querySelector("[data-matrix-group].is-selected")) return true;
           const firstVisibleGrid = Array.from(deck.querySelectorAll(".availability-grid")).find((grid) => {
             const card = grid.closest("[data-availability-card]");
@@ -1593,7 +1607,8 @@
       deck.querySelectorAll("[data-action='start']").forEach((button) => {
         button.addEventListener("click", () => {
           markProgressDirty();
-          setSlide(1);
+          showAgeEligibilityGate();
+          setSlide(SLIDES.ageGate);
         });
       });
 
@@ -1606,10 +1621,6 @@
 
       deck.querySelectorAll("[data-action='next']").forEach((button) => {
         button.addEventListener("click", () => {
-          if (current === 1 && getAgeEligibilityValue() === "UNDER_18") {
-            window.location.assign("https://www.gymfusion.com.au/eoi");
-            return;
-          }
           markProgressDirty();
           if (!validateStep(current)) {
             scrollToFirstInvalid();
@@ -1647,6 +1658,7 @@
         updatePostalVisibility("Yes");
         updateSecondPreferenceVisibility();
         updateSelectionSummaries();
+        showAgeEligibilityGate();
         sessionStorage.removeItem("gymfusion_eoi_part1_submission_id");
         delete window.__GYMFUSION_EOI_PART1_SUBMISSION_ID__;
         maxUnlockedProgressStep = 0;
@@ -1734,13 +1746,31 @@
       });
 
       const introCheckboxes = Array.from(deck.querySelectorAll("[data-intro-ack]"));
-      const ageEligibilityInputs = Array.from(deck.querySelectorAll('input[name="age_eligibility_confirmation"]'));
       const introConfirm = deck.querySelector("[data-intro-confirm]");
-      const under18HandoffActions = deck.querySelector("[data-under18-handoff-actions]");
-      const under18HandoffButton = deck.querySelector("[data-under18-handoff]");
       const privacyCheckbox = deck.querySelector('input[name="privacy_consent"]');
       const privacyConfirm = deck.querySelector("[data-privacy-confirm]");
+      const ageGatePanel = deck.querySelector("[data-age-eligibility-panel]");
+      const ageGateView = deck.querySelector('[data-age-eligibility-view="gate"]');
+      const ageGateButtons = Array.from(deck.querySelectorAll("[data-age-eligibility-choice]"));
+      const under18Panel = deck.querySelector("[data-under18-soft-exit]");
+      const under18Processing = deck.querySelector("[data-under18-processing]");
+      const under18Success = deck.querySelector("[data-under18-success]");
+      const under18Failure = deck.querySelector("[data-under18-failure]");
+      const under18AgeBandButtons = Array.from(deck.querySelectorAll("[data-under18-age-band]"));
+      const under18SubmitButtons = Array.from(deck.querySelectorAll("[data-under18-submit]"));
+      const under18ActionFooter = deck.querySelector("[data-under18-actions]");
+      const under18HomeExitButton = deck.querySelector("[data-under18-home-exit]");
+      const under18RetryButton = deck.querySelector("[data-under18-retry]");
+      const under18HomeButtons = Array.from(deck.querySelectorAll("[data-under18-home]"));
+      const under18TurnstileHost = deck.querySelector("[data-under18-turnstile]");
+      const under18TurnstileMessage = deck.querySelector("[data-under18-turnstile-message]");
       const autoScrolledFooters = new Set();
+      let selectedAgeEligibility = "";
+      let under18SelectedAgeBand = "";
+      let under18SubmissionInFlight = false;
+      let under18TurnstileToken = "";
+      let under18TurnstileScriptPromise = null;
+      let under18TurnstileWidgetId = null;
 
       const scrollCurrentPageToElement = (element) => {
         const currentPage = pages[current];
@@ -1754,7 +1784,7 @@
       };
 
       const scrollToFirstInvalid = () => {
-        if (!firstInvalidTarget || current === 5) return;
+        if (!firstInvalidTarget || current === SLIDES.submitted) return;
         scrollCurrentPageToElement(firstInvalidTarget);
       };
 
@@ -1779,23 +1809,12 @@
         });
       };
 
-      const getAgeEligibilityValue = () => String(deck.querySelector('input[name="age_eligibility_confirmation"]:checked')?.value || "");
       const updateIntroConfirm = () => {
         if (!introCheckboxes.length || !introConfirm) return;
-        const ageEligibility = getAgeEligibilityValue();
-        const isAdult = ageEligibility === "18_OR_OVER";
-        const isUnder18 = ageEligibility === "UNDER_18";
-        const adultReady = isAdult && introCheckboxes.every((checkbox) => checkbox.checked);
+        const adultReady = introCheckboxes.every((checkbox) => checkbox.checked);
         introConfirm.classList.toggle("is-hidden", !adultReady);
         introConfirm.closest(".footer-actions")?.classList.toggle("is-revealed", adultReady);
-        if (under18HandoffActions) {
-          under18HandoffActions.classList.toggle("is-hidden", !isUnder18);
-          under18HandoffActions.classList.toggle("is-revealed", isUnder18);
-        }
-        if (under18HandoffButton) {
-          under18HandoffButton.disabled = !isUnder18;
-        }
-        if (adultReady || isUnder18) {
+        if (adultReady) {
           scrollCurrentPageToFooterOnce("intro");
         }
       };
@@ -1852,7 +1871,253 @@
         }
       };
 
-      const part1SubmitEndpoint = window.EOI_PART1_SUBMIT_URL || (window.location.protocol === "file:" ? "" : "https://www.gymfusion.com.au/_functions/eoi_part1_submit");
+      const part1SubmitEndpoint =
+        window.EOI_PART1_SUBMIT_URL ||
+        (window.location.protocol === "file:"
+          ? ""
+          : LOCAL_PREVIEW_HOSTS.includes(window.location.hostname)
+            ? "/api/preview/eoi-part1-submit"
+            : "https://www.gymfusion.com.au/_functions/eoi_part1_submit");
+      const isLocalTurnstileHost = () => LOCAL_PREVIEW_HOSTS.includes(window.location.hostname);
+      const getUnder18TurnstileSiteKey = () =>
+        String(contextParams.get("under18_turnstile_site_key") || "").trim() ||
+        (isLocalTurnstileHost() ? UNDER18_TURNSTILE_TEST_SITE_KEY : "");
+      const getUnder18SubmissionNonce = () => {
+        if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+        return `under18_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      };
+      const showUnder18TurnstileMessage = (message) => {
+        if (!under18TurnstileMessage) return;
+        under18TurnstileMessage.textContent = message || "";
+        under18TurnstileMessage.classList.toggle("is-hidden", !message);
+      };
+      const getLocalPreviewUnder18Mode = () => {
+        if (LOCAL_PREVIEW_UNDER18_STATE === "pending") return "pending";
+        if (LOCAL_PREVIEW_UNDER18_STATE === "unavailable" || LOCAL_PREVIEW_UNDER18_STATE === "error") return "unavailable";
+        if (LOCAL_PREVIEW_UNDER18_STATE === "failure") return "failure";
+        return "success";
+      };
+      const hasLocalPreviewUnder18Token = () => {
+        const previewMode = getLocalPreviewUnder18Mode();
+        return previewMode !== "pending" && previewMode !== "unavailable";
+      };
+      const renderLocalPreviewTurnstile = () => {
+        if (!under18TurnstileHost) return false;
+        under18TurnstileHost.textContent = "";
+        under18TurnstileHost.setAttribute("data-preview-turnstile", "true");
+        under18TurnstileHost.setAttribute("data-preview-turnstile-mode", getLocalPreviewUnder18Mode());
+        under18TurnstileToken = hasLocalPreviewUnder18Token() ? "preview-turnstile-token" : "";
+        showUnder18TurnstileMessage("");
+        updateUnder18SubmitAvailability();
+        return true;
+      };
+      const setUnder18View = (view) => {
+        const views = [
+          ["gate", ageGateView],
+          ["under18", under18Panel],
+          ["processing", under18Processing],
+          ["success", under18Success],
+          ["failure", under18Failure]
+        ];
+        views.forEach(([key, element]) => {
+          if (!element) return;
+          element.classList.toggle("is-hidden", key !== view);
+        });
+        if (ageGatePanel) {
+          ageGatePanel.setAttribute("data-under18-view", view);
+          ageGatePanel.closest(".gate-page")?.classList.toggle("is-under18-view", view === "under18");
+        }
+      };
+      const updateUnder18AgeBandButtons = () => {
+        under18AgeBandButtons.forEach((button) => {
+          const isSelected = String(button.getAttribute("data-value") || "") === under18SelectedAgeBand;
+          button.classList.toggle("is-selected", isSelected);
+          button.setAttribute("aria-pressed", String(isSelected));
+        });
+      };
+      const updateUnder18SubmitAvailability = () => {
+        const isReady = Boolean(under18TurnstileToken) && !under18SubmissionInFlight;
+        under18SubmitButtons.forEach((button) => {
+          button.disabled = !isReady;
+          button.classList.toggle("is-hidden", !isReady);
+          button.setAttribute("aria-hidden", String(!isReady));
+        });
+        if (under18HomeExitButton) {
+          under18HomeExitButton.classList.toggle("is-hidden", isReady);
+          under18HomeExitButton.disabled = isReady;
+          under18HomeExitButton.setAttribute("aria-hidden", String(isReady));
+        }
+      };
+      const resetUnder18Turnstile = () => {
+        under18TurnstileToken = "";
+        updateUnder18SubmitAvailability();
+        if (isLocalTurnstileHost() && under18TurnstileHost) {
+          under18TurnstileHost.textContent = "";
+          under18TurnstileHost.setAttribute("data-preview-turnstile", "true");
+          under18TurnstileHost.setAttribute("data-preview-turnstile-mode", getLocalPreviewUnder18Mode());
+          return;
+        }
+        if (window.turnstile && under18TurnstileWidgetId !== null) {
+          window.turnstile.reset(under18TurnstileWidgetId);
+        }
+      };
+      const ensureUnder18TurnstileScript = () => {
+        if (window.turnstile) return Promise.resolve(window.turnstile);
+        if (under18TurnstileScriptPromise) return under18TurnstileScriptPromise;
+        under18TurnstileScriptPromise = new Promise((resolve, reject) => {
+          const existing = document.querySelector('script[data-under18-turnstile-script]');
+          if (existing) {
+            existing.addEventListener("load", () => resolve(window.turnstile), { once: true });
+            existing.addEventListener("error", () => reject(new Error("Turnstile failed to load")), { once: true });
+            return;
+          }
+          const script = document.createElement("script");
+          script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+          script.defer = true;
+          script.setAttribute("data-under18-turnstile-script", "true");
+          script.onload = () => resolve(window.turnstile);
+          script.onerror = () => reject(new Error("Turnstile failed to load"));
+          document.head.appendChild(script);
+        });
+        return under18TurnstileScriptPromise;
+      };
+      const ensureUnder18Turnstile = async () => {
+        if (!under18TurnstileHost) return false;
+        if (isLocalTurnstileHost()) {
+          return renderLocalPreviewTurnstile();
+        }
+        const siteKey = getUnder18TurnstileSiteKey();
+        if (!siteKey) {
+          showUnder18TurnstileMessage("We’re currently experiencing difficulties confirming you’re a human. Please try again in a few minutes, or contact us at support@gymfusion.com.au if the problem continues.");
+          updateUnder18SubmitAvailability();
+          return false;
+        }
+        showUnder18TurnstileMessage("");
+        try {
+          const turnstile = await ensureUnder18TurnstileScript();
+          if (!turnstile) throw new Error("Turnstile unavailable");
+          await new Promise((resolve) => turnstile.ready(resolve));
+          if (under18TurnstileWidgetId === null) {
+            under18TurnstileWidgetId = turnstile.render(under18TurnstileHost, {
+              sitekey: siteKey,
+              theme: "dark",
+              size: "flexible",
+              callback(token) {
+                under18TurnstileToken = String(token || "").trim();
+                showUnder18TurnstileMessage("");
+                updateUnder18SubmitAvailability();
+              },
+              "expired-callback": () => {
+                under18TurnstileToken = "";
+                showUnder18TurnstileMessage("Human verification expired. Please verify again.");
+                updateUnder18SubmitAvailability();
+              },
+              "error-callback": () => {
+                under18TurnstileToken = "";
+                showUnder18TurnstileMessage("Human verification could not be completed. Please try again.");
+                updateUnder18SubmitAvailability();
+              }
+            });
+          } else {
+            resetUnder18Turnstile();
+          }
+          updateUnder18SubmitAvailability();
+          return true;
+        } catch {
+          showUnder18TurnstileMessage("We’re currently experiencing difficulties confirming you’re a human. Please try again in a few minutes, or contact us at support@gymfusion.com.au if the problem continues.");
+          updateUnder18SubmitAvailability();
+          return false;
+        }
+      };
+      const showAgeEligibilityGate = () => {
+        selectedAgeEligibility = "";
+        under18SubmissionInFlight = false;
+        under18SelectedAgeBand = "";
+        updateUnder18AgeBandButtons();
+        resetUnder18Turnstile();
+        showUnder18TurnstileMessage("");
+        updateUnder18SubmitAvailability();
+        ageGateButtons.forEach((button) => {
+          button.classList.remove("is-selected");
+          button.setAttribute("aria-pressed", "false");
+        });
+        setUnder18View("gate");
+      };
+      const showUnder18Planning = async () => {
+        setUnder18View("under18");
+        const currentPage = pages[current];
+        const scroller = currentPage?.querySelector(".content-scroll");
+        scroller?.scrollTo({ top: 0, behavior: "auto" });
+        await ensureUnder18Turnstile();
+      };
+      const getLocalPreviewUnder18Outcome = () =>
+        LOCAL_PREVIEW_UNDER18_STATE === "failure" ? "failure" : "success";
+      const applyLocalPreviewUnder18State = () => {
+        if (!LOCAL_PREVIEW_UNDER18_STATE) return false;
+        selectedAgeEligibility = UNDER_18_AGE_ELIGIBILITY_VALUE;
+        const previewMode = getLocalPreviewUnder18Mode();
+        if (previewMode === "pending" || previewMode === "unavailable") {
+          setUnder18View("under18");
+          renderLocalPreviewTurnstile();
+          showUnder18TurnstileMessage(
+            previewMode === "unavailable"
+              ? "We’re currently experiencing difficulties confirming you’re a human. Please try again in a few minutes, or contact us at support@gymfusion.com.au if the problem continues."
+              : ""
+          );
+          setSlide(SLIDES.ageGate);
+          return true;
+        }
+        if (LOCAL_PREVIEW_UNDER18_STATE !== "failure" && LOCAL_PREVIEW_UNDER18_STATE !== "success") return false;
+        setUnder18View(getLocalPreviewUnder18Outcome());
+        showUnder18TurnstileMessage("");
+        setSlide(SLIDES.ageGate);
+        return true;
+      };
+      const submitUnder18Planning = async () => {
+        if (under18SubmissionInFlight) return;
+        if (!under18TurnstileToken) {
+          showUnder18TurnstileMessage("Please complete the human verification before submitting.");
+          updateUnder18SubmitAvailability();
+          return;
+        }
+
+        under18SubmissionInFlight = true;
+        updateUnder18SubmitAvailability();
+        setUnder18View("processing");
+
+        try {
+          if (isLocalTurnstileHost()) {
+            await new Promise((resolve) => window.setTimeout(resolve, 320));
+            setUnder18View(getLocalPreviewUnder18Outcome());
+            return;
+          }
+          const payload = {
+            turnstileToken: under18TurnstileToken,
+            submissionNonce: getUnder18SubmissionNonce()
+          };
+          if (under18SelectedAgeBand) {
+            payload.under18AgeBand = under18SelectedAgeBand;
+          }
+
+          const response = await fetch(UNDER18_SUBMIT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok || result?.ok !== true) {
+            throw new Error(String(result?.code || response.status || "submit_failed"));
+          }
+          setUnder18View("success");
+        } catch {
+          setUnder18View("failure");
+        } finally {
+          under18SubmissionInFlight = false;
+          under18TurnstileToken = "";
+          updateUnder18SubmitAvailability();
+          resetUnder18Turnstile();
+        }
+      };
       const buildSubmissionId = () => {
         if (window.crypto?.randomUUID) return window.crypto.randomUUID();
         return `submission_${Date.now()}_${Math.random().toString(16).slice(2)}`;
@@ -1889,6 +2154,7 @@
           }
           fields[name] = String(control.value || "").trim();
         });
+        fields.age_eligibility_confirmation = selectedAgeEligibility || ADULT_AGE_ELIGIBILITY_VALUE;
 
         const selections = {
           postal_same_as_residential: deck.querySelector('[data-choice-group="postal_same"].is-selected')?.dataset?.value || "",
@@ -1943,10 +2209,6 @@
       const finalSubmitButton = deck.querySelector("[data-availability-submit]");
       if (finalSubmitButton) {
         finalSubmitButton.addEventListener("click", async () => {
-          if (current === 1 && getAgeEligibilityValue() === "UNDER_18") {
-            window.location.assign("https://www.gymfusion.com.au/eoi");
-            return;
-          }
           if (!validateStep(current)) {
             scrollToFirstInvalid();
             return;
@@ -1968,9 +2230,49 @@
         });
       }
 
-      ageEligibilityInputs.forEach((input) => input.addEventListener("change", updateIntroConfirm));
-      under18HandoffButton?.addEventListener("click", () => {
-        window.location.assign("https://www.gymfusion.com.au/eoi");
+      ageGateButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", "false");
+        button.addEventListener("click", async () => {
+          markProgressDirty();
+          const value = String(button.getAttribute("data-value") || "");
+          ageGateButtons.forEach((item) => {
+            const isActive = item === button;
+            item.classList.toggle("is-selected", isActive);
+            item.setAttribute("aria-pressed", String(isActive));
+          });
+          selectedAgeEligibility = value;
+          if (value === ADULT_AGE_ELIGIBILITY_VALUE) {
+            setSlide(SLIDES.intro);
+            return;
+          }
+          if (value === UNDER_18_AGE_ELIGIBILITY_VALUE) {
+            await showUnder18Planning();
+          }
+        });
+      });
+      under18AgeBandButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", "false");
+        button.addEventListener("click", () => {
+          markProgressDirty();
+          const value = String(button.getAttribute("data-value") || "");
+          under18SelectedAgeBand = under18SelectedAgeBand === value ? "" : value;
+          updateUnder18AgeBandButtons();
+          if (under18ActionFooter) {
+            scrollCurrentPageToElement(under18ActionFooter);
+          }
+        });
+      });
+      under18SubmitButtons.forEach((button) => {
+        button.addEventListener("click", submitUnder18Planning);
+      });
+      under18RetryButton?.addEventListener("click", async () => {
+        markProgressDirty();
+        await showUnder18Planning();
+      });
+      under18HomeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          window.location.assign(UNDER18_HOMEPAGE_URL);
+        });
       });
 
       introCheckboxes.forEach((checkbox) => checkbox.addEventListener("change", updateIntroConfirm));
@@ -1988,12 +2290,14 @@
       updatePrivacyConfirm();
       updatePronounsOther();
       normalizeDefaultSelectValues();
+      showAgeEligibilityGate();
       initAddressLookup();
       updateSecondPreferenceVisibility();
       updateAvailabilityVisibility();
 
       updatePostalVisibility("Yes");
       setSlide(0);
+      applyLocalPreviewUnder18State();
     })();
   
 
