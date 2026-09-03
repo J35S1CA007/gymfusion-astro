@@ -2050,8 +2050,7 @@
         showUnder18TurnstileMessage("");
         try {
           const turnstile = await ensureUnder18TurnstileScript();
-          if (!turnstile) throw new Error("Turnstile unavailable");
-          await new Promise((resolve) => turnstile.ready(resolve));
+          if (!turnstile || typeof turnstile.render !== "function") throw new Error("Turnstile unavailable");
           if (under18TurnstileWidgetId === null) {
             under18TurnstileWidgetId = turnstile.render(under18TurnstileHost, {
               sitekey: siteKey,
