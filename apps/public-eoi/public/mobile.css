@@ -118,11 +118,23 @@
     }
 
     .accessibility-toggle:hover,
-    .accessibility-toggle:focus-visible,
     .accessibility-toggle[aria-expanded="true"] {
       transform: translateY(-1px);
       filter: drop-shadow(0 0 16px rgba(36, 19, 65, 0.34)) drop-shadow(0 12px 28px rgba(10, 8, 28, 0.34));
-      outline: none;
+    }
+
+    .accessibility-toggle[aria-expanded="true"] {
+      box-shadow: 0 0 0 3px rgba(103, 238, 240, 0.62);
+    }
+
+    .accessibility-toggle:active {
+      transform: translateY(1px);
+      filter: drop-shadow(0 0 10px rgba(36, 19, 65, 0.24)) drop-shadow(0 6px 14px rgba(10, 8, 28, 0.24));
+    }
+
+    .accessibility-toggle:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.92);
+      outline-offset: 4px;
     }
 
     .accessibility-trigger-icon {
@@ -5686,6 +5698,21 @@
       display: none !important;
     }
 
+    .page:not([data-deck-state="form"]) .accessibility-toggle:focus-visible,
+    .page[data-deck-state="cover"] .accessibility-toggle:focus-visible,
+    .deck[data-deck-state="cover"] .accessibility-toggle:focus-visible,
+    .deck[style*="--slide-index: 0"] .accessibility-toggle:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.92) !important;
+      outline-offset: 3px !important;
+    }
+
+    .page:not([data-deck-state="form"]) .accessibility-toggle[aria-expanded="true"],
+    .page[data-deck-state="cover"] .accessibility-toggle[aria-expanded="true"],
+    .deck[data-deck-state="cover"] .accessibility-toggle[aria-expanded="true"],
+    .deck[style*="--slide-index: 0"] .accessibility-toggle[aria-expanded="true"] {
+      box-shadow: 0 0 0 3px rgba(103, 238, 240, 0.62) !important;
+    }
+
     /* 2) Personal Details card header rhythm: use the good question-heading rhythm from the sex-at-birth section. */
     .step-page[aria-label="Personal details"] .card > .eyebrow,
     .step-page[aria-label="Personal details"] .card > .detail-eyebrow {
@@ -6005,24 +6032,28 @@
     }
 
     .gate-page .content-scroll.age-gate-scroll:has(.age-gate-card[data-under18-view="processing"]),
-    .gate-page .content-scroll.age-gate-scroll:has(.age-gate-card[data-under18-view="success"]) {
+    .gate-page .content-scroll.age-gate-scroll:has(.age-gate-card[data-under18-view="success"]),
+    .gate-page .content-scroll.age-gate-scroll:has(.age-gate-card[data-under18-view="failure"]) {
       justify-content: center !important;
     }
 
     .gate-page .content-scroll.age-gate-scroll:has(.age-gate-card[data-under18-view="processing"]) > .age-gate-shell,
-    .gate-page .content-scroll.age-gate-scroll:has(.age-gate-card[data-under18-view="success"]) > .age-gate-shell {
+    .gate-page .content-scroll.age-gate-scroll:has(.age-gate-card[data-under18-view="success"]) > .age-gate-shell,
+    .gate-page .content-scroll.age-gate-scroll:has(.age-gate-card[data-under18-view="failure"]) > .age-gate-shell {
       align-content: center !important;
       transform: translateY(15px) !important;
     }
 
     .age-gate-card[data-under18-view="processing"],
-    .age-gate-card[data-under18-view="success"] {
+    .age-gate-card[data-under18-view="success"],
+    .age-gate-card[data-under18-view="failure"] {
       min-height: 20.5rem !important;
       align-content: stretch !important;
     }
 
     .age-gate-card[data-under18-view="processing"] > [data-under18-processing].under18-state,
-    .age-gate-card[data-under18-view="success"] > [data-under18-success].under18-state {
+    .age-gate-card[data-under18-view="success"] > [data-under18-success].under18-state,
+    .age-gate-card[data-under18-view="failure"] > [data-under18-failure].under18-state {
       min-height: 100% !important;
       width: 100% !important;
       display: flex !important;
@@ -6039,4 +6070,63 @@
       padding-top: 0 !important;
       padding-bottom: 0 !important;
       justify-content: center !important;
+    }
+
+    .age-gate-card[data-under18-view="failure"] > [data-under18-failure].under18-state .footer-actions {
+      margin-top: 10px !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      justify-content: center !important;
+    }
+
+    .age-gate-card[data-under18-view="failure"] {
+      width: min(100%, 12.5rem) !important;
+    }
+
+    .age-gate-card[data-under18-view="failure"] > [data-under18-failure].under18-state {
+      min-width: 0 !important;
+    }
+
+    .age-gate-card[data-under18-view="failure"] > [data-under18-failure].under18-state .footer-actions {
+      display: flex !important;
+      flex-direction: column !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      gap: 10px !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .age-gate-card[data-under18-view="failure"] > [data-under18-failure].under18-state .footer-actions .btn {
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      flex: 0 0 auto !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      padding-top: 7px !important;
+      padding-bottom: 7px !important;
+      font-size: 11px !important;
+      min-height: 34px !important;
+      white-space: nowrap !important;
+    }
+
+    .age-gate-card[data-under18-view="failure"] > [data-under18-failure].under18-state .footer-actions [data-under18-retry] {
+      width: 82.765625px !important;
+    }
+
+    .age-gate-card[data-under18-view="failure"] > [data-under18-failure].under18-state .footer-actions [data-under18-home] {
+      width: 142.765625px !important;
+    }
+
+    .age-gate-card[data-under18-view="failure"] > [data-under18-failure].under18-state > h3 {
+      position: relative !important;
+      top: -6px !important;
+      font-size: 18.12px !important;
+    }
+
+    .age-gate-card[data-under18-view="failure"] > [data-under18-failure].under18-state > p {
+      position: relative !important;
+      top: -5px !important;
     }

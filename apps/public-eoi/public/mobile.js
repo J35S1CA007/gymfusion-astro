@@ -9,6 +9,18 @@
       };
       const deck = document.getElementById("preview-deck");
       if (!deck) return;
+      let isInitializing = true;
+      const getResponsiveStateBridge = () => window.__GYMFUSION_EOI_RESPONSIVE_STATE_BRIDGE__;
+      const RESPONSIVE_PRESENTATION_MODE_KEY = "__GYMFUSION_EOI_RESPONSIVE_PRESENTATION_MODE__";
+      const RESPONSIVE_TRANSITION_KEY = "__GYMFUSION_EOI_RESPONSIVE_TRANSITION_IN_PROGRESS__";
+      const isResponsivePresentationActive = () => window[RESPONSIVE_PRESENTATION_MODE_KEY] !== "desktop";
+      const isResponsiveTransitionInProgress = () => Boolean(
+        getResponsiveStateBridge()?.isTransitionInProgress?.() || window[RESPONSIVE_TRANSITION_KEY]
+      );
+      const publishJourneyState = (patch) => {
+        if (isInitializing || !isResponsivePresentationActive()) return;
+        getResponsiveStateBridge()?.setJourneyState?.(patch);
+      };
       const accessibilityTools = document.getElementById("accessibility-tools");
       const accessibilityToggle = document.getElementById("accessibility-toggle");
       const accessibilityTriggerIcon = document.getElementById("accessibility-trigger-icon");
@@ -41,8 +53,8 @@
           backup: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg"
         },
         "accessibility-support": {
-          primary: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg",
-          backup: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg"
+          primary: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-support.png",
+          backup: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-support.png"
         },
         "details-person": {
           primary: "/assets/mobile-eoi-part-1-form-assets/icons/details-icon.png",
@@ -532,16 +544,18 @@
       const applyAccessibilityTriggerIcon = (isActive) => {
         if (!accessibilityTriggerIcon) return;
         const iconKey = isActive ? "accessibility-support" : "accessibility-support-outline";
-        const image = accessibilityTriggerIcon.querySelector(".icon-image");
+        const images = accessibilityTriggerIcon.querySelectorAll(".icon-image");
         accessibilityTriggerIcon.setAttribute("data-icon-key", iconKey);
-        if (!image) return;
+        if (!images.length) return;
         resolveIconSource(iconKey)
           .then((result) => {
             if (!result) {
               accessibilityTriggerIcon.dataset.iconState = "dot";
               return;
             }
-            image.src = result.src;
+            images.forEach((image) => {
+              image.src = result.src;
+            });
             accessibilityTriggerIcon.dataset.iconState = result.state;
           })
           .catch(() => {
@@ -657,17 +671,17 @@
         }
 
         const loop = async () => {
-          if (isPaused || document.hidden) return
+          if (isPaused || document.hidden || !isResponsivePresentationActive()) return
 
           const nextIndex = (index + 1) % slides.length
           await transitionTo(nextIndex)
-          if (isPaused || document.hidden) return
+          if (isPaused || document.hidden || !isResponsivePresentationActive()) return
           timerId = window.setTimeout(loop, Math.max(0, cadenceMs - transitionMs))
         }
 
         const start = () => {
           stop()
-          if (isPaused || document.hidden) return
+          if (isPaused || document.hidden || !isResponsivePresentationActive()) return
           slides.forEach((slide, slideIndex) => {
             slide.style.transform =
               slideIndex === 0
@@ -686,7 +700,7 @@
           start()
         })
         document.addEventListener('visibilitychange', () => {
-          if (document.hidden) stop()
+          if (!isResponsivePresentationActive() || document.hidden) stop()
           else if (!isPaused) start()
         })
 
@@ -747,7 +761,14 @@
         accessibilityPanel.hidden = !shouldOpen;
         accessibilityToggle.setAttribute("aria-expanded", String(shouldOpen));
         document.body.classList.toggle("is-a11y-open", shouldOpen);
-        applyAccessibilityTriggerIcon(shouldOpen);
+        syncAccessibilityTriggerIcon();
+      };
+
+      const syncAccessibilityTriggerIcon = () => {
+        if (!accessibilityToggle) return;
+        const isOpen = accessibilityToggle.getAttribute("aria-expanded") === "true";
+        const isInteractive = accessibilityToggle.matches(":hover, :focus");
+        applyAccessibilityTriggerIcon(isOpen || isInteractive);
       };
 
       accessibilityPrefs = { ...defaultAccessibilityPrefs };
@@ -756,12 +777,17 @@
       initializeMenuIcon();
       initializeCoverImageFallbacks();
       initializeInlineCoverCarousel();
-      applyAccessibilityTriggerIcon(false);
+      syncAccessibilityTriggerIcon();
 
       accessibilityToggle?.addEventListener("click", (event) => {
         event.stopPropagation();
         toggleAccessibilityPanel();
       });
+      accessibilityToggle?.addEventListener("pointerenter", syncAccessibilityTriggerIcon);
+      accessibilityToggle?.addEventListener("pointerdown", syncAccessibilityTriggerIcon);
+      accessibilityToggle?.addEventListener("pointerleave", syncAccessibilityTriggerIcon);
+      accessibilityToggle?.addEventListener("focus", syncAccessibilityTriggerIcon);
+      accessibilityToggle?.addEventListener("blur", syncAccessibilityTriggerIcon);
 
       siteMenuButtons.forEach((button) => {
         button.addEventListener("click", (event) => {
@@ -842,8 +868,14 @@
         }
       });
 
-      document.addEventListener("keydown", trapActiveModalFocus, true);
-      document.addEventListener("focusin", keepFocusInsideModal, true);
+      document.addEventListener("keydown", (event) => {
+        if (!isResponsivePresentationActive()) return;
+        trapActiveModalFocus(event);
+      }, true);
+      document.addEventListener("focusin", (event) => {
+        if (!isResponsivePresentationActive()) return;
+        keepFocusInsideModal(event);
+      }, true);
 
       accessibilityTextSlider?.addEventListener("input", () => {
         const index = Number(accessibilityTextSlider.value);
@@ -868,6 +900,7 @@
       });
 
       document.addEventListener("click", (event) => {
+        if (!isResponsivePresentationActive()) return;
         if (
           event.target instanceof Node &&
           !siteMenuButtons.some((button) => button.contains(event.target)) &&
@@ -887,6 +920,7 @@
       });
 
       document.addEventListener("keydown", (event) => {
+        if (!isResponsivePresentationActive()) return;
         if (event.key !== "Escape") return;
         closeMenuWarning();
         closeSiteMenus();
@@ -954,6 +988,11 @@
         syncDeckState(current);
         syncBrandIcon();
         syncPreviewSteps();
+        publishJourneyState({
+          activeViewport: "mobile",
+          current,
+          deckState: current === SLIDES.cover ? "cover" : "form"
+        });
       };
 
       const syncDeckState = (index) => {
@@ -993,10 +1032,12 @@
       const markProgressDirty = () => {
         if (isRestoringProgress || submissionCompleted) return;
         hasDirtyProgress = true;
+        publishJourneyState({ hasDirtyProgress: true });
       };
 
       const clearProgressDirty = () => {
         hasDirtyProgress = false;
+        publishJourneyState({ hasDirtyProgress: false });
       };
 
       const clearErrors = () => {
@@ -1577,6 +1618,14 @@
       let under18TurnstileToken = "";
       let under18TurnstileScriptPromise = null;
       let under18TurnstileWidgetId = null;
+      const initialJourneyState = getResponsiveStateBridge()?.getJourneyState?.();
+      if (initialJourneyState) {
+        current = Number(initialJourneyState.current || current);
+        hasDirtyProgress = Boolean(initialJourneyState.hasDirtyProgress);
+        submissionCompleted = Boolean(initialJourneyState.submissionCompleted);
+        selectedAgeEligibility = String(initialJourneyState.selectedAgeEligibility || selectedAgeEligibility || "");
+        under18SelectedAgeBand = String(initialJourneyState.under18AgeBand || under18SelectedAgeBand || "");
+      }
 
       const markScrollActive = (scroller) => {
         if (!scroller) return;
@@ -1673,6 +1722,8 @@
       };
 
       const handleBeforeUnload = (event) => {
+        if (isResponsiveTransitionInProgress()) return;
+        if (!isResponsivePresentationActive()) return;
         if (!hasDirtyProgress || submissionCompleted) return;
         event.preventDefault();
         event.returnValue = "";
@@ -1769,6 +1820,19 @@
         });
         clearProgressDirty();
         submissionCompleted = false;
+        publishJourneyState({
+          activeViewport: "mobile",
+          current: 0,
+          hasDirtyProgress: false,
+          progress: {
+            maxUnlockedProgressStep: 0,
+            maxUnlockedSlideIndex: 0
+          },
+          selectedAgeEligibility: "",
+          submissionCompleted: false,
+          under18AgeBand: "",
+          under18View: "gate"
+        });
       };
 
       const updateIntroConfirm = (shouldAutoScroll = false) => {
@@ -1982,6 +2046,7 @@
         });
         ageGatePanel?.setAttribute("data-under18-view", view);
         ageGateScroll?.classList.toggle("is-under18-view", view === "under18" || view === "processing" || view === "success" || view === "failure");
+        publishJourneyState({ under18View: view, submissionCompleted: view === "success" });
       };
       const updateUnder18AgeBandButtons = () => {
         under18AgeBandButtons.forEach((button) => {
@@ -2160,12 +2225,8 @@
           });
           const result = await response.json().catch(() => ({}));
           const isRecordedResponse =
-            response.ok && (
-              result?.ok === true ||
-              result?.status === "RECORDED" ||
-              result?.body?.ok === true ||
-              result?.body?.status === "RECORDED"
-            );
+            (result?.ok === true && result?.status === "RECORDED") ||
+            (result?.body?.ok === true && result?.body?.status === "RECORDED");
           if (!isRecordedResponse) {
             throw new Error(String(result?.code || response.status || "submit_failed"));
           }
@@ -2267,6 +2328,7 @@
         }
         submissionCompleted = true;
         clearProgressDirty();
+        publishJourneyState({ hasDirtyProgress: false, submissionCompleted: true });
         if (button) button.textContent = "Submitted";
         return json;
       };
@@ -2303,6 +2365,7 @@
             item.setAttribute("aria-pressed", String(isActive));
           });
           selectedAgeEligibility = value;
+          publishJourneyState({ selectedAgeEligibility: value });
           if (value === ADULT_AGE_ELIGIBILITY_VALUE) {
             navigateToSlide(SLIDES.intro);
             return;
@@ -2318,6 +2381,7 @@
           markProgressDirty();
           const value = String(button.getAttribute("data-value") || "");
           under18SelectedAgeBand = under18SelectedAgeBand === value ? "" : value;
+          publishJourneyState({ under18AgeBand: under18SelectedAgeBand });
           updateUnder18AgeBandButtons();
           if (under18ActionFooter) {
             scrollCurrentPageToElement(under18ActionFooter);
@@ -2580,6 +2644,7 @@
         };
 
         window.addEventListener("message", (event) => {
+          if (!isResponsivePresentationActive()) return;
           if (!isTrustedAddressMessageOrigin(event)) return;
           const payload = event.data;
           if (!payload || typeof payload !== "object") return;
@@ -2711,8 +2776,14 @@
       updateSecondPreferenceVisibility();
       updateAvailabilityVisibility();
       showAgeEligibilityGate();
-      syncDeckState(0);
-      setSlide(0);
+      setSlide(current);
       applyLocalPreviewUnder18State();
+      isInitializing = false;
+      window.__GYMFUSION_EOI_MOBILE_PRESENTATION__ = {
+        activate() {
+          if (!isResponsivePresentationActive()) return;
+          applyAccessibilityTriggerIcon(Boolean(accessibilityPanel && !accessibilityPanel.hidden));
+        }
+      };
     })();
   

@@ -9,6 +9,43 @@
       };
       const deck = document.getElementById("preview-deck");
       if (!deck) return;
+      let isInitializing = true;
+      const getResponsiveStateBridge = () => {
+        try {
+          if (window.__GYMFUSION_EOI_RESPONSIVE_STATE_BRIDGE__) return window.__GYMFUSION_EOI_RESPONSIVE_STATE_BRIDGE__;
+          if (window.parent && window.parent !== window) return window.parent.__GYMFUSION_EOI_RESPONSIVE_STATE_BRIDGE__;
+        } catch {
+          return window.__GYMFUSION_EOI_RESPONSIVE_STATE_BRIDGE__;
+        }
+        return window.__GYMFUSION_EOI_RESPONSIVE_STATE_BRIDGE__;
+      };
+      const getResponsivePresentationMode = () => {
+        try {
+          if (window.__GYMFUSION_EOI_RESPONSIVE_PRESENTATION_MODE__) {
+            return window.__GYMFUSION_EOI_RESPONSIVE_PRESENTATION_MODE__;
+          }
+          if (window.parent && window.parent !== window) {
+            return window.parent.__GYMFUSION_EOI_RESPONSIVE_PRESENTATION_MODE__ || "";
+          }
+        } catch {
+          return window.__GYMFUSION_EOI_RESPONSIVE_PRESENTATION_MODE__ || "";
+        }
+        return window.__GYMFUSION_EOI_RESPONSIVE_PRESENTATION_MODE__ || "";
+      };
+      const isResponsiveTransitionInProgress = () => {
+        try {
+          if (getResponsiveStateBridge()?.isTransitionInProgress?.()) return true;
+          if (window.__GYMFUSION_EOI_RESPONSIVE_TRANSITION_IN_PROGRESS__) return true;
+          return Boolean(window.parent && window.parent !== window && window.parent.__GYMFUSION_EOI_RESPONSIVE_TRANSITION_IN_PROGRESS__);
+        } catch {
+          return Boolean(window.__GYMFUSION_EOI_RESPONSIVE_TRANSITION_IN_PROGRESS__);
+        }
+      };
+      const isResponsivePresentationActive = () => getResponsivePresentationMode() !== "mobile";
+      const publishJourneyState = (patch) => {
+        if (isInitializing || !isResponsivePresentationActive()) return;
+        getResponsiveStateBridge()?.setJourneyState?.(patch);
+      };
       const accessibilityTools = document.getElementById("accessibility-tools");
       const accessibilityToggle = document.getElementById("accessibility-toggle");
       const accessibilityTriggerIcon = document.getElementById("accessibility-trigger-icon");
@@ -39,8 +76,8 @@
           backup: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg"
         },
         "accessibility-support": {
-          primary: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg",
-          backup: "/assets/mobile-eoi-part-1-form-assets/icons/accessibility-button-icon.svg"
+          primary: "/assets/desktop-eoi-part-1-assets/accessibility-support.png",
+          backup: "/assets/desktop-eoi-part-1-assets/accessibility-support.png"
         },
         "details-person": {
           primary: "/assets/desktop-eoi-part-1-assets/details-icon.png",
@@ -381,16 +418,18 @@
       const applyAccessibilityTriggerIcon = (isActive) => {
         if (!accessibilityTriggerIcon) return;
         const iconKey = isActive ? "accessibility-support" : "accessibility-support-outline";
-        const image = accessibilityTriggerIcon.querySelector(".icon-image");
+        const images = accessibilityTriggerIcon.querySelectorAll(".icon-image");
         accessibilityTriggerIcon.setAttribute("data-icon-key", iconKey);
-        if (!image) return;
+        if (!images.length) return;
         resolveIconSource(iconKey)
           .then((result) => {
             if (!result) {
               accessibilityTriggerIcon.dataset.iconState = "dot";
               return;
             }
-            image.src = result.src;
+            images.forEach((image) => {
+              image.src = result.src;
+            });
             accessibilityTriggerIcon.dataset.iconState = result.state;
           })
           .catch(() => {
@@ -459,7 +498,14 @@
         const shouldOpen = typeof forceOpen === "boolean" ? forceOpen : accessibilityPanel.hidden;
         accessibilityPanel.hidden = !shouldOpen;
         accessibilityToggle.setAttribute("aria-expanded", String(shouldOpen));
-        applyAccessibilityTriggerIcon(shouldOpen);
+        syncAccessibilityTriggerIcon();
+      };
+
+      const syncAccessibilityTriggerIcon = () => {
+        if (!accessibilityToggle) return;
+        const isOpen = accessibilityToggle.getAttribute("aria-expanded") === "true";
+        const isInteractive = accessibilityToggle.matches(":hover, :focus");
+        applyAccessibilityTriggerIcon(isOpen || isInteractive);
       };
 
       accessibilityPrefs = { ...defaultAccessibilityPrefs };
@@ -468,12 +514,17 @@
       initializeMenuIcon();
       installToolbarMenus();
       initializeCoverImageFallbacks();
-      applyAccessibilityTriggerIcon(false);
+      syncAccessibilityTriggerIcon();
 
       accessibilityToggle?.addEventListener("click", (event) => {
         event.stopPropagation();
         toggleAccessibilityPanel();
       });
+      accessibilityToggle?.addEventListener("pointerenter", syncAccessibilityTriggerIcon);
+      accessibilityToggle?.addEventListener("pointerdown", syncAccessibilityTriggerIcon);
+      accessibilityToggle?.addEventListener("pointerleave", syncAccessibilityTriggerIcon);
+      accessibilityToggle?.addEventListener("focus", syncAccessibilityTriggerIcon);
+      accessibilityToggle?.addEventListener("blur", syncAccessibilityTriggerIcon);
 
       accessibilityTextSlider?.addEventListener("input", () => {
         const index = Number(accessibilityTextSlider.value);
@@ -771,6 +822,15 @@
         moveAccessibilityToolsForSlide();
         syncPreviewSteps();
         scrollActivePreviewStepIntoView();
+        publishJourneyState({
+          activeViewport: "desktop",
+          current,
+          deckState,
+          progress: {
+            maxUnlockedProgressStep,
+            maxUnlockedSlideIndex
+          }
+        });
       };
 
       const clearErrors = () => {
@@ -823,10 +883,12 @@
       const markProgressDirty = () => {
         if (submissionCompleted) return;
         hasDirtyProgress = true;
+        publishJourneyState({ hasDirtyProgress: true });
       };
 
       const clearProgressDirty = () => {
         hasDirtyProgress = false;
+        publishJourneyState({ hasDirtyProgress: false });
       };
 
       const markOptionGroupInvalid = (selector, message = "Please select a response") => {
@@ -1666,6 +1728,19 @@
         recompletedProgressSteps.clear();
         submissionCompleted = false;
         clearProgressDirty();
+        publishJourneyState({
+          activeViewport: "desktop",
+          current: 0,
+          hasDirtyProgress: false,
+          progress: {
+            maxUnlockedProgressStep: 0,
+            maxUnlockedSlideIndex: 0
+          },
+          selectedAgeEligibility: "",
+          submissionCompleted: false,
+          under18AgeBand: "",
+          under18View: "gate"
+        });
       };
 
       deck.querySelectorAll("[data-action='close-form']").forEach((button) => {
@@ -1771,6 +1846,14 @@
       let under18TurnstileToken = "";
       let under18TurnstileScriptPromise = null;
       let under18TurnstileWidgetId = null;
+      const initialJourneyState = getResponsiveStateBridge()?.getJourneyState?.();
+      if (initialJourneyState) {
+        current = Number(initialJourneyState.current || current);
+        hasDirtyProgress = Boolean(initialJourneyState.hasDirtyProgress);
+        submissionCompleted = Boolean(initialJourneyState.submissionCompleted);
+        selectedAgeEligibility = String(initialJourneyState.selectedAgeEligibility || selectedAgeEligibility || "");
+        under18SelectedAgeBand = String(initialJourneyState.under18AgeBand || under18SelectedAgeBand || "");
+      }
 
       const scrollCurrentPageToElement = (element) => {
         const currentPage = pages[current];
@@ -1829,6 +1912,7 @@
       };
 
       const handleBeforeUnload = (event) => {
+        if (isResponsiveTransitionInProgress()) return;
         if (!hasDirtyProgress || submissionCompleted) return;
         event.preventDefault();
         event.returnValue = "";
@@ -1927,6 +2011,7 @@
           ageGatePanel.setAttribute("data-under18-view", view);
           ageGatePanel.closest(".gate-page")?.classList.toggle("is-under18-view", view === "under18");
         }
+        publishJourneyState({ under18View: view, submissionCompleted: view === "success" });
       };
       const updateUnder18AgeBandButtons = () => {
         under18AgeBandButtons.forEach((button) => {
@@ -2105,12 +2190,8 @@
           });
           const result = await response.json().catch(() => ({}));
           const isRecordedResponse =
-            response.ok && (
-              result?.ok === true ||
-              result?.status === "RECORDED" ||
-              result?.body?.ok === true ||
-              result?.body?.status === "RECORDED"
-            );
+            (result?.ok === true && result?.status === "RECORDED") ||
+            (result?.body?.ok === true && result?.body?.status === "RECORDED");
           if (!isRecordedResponse) {
             throw new Error(String(result?.code || response.status || "submit_failed"));
           }
@@ -2219,18 +2300,19 @@
             scrollToFirstInvalid();
             return;
           }
-          finalSubmitButton.disabled = true;
-          const originalLabel = finalSubmitButton.textContent;
-          finalSubmitButton.textContent = "Submitting...";
-          try {
-            await submitPart1ToWix(finalSubmitButton);
-            submissionCompleted = true;
-            clearProgressDirty();
-            finalSubmitButton.classList.add("is-hidden");
-            setSlide(current + 1);
-          } catch (error) {
-            finalSubmitButton.disabled = false;
-            finalSubmitButton.textContent = originalLabel;
+        finalSubmitButton.disabled = true;
+        const originalLabel = finalSubmitButton.textContent;
+        finalSubmitButton.textContent = "Submitting...";
+        try {
+          await submitPart1ToWix(finalSubmitButton);
+          submissionCompleted = true;
+          clearProgressDirty();
+          publishJourneyState({ hasDirtyProgress: false, submissionCompleted: true });
+          finalSubmitButton.classList.add("is-hidden");
+          setSlide(current + 1);
+        } catch (error) {
+          finalSubmitButton.disabled = false;
+          finalSubmitButton.textContent = originalLabel;
             window.alert(String(error?.message || error));
           }
         });
@@ -2247,6 +2329,7 @@
             item.setAttribute("aria-pressed", String(isActive));
           });
           selectedAgeEligibility = value;
+          publishJourneyState({ selectedAgeEligibility: value });
           if (value === ADULT_AGE_ELIGIBILITY_VALUE) {
             setSlide(SLIDES.intro);
             return;
@@ -2262,6 +2345,7 @@
           markProgressDirty();
           const value = String(button.getAttribute("data-value") || "");
           under18SelectedAgeBand = under18SelectedAgeBand === value ? "" : value;
+          publishJourneyState({ under18AgeBand: under18SelectedAgeBand });
           updateUnder18AgeBandButtons();
           if (under18ActionFooter) {
             scrollCurrentPageToElement(under18ActionFooter);
@@ -2302,8 +2386,10 @@
       updateAvailabilityVisibility();
 
       updatePostalVisibility("Yes");
-      setSlide(0);
+      setSlide(current);
       applyLocalPreviewUnder18State();
+      isInitializing = false;
+      void getResponsiveStateBridge()?.restoreDocument?.(document);
     })();
   
 

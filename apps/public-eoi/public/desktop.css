@@ -122,11 +122,23 @@
     }
 
     .accessibility-toggle:hover,
-    .accessibility-toggle:focus-visible,
     .accessibility-toggle[aria-expanded="true"] {
       transform: translateY(-1px);
       filter: drop-shadow(0 0 16px rgba(36, 19, 65, 0.34)) drop-shadow(0 12px 28px rgba(10, 8, 28, 0.34));
-      outline: none;
+    }
+
+    .accessibility-toggle[aria-expanded="true"] {
+      box-shadow: 0 0 0 3px rgba(103, 238, 240, 0.62);
+    }
+
+    .accessibility-toggle:active {
+      transform: translateY(1px);
+      filter: drop-shadow(0 0 10px rgba(36, 19, 65, 0.24)) drop-shadow(0 6px 14px rgba(10, 8, 28, 0.24));
+    }
+
+    .accessibility-toggle:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.92);
+      outline-offset: 4px;
     }
 
     .accessibility-trigger-icon {

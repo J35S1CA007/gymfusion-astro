@@ -17,6 +17,7 @@ const under18TurnstileSiteKey = String(import.meta.env.PUBLIC_UNDER18_TURNSTILE_
   title="GYMFUSION Expression of Interest"
   description="Public EOI Part 1 landing page for the GYMFUSION Astro migration."
 >
+  <script slot="head" defer src="/eoi-responsive-state-bridge.js"></script>
   <link slot="head" rel="stylesheet" href="/mobile.css" media="screen and (max-width: 1023px)" />
   <main class="eoi-landing" aria-label="GYMFUSION Expression of Interest">
     <div class="top-strip" data-site-header>
@@ -227,6 +228,21 @@ const under18TurnstileSiteKey = String(import.meta.env.PUBLIC_UNDER18_TURNSTILE_
   import '../lib/gfPublicMemberNav.js';
   import '../lib/gfPublicMemberNavMobile.js';
 
+  declare global {
+    interface Window {
+      __GYMFUSION_EOI_RESPONSIVE_PRESENTATION_MODE__?: 'mobile' | 'desktop';
+      __GYMFUSION_EOI_RESPONSIVE_STATE_BRIDGE__?: {
+        captureDocument?: (doc?: Document | null) => void;
+        isTransitionInProgress?: () => boolean;
+        restoreDocument?: (doc?: Document | null) => void | Promise<void>;
+        setTransitionInProgress?: (next: boolean) => void;
+      };
+      __GYMFUSION_EOI_MOBILE_PRESENTATION__?: {
+        activate?: () => void;
+      };
+    }
+  }
+
   const gfHeader = document.querySelector<HTMLElement>('[data-site-header]');
   const gfMenuButton = document.getElementById('gfMenuButton');
   const gfMenuOverlay = gfHeader?.querySelector<HTMLElement>('[data-desktop-menu-overlay]');
@@ -236,10 +252,14 @@ const under18TurnstileSiteKey = String(import.meta.env.PUBLIC_UNDER18_TURNSTILE_
   const gfMobileMenuLinks = Array.from(document.querySelectorAll<HTMLElement>('[data-mobile-menu-link]'));
   const gfMobileMemberNav = document.querySelector<HTMLElement>('.gf-member-nav-mobile-host');
   const gfMobileBreakpoint = window.matchMedia('(max-width: 1023px)');
+  const getResponsiveStateBridge = () => window.__GYMFUSION_EOI_RESPONSIVE_STATE_BRIDGE__;
   let isMenuOpen = false;
   let isMobileMenuOpen = false;
   let mobileMenuRevealFrame: number | null = null;
   let mobileMenuRevealTimer: number | null = null;
+  let mobileRuntimeScript: HTMLScriptElement | null = null;
+  let mobileRuntimeReady = false;
+  let desktopRuntimeLoaded = false;
 
   function setMenuOpen(nextOpen: boolean) {
     isMenuOpen = nextOpen;
@@ -412,20 +432,73 @@ const under18TurnstileSiteKey = String(import.meta.env.PUBLIC_UNDER18_TURNSTILE_
       return;
     }
 
-    if (gfEoiLanding) {
-      gfEoiLanding.dataset.reducedMotion = String(message.motionReduced);
-    }
+  if (gfEoiLanding) {
+    gfEoiLanding.dataset.reducedMotion = String(message.motionReduced);
+  }
   });
-  const mobile = window.matchMedia('(max-width: 1023px)').matches;
-  if (iframe && !mobile) {
+
+  const unloadDesktopRuntime = () => {
+    if (!iframe || !desktopRuntimeLoaded) return;
+    getResponsiveStateBridge()?.captureDocument?.(iframe.contentDocument);
+    desktopRuntimeLoaded = false;
+    iframe.src = 'about:blank';
+  };
+
+  const loadDesktopRuntime = () => {
+    if (!iframe || desktopRuntimeLoaded) return;
+    desktopRuntimeLoaded = true;
     iframe.src = desktopEoiUrl;
-  }
-  if (mobile) {
-    const mobileScript = document.createElement('script');
-    mobileScript.src = '/mobile.js';
-    mobileScript.defer = true;
-    document.body.appendChild(mobileScript);
-  }
+  };
+
+  const unloadMobileRuntime = () => {
+    getResponsiveStateBridge()?.captureDocument?.(document);
+  };
+
+  const restoreMobileRuntime = () => {
+    if (!mobileRuntimeReady) return;
+    Promise.resolve(getResponsiveStateBridge()?.restoreDocument?.(document))
+      .finally(() => window.__GYMFUSION_EOI_MOBILE_PRESENTATION__?.activate?.());
+  };
+
+  const loadMobileRuntime = () => {
+    if (mobileRuntimeScript) {
+      restoreMobileRuntime();
+      return;
+    }
+    mobileRuntimeScript = document.createElement('script');
+    mobileRuntimeScript.src = '/mobile.js';
+    mobileRuntimeScript.defer = true;
+    mobileRuntimeScript.onload = () => {
+      mobileRuntimeReady = true;
+      restoreMobileRuntime();
+    };
+    document.body.appendChild(mobileRuntimeScript);
+  };
+
+  const setResponsivePresentation = (isMobile: boolean) => {
+    const bridge = getResponsiveStateBridge();
+    bridge?.setTransitionInProgress?.(true);
+    try {
+      if (isMobile) {
+        unloadDesktopRuntime();
+        window.__GYMFUSION_EOI_RESPONSIVE_PRESENTATION_MODE__ = 'mobile';
+        loadMobileRuntime();
+        return;
+      }
+
+      unloadMobileRuntime();
+      window.__GYMFUSION_EOI_RESPONSIVE_PRESENTATION_MODE__ = 'desktop';
+      loadDesktopRuntime();
+    } finally {
+      bridge?.setTransitionInProgress?.(false);
+    }
+  };
+
+  gfMobileBreakpoint.addEventListener('change', () => {
+    setResponsivePresentation(gfMobileBreakpoint.matches);
+  });
+
+  setResponsivePresentation(gfMobileBreakpoint.matches);
 
 </script>
 
