@@ -2159,7 +2159,14 @@
             body: JSON.stringify(payload)
           });
           const result = await response.json().catch(() => ({}));
-          if (!response.ok || result?.ok !== true) {
+          const isRecordedResponse =
+            response.ok && (
+              result?.ok === true ||
+              result?.status === "RECORDED" ||
+              result?.body?.ok === true ||
+              result?.body?.status === "RECORDED"
+            );
+          if (!isRecordedResponse) {
             throw new Error(String(result?.code || response.status || "submit_failed"));
           }
           setUnder18View("success");
