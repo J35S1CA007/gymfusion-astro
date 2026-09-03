@@ -366,22 +366,22 @@
 <h3>Tell us a bit about yourself</h3>
 <div class="field-grid address-field-grid" style="margin-top: 16px;">
 <div class="field" data-field="first_name">
-<label>First Name <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" name="first_name" placeholder="Legal Given Name" required="" type="text"/></div>
+<label for="first-name">First Name <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="given-name" class="field-input" id="first-name" name="first_name" placeholder="Legal Given Name" required="" type="text"/></div>
 <div class="form-error">First name is required.</div>
 </div>
 <div class="field">
-<label>Preferred Name <span class="label-note">(If different)</span></label>
-<div class="field-box"><input class="field-input" name="preferred_name" type="text"/></div>
+<label for="preferred-name">Preferred Name <span class="label-note">(If different)</span></label>
+<div class="field-box"><input autocomplete="off" class="field-input" id="preferred-name" name="preferred_name" type="text"/></div>
 </div>
 <div class="field" data-field="last_name">
-<label>Last Name <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" name="last_name" placeholder="Legal Surname" required="" type="text"/></div>
+<label for="last-name">Last Name <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="family-name" class="field-input" id="last-name" name="last_name" placeholder="Legal Surname" required="" type="text"/></div>
 <div class="form-error">Last name is required.</div>
 </div>
 <div class="field" data-field="pronouns">
-<label>Pronouns <span class="label-note">(Optional)</span></label>
-<select aria-label="Pronouns" class="select-field" name="pronouns">
+<label for="pronouns">Pronouns <span class="label-note">(Optional)</span></label>
+<select aria-label="Pronouns" class="select-field" id="pronouns" name="pronouns">
 <option selected="" value=""></option>
 <option>She/Her</option>
 <option>He/Him</option>
@@ -391,12 +391,13 @@
 </select>
 </div>
 <div class="field" data-field="pronouns_other" style="grid-column: 1 / -1; display: none;">
-<label>Other (Self-Describe) <span class="label-note">(Optional)</span></label>
-<div class="field-box"><input class="field-input" name="pronouns_other" placeholder="Please specify" type="text"/></div>
+<label for="pronouns-other">Other (Self-Describe) <span class="label-note">(Optional)</span></label>
+<div class="field-box"><input autocomplete="off" class="field-input" id="pronouns-other" name="pronouns_other" placeholder="Please specify" type="text"/></div>
 </div>
 </div>
 <h3 class="section-title" style="margin-top: 18px;">Select your age demographic: <span class="required">*</span></h3>
-<select aria-label="Age band" class="select-field" name="age_band" required="">
+<label for="age-band" class="sr-only">Age band</label>
+<select aria-label="Age band" class="select-field" id="age-band" name="age_band" required="">
 <option selected="" value=""></option>
 <option>18–24</option>
 <option>25–34</option>
@@ -412,7 +413,8 @@
 <div class="helper-copy">
                     Providing your sex recorded at birth is optional. You may select ‘Prefer not to say’ if you do not wish to provide this information. Your response is kept private and is accessible only to authorised staff who require it for relevant screening, programming or coaching purposes.
                   </div>
-<select aria-label="Sex recorded as at birth" class="select-field" data-other-target="sex_at_birth" name="sex_at_birth" required="">
+<label for="sex-at-birth" class="sr-only">Sex recorded as at birth</label>
+<select aria-label="Sex recorded as at birth" class="select-field" data-other-target="sex_at_birth" id="sex-at-birth" name="sex_at_birth" required="">
 <option selected="" value=""></option>
 <option>Female</option>
 <option>Male</option>
@@ -420,8 +422,8 @@
 <option>Prefer not to say</option>
 </select>
 <div class="field" data-field="sex_at_birth_other" data-other-field="sex_at_birth" style="margin-top: 14px; display: none;">
-<label>Another term <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" name="sex_at_birth_other" placeholder="Please specify" type="text"/></div>
+<label for="sex-at-birth-other">Another term <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="off" class="field-input" id="sex-at-birth-other" name="sex_at_birth_other" placeholder="Please specify" type="text"/></div>
 </div>
 </article>
 <article class="card">
@@ -429,20 +431,20 @@
 <h3>Where do you live?</h3>
 <div class="field-grid" style="margin-top: 16px;">
 <div class="field address-lookup-field" style="grid-column: 1 / -1;">
-<label>Address <span class="required">*</span></label>
+<label for="address-lookup">Address <span class="required">*</span></label>
 <div class="field-box address-lookup-box">
 <input autocomplete="off" class="field-input" id="address-lookup" placeholder="Start typing your residential address..." type="text">
 <ul class="address-lookup-dropdown" hidden="" id="address-lookup-results"></ul>
 </input></div>
 </div>
 <div class="field" data-address-manual="residential" data-field="res_address" style="grid-column: 1 / -1; display: none;">
-<label>Street Address <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" disabled="" name="res_address" placeholder="e.g. 123 Main Street" type="text"/></div>
+<label for="res-address">Street Address <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="street-address" class="field-input" disabled="" id="res-address" name="res_address" placeholder="e.g. 123 Main Street" type="text"/></div>
 <div class="form-error">Street address is required.</div>
 </div>
 <div class="field" data-address-manual="residential" data-field="res_suburb" style="grid-column: 1 / 2; display: none;">
-<label>Suburb <span class="required">*</span></label>
-<select class="select-field" data-other-target="res_suburb" disabled="" name="res_suburb">
+<label for="res-suburb">Suburb <span class="required">*</span></label>
+<select class="select-field" data-other-target="res_suburb" disabled="" id="res-suburb" name="res_suburb">
 <option selected="" value=""></option>
 <option>Shepparton</option>
 <option>Mooroopna</option>
@@ -458,13 +460,13 @@
 <div class="form-error">Suburb is required.</div>
 </div>
 <div class="field" data-field="res_suburb_other" data-other-field="res_suburb" style="grid-column: 1 / -1; display: none;">
-<label>Other Suburb (Please specify) <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" disabled="" name="res_suburb_other" placeholder="Enter your suburb" type="text"/></div>
+<label for="res-suburb-other">Other Suburb (Please specify) <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="off" class="field-input" disabled="" id="res-suburb-other" name="res_suburb_other" placeholder="Enter your suburb" type="text"/></div>
 <div class="form-error">Please specify your suburb.</div>
 </div>
 <div class="field" data-address-manual="residential" data-field="res_state" style="grid-column: 2 / 3; display: none;">
-<label>State <span class="required">*</span></label>
-<select class="select-field" disabled="" name="res_state">
+<label for="res-state">State <span class="required">*</span></label>
+<select class="select-field" disabled="" id="res-state" name="res_state">
 <option value=""></option>
 <option selected="" value="VIC">VIC</option>
 <option value="NSW">NSW</option>
@@ -478,8 +480,8 @@
 <div class="form-error">State is required.</div>
 </div>
 <div class="field" data-address-manual="residential" data-field="res_postcode" style="grid-column: 3 / -1; display: none;">
-<label>Postcode <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" disabled="" maxlength="4" name="res_postcode" placeholder="e.g. 3630" type="text"/></div>
+<label for="res-postcode">Postcode <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="postal-code" class="field-input" disabled="" id="res-postcode" maxlength="4" name="res_postcode" placeholder="e.g. 3630" type="text"/></div>
 <div class="form-error">Postcode is required.</div>
 </div>
 </div>
@@ -491,20 +493,20 @@
 <div id="postal-address-fields" style="display: none; margin-top: 18px;">
 <div class="field-grid">
 <div class="field address-lookup-field" style="grid-column: 1 / -1;">
-<label>Address <span class="required">*</span></label>
+<label for="postal-address-lookup">Address <span class="required">*</span></label>
 <div class="field-box address-lookup-box">
 <input autocomplete="off" class="field-input" id="postal-address-lookup" placeholder="Start typing your postal address..." type="text">
 <ul class="address-lookup-dropdown" hidden="" id="postal-address-lookup-results"></ul>
 </input></div>
 </div>
 <div class="field" data-address-manual="postal" data-field="postal_address" style="grid-column: 1 / -1; display: none;">
-<label>Postal Address <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" disabled="" name="postal_address" placeholder="e.g. P.O. Box or Street Address" type="text"/></div>
+<label for="postal-address">Postal Address <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="street-address" class="field-input" disabled="" id="postal-address" name="postal_address" placeholder="e.g. P.O. Box or Street Address" type="text"/></div>
 <div class="form-error">Postal address is required.</div>
 </div>
 <div class="field" data-address-manual="postal" data-field="postal_suburb" style="grid-column: 1 / 2; display: none;">
-<label>Suburb <span class="required">*</span></label>
-<select class="select-field" data-other-target="postal_suburb" disabled="" name="postal_suburb">
+<label for="postal-suburb">Suburb <span class="required">*</span></label>
+<select class="select-field" data-other-target="postal_suburb" disabled="" id="postal-suburb" name="postal_suburb">
 <option selected="" value=""></option>
 <option>Shepparton</option>
 <option>Mooroopna</option>
@@ -520,13 +522,13 @@
 <div class="form-error">Suburb is required.</div>
 </div>
 <div class="field" data-field="postal_suburb_other" data-other-field="postal_suburb" style="grid-column: 1 / -1; display: none;">
-<label>Other Suburb (Please specify) <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" disabled="" name="postal_suburb_other" placeholder="Enter your postal suburb" type="text"/></div>
+<label for="postal-suburb-other">Other Suburb (Please specify) <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="off" class="field-input" disabled="" id="postal-suburb-other" name="postal_suburb_other" placeholder="Enter your postal suburb" type="text"/></div>
 <div class="form-error">Please specify your postal suburb.</div>
 </div>
 <div class="field" data-address-manual="postal" data-field="postal_state" style="grid-column: 2 / 3; display: none;">
-<label>State <span class="required">*</span></label>
-<select class="select-field" disabled="" name="postal_state">
+<label for="postal-state">State <span class="required">*</span></label>
+<select class="select-field" disabled="" id="postal-state" name="postal_state">
 <option value=""></option>
 <option selected="" value="VIC">VIC</option>
 <option value="NSW">NSW</option>
@@ -540,8 +542,8 @@
 <div class="form-error">State is required.</div>
 </div>
 <div class="field" data-address-manual="postal" data-field="postal_postcode" style="grid-column: 3 / -1; display: none;">
-<label>Postcode <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" disabled="" maxlength="4" name="postal_postcode" placeholder="e.g. 3630" type="text"/></div>
+<label for="postal-postcode">Postcode <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="postal-code" class="field-input" disabled="" id="postal-postcode" maxlength="4" name="postal_postcode" placeholder="e.g. 3630" type="text"/></div>
 <div class="form-error">Postcode is required.</div>
 </div>
 </div>
@@ -552,23 +554,23 @@
 <h3>How should we reach you?</h3>
 <div class="field-grid" style="margin-top: 16px;">
 <div class="field" data-field="email">
-<label>Email <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" name="email" required="" type="email"/></div>
+<label for="email">Email <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="email" class="field-input" id="email" name="email" required="" type="email"/></div>
 <div class="form-error">A valid email address is required.</div>
 </div>
 <div class="field" data-field="confirm_email">
-<label>Confirm Email <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" name="confirm_email" required="" type="email"/></div>
+<label for="confirm-email">Confirm Email <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="email" class="field-input" id="confirm-email" name="confirm_email" required="" type="email"/></div>
 <div class="form-error">Email addresses must match.</div>
 </div>
 <div class="field" data-field="mobile">
-<label>Mobile <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" inputmode="numeric" maxlength="10" name="mobile" pattern="\\d{10}" placeholder="04XXXXXXXX" required="" type="tel"/></div>
+<label for="mobile">Mobile <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="tel" class="field-input" id="mobile" inputmode="numeric" maxlength="10" name="mobile" pattern="\\d{10}" placeholder="04XXXXXXXX" required="" type="tel"/></div>
 <div class="form-error">Enter a 10-digit mobile number.</div>
 </div>
 <div class="field" data-field="confirm_mobile">
-<label>Confirm Mobile <span class="required">*</span></label>
-<div class="field-box"><input class="field-input" inputmode="numeric" maxlength="10" name="confirm_mobile" pattern="\\d{10}" placeholder="04XXXXXXXX" required="" type="tel"/></div>
+<label for="confirm-mobile">Confirm Mobile <span class="required">*</span></label>
+<div class="field-box"><input autocomplete="tel" class="field-input" id="confirm-mobile" inputmode="numeric" maxlength="10" name="confirm_mobile" pattern="\\d{10}" placeholder="04XXXXXXXX" required="" type="tel"/></div>
 <div class="form-error">Mobile numbers must match.</div>
 </div>
 </div>
