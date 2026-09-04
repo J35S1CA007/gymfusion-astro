@@ -1047,6 +1047,9 @@ const under18TurnstileSiteKey = String(import.meta.env.PUBLIC_UNDER18_TURNSTILE_
     .mobile-menu-overlay {
       display: none;
       padding: calc(var(--mobile-header-height) + 24px) 20px calc(24px + env(safe-area-inset-bottom));
+      background: rgba(0, 0, 0, 0.68);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
     }
 
     .desktop-chrome--bottom .desktop-marquee {
