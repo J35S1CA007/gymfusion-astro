@@ -7,6 +7,7 @@ import { getPortalUrl, getSession } from '../lib/auth';
 
 const session = await getSession(Astro.request, env);
 const portalUrl = session ? getPortalUrl(Astro.request, env) : undefined;
+const turnstileSiteKey = String((env as { TURNSTILE_SITE_KEY?: string }).TURNSTILE_SITE_KEY ?? "").trim();
 if (portalUrl) return Astro.redirect(portalUrl);
 ---
 
@@ -129,6 +130,8 @@ if (portalUrl) return Astro.redirect(portalUrl);
 
             <p class="form-message" data-message role="alert" aria-live="polite"></p>
 
+            <div data-turnstile-widget data-turnstile-site-key={turnstileSiteKey}></div>
+
             <div class="cta-stack" data-login-actions data-mode="login">
               <button class="cta" type="submit" data-submit>Login</button>
               <button class="forgot" type="button" aria-controls="password-field" aria-expanded="true" data-forgot>Forgot Password?</button>
@@ -138,7 +141,9 @@ if (portalUrl) return Astro.redirect(portalUrl);
       </section>
     </main>
 
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer is:inline></script>
     <script>
+      const turnstileSiteKey = document.querySelector<HTMLElement>('[data-turnstile-widget]')?.dataset.turnstileSiteKey || '';
       const form = document.querySelector<HTMLFormElement>('[data-auth-form]')!;
       const email = document.querySelector<HTMLInputElement>('#email')!;
       const password = document.querySelector<HTMLInputElement>('#password')!;
@@ -167,6 +172,76 @@ if (portalUrl) return Astro.redirect(portalUrl);
       let activeMenuMode = '';
       let mobileMenuRevealFrame: number | null = null;
       let mobileMenuRevealTimer: number | null = null;
+      let turnstileWidgetId: string | null = null;
+      let turnstileReady: Promise<TurnstileApi> | null = null;
+      let turnstileAttempt = 0;
+      let activeTurnstileAttempt: { id: number; widgetId: string; resolve: (token: string) => void; reject: (error: Error) => void } | null = null;
+
+      type TurnstileApi = {
+        render: (container: HTMLElement, options: Record<string, unknown>) => string;
+        execute: (widgetId: string) => void;
+        remove?: (widgetId: string) => void;
+        reset: (widgetId: string) => void;
+      };
+
+      const getTurnstile = (): Promise<TurnstileApi> => {
+        if (turnstileReady) return turnstileReady;
+        turnstileReady = new Promise((resolve, reject) => {
+          const started = Date.now();
+          const wait = () => {
+            const api = (window as Window & { turnstile?: TurnstileApi }).turnstile;
+            if (api) return resolve(api);
+            if (Date.now() - started >= 8000) return reject(new Error('Turnstile is unavailable.'));
+            window.setTimeout(wait, 50);
+          };
+          wait();
+        });
+        return turnstileReady;
+      };
+
+      const getTurnstileToken = async (): Promise<string> => {
+        if (!turnstileSiteKey) throw new Error('Turnstile is unavailable.');
+        const api = await getTurnstile();
+        const container = document.querySelector<HTMLElement>('[data-turnstile-widget]');
+        if (!container) throw new Error('Turnstile is unavailable.');
+        if (turnstileWidgetId !== null) {
+          api.remove?.(turnstileWidgetId);
+          turnstileWidgetId = null;
+        }
+        const attemptId = ++turnstileAttempt;
+        return new Promise((resolve, reject) => {
+          const isCurrent = () => activeTurnstileAttempt?.id === attemptId;
+          const rejectCurrent = () => {
+            if (!isCurrent()) return;
+            activeTurnstileAttempt = null;
+            reject(new Error('Turnstile verification failed.'));
+          };
+          const widgetId = api.render(container, {
+            appearance: 'interaction-only',
+            action: 'member_login',
+            callback: (token: string) => {
+              if (!isCurrent()) return;
+              activeTurnstileAttempt = null;
+              resolve(token);
+            },
+            'error-callback': rejectCurrent,
+            'expired-callback': rejectCurrent,
+            execution: 'execute',
+            sitekey: turnstileSiteKey,
+            'unsupported-callback': rejectCurrent,
+          });
+          activeTurnstileAttempt = { id: attemptId, reject, resolve, widgetId };
+          turnstileWidgetId = widgetId;
+          try {
+            api.execute(widgetId);
+          } catch {
+            if (activeTurnstileAttempt?.id === attemptId) {
+              activeTurnstileAttempt = null;
+              reject(new Error('Turnstile verification failed.'));
+            }
+          }
+        });
+      };
 
       const setMessage = (text: string, kind = '') => {
         message.textContent = text;
@@ -386,8 +461,9 @@ if (portalUrl) return Astro.redirect(portalUrl);
             }, 0);
             return;
           }
+          const turnstileToken = recoveryMode ? undefined : await getTurnstileToken();
           const response = await fetch(recoveryMode ? '/api/auth/recovery' : '/api/auth/login', {
-            body: JSON.stringify(recoveryMode ? { email: email.value } : { email: email.value, password: password.value }),
+            body: JSON.stringify(recoveryMode ? { email: email.value } : { email: email.value, password: password.value, turnstileToken }),
             credentials: 'same-origin',
             headers: { 'content-type': 'application/json' },
             method: 'POST',
@@ -409,6 +485,13 @@ if (portalUrl) return Astro.redirect(portalUrl);
               : (errorText || 'We could not complete that request. Please try again.');
           setMessage(safeMessage, 'error');
           setBusy(false, '');
+          if (turnstileWidgetId !== null) {
+            const api = (window as Window & { turnstile?: TurnstileApi }).turnstile;
+            api?.reset(turnstileWidgetId);
+            api?.remove?.(turnstileWidgetId);
+            turnstileWidgetId = null;
+          }
+          activeTurnstileAttempt = null;
         }
       });
       updatePasswordControls();

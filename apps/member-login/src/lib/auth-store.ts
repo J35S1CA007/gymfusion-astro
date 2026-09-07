@@ -41,6 +41,8 @@ export interface DurableObjectStorageLike {
 
 export type AuthRuntimeBindings = {
   MEMBER_LOGIN_AUTH_STATE?: DurableObjectNamespaceLike;
+  TURNSTILE_SECRET_KEY?: string;
+  TURNSTILE_SITE_KEY?: string;
   MEMBER_LOGIN_URL?: string;
   MEMBERS_PORTAL_URL?: string;
   WIX_API_BASE_URL?: string;

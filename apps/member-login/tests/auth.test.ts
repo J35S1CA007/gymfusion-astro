@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { afterEach, beforeEach, test } from "node:test";
-import { beginLogin, clearSession, completeLogin, getSession, SESSION_COOKIE, __testHooks } from "../src/lib/auth.ts";
+import { beginLogin, clearSession, completeLogin, getSession, SESSION_COOKIE, verifyTurnstileToken, __testHooks } from "../src/lib/auth.ts";
 import { createInMemoryDurableObjectNamespace, type AuthRuntimeBindings, type PendingAuth } from "../src/lib/auth-store.ts";
 
 class TestCookieStore {
@@ -30,6 +30,7 @@ const envBackup = {
   WIX_AUTH_REDIRECT_URI: process.env.WIX_AUTH_REDIRECT_URI,
   WIX_HEADLESS_CLIENT_ID: process.env.WIX_HEADLESS_CLIENT_ID,
   WIX_PASSWORD_RESET_REDIRECT_URI: process.env.WIX_PASSWORD_RESET_REDIRECT_URI,
+  TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
 };
 
 let now = realNow();
@@ -69,6 +70,7 @@ beforeEach(async () => {
   process.env.WIX_AUTH_REDIRECT_URI = "https://login.example/api/auth/callback";
   process.env.WIX_HEADLESS_CLIENT_ID = "test-client";
   process.env.WIX_PASSWORD_RESET_REDIRECT_URI = "https://login.example/?reset=complete";
+  process.env.TURNSTILE_SECRET_KEY = "test-turnstile-secret";
   installFetch(async () => new Response("", { status: 500 }));
   setNow(realNow());
 });
@@ -80,6 +82,7 @@ afterEach(async () => {
   process.env.WIX_AUTH_REDIRECT_URI = envBackup.WIX_AUTH_REDIRECT_URI;
   process.env.WIX_HEADLESS_CLIENT_ID = envBackup.WIX_HEADLESS_CLIENT_ID;
   process.env.WIX_PASSWORD_RESET_REDIRECT_URI = envBackup.WIX_PASSWORD_RESET_REDIRECT_URI;
+  process.env.TURNSTILE_SECRET_KEY = envBackup.TURNSTILE_SECRET_KEY;
   if (realDateNowDescriptor) {
     Object.defineProperty(Date, "now", realDateNowDescriptor);
   }
@@ -171,6 +174,61 @@ test("malformed Wix Login V2 failures log safe metadata only", async () => {
   assert.equal(fields.responseContentType, "text/plain");
   assert.equal(fields.responseBodyLength, 8);
   assert.equal(Object.hasOwn(fields, "message"), false);
+});
+
+test("Turnstile rejects missing, malformed, oversized, failed, timeout, and malformed responses", async () => {
+  const wixCalls: string[] = [];
+  installFetch(async (url) => {
+    if (url.includes("challenges.cloudflare.com")) return jsonResponse({ success: false, "error-codes": ["timeout-or-duplicate"] });
+    wixCalls.push(url);
+    return jsonResponse({ access_token: "must-not-be-requested" });
+  });
+
+  assert.equal(await verifyTurnstileToken(undefined), false);
+  assert.equal(await verifyTurnstileToken(""), false);
+  assert.equal(await verifyTurnstileToken("x".repeat(2049)), false);
+  assert.equal(await verifyTurnstileToken("token"), false);
+  assert.deepEqual(wixCalls, []);
+
+  installFetch(async (url) => {
+    if (url.includes("challenges.cloudflare.com")) return new Response("not-json", { status: 200 });
+    throw new Error(`unexpected Wix request: ${url}`);
+  });
+  assert.equal(await verifyTurnstileToken("token"), false);
+
+  installFetch(async (url) => {
+    if (url.includes("challenges.cloudflare.com")) throw new Error("network");
+    throw new Error(`unexpected Wix request: ${url}`);
+  });
+  assert.equal(await verifyTurnstileToken("token"), false);
+});
+
+test("successful Turnstile verification sends only the token to Siteverify", async () => {
+  let siteverifyBody: Record<string, unknown> | undefined;
+  installFetch(async (url, init) => {
+    assert.match(url, /challenges\.cloudflare\.com\/turnstile\/v0\/siteverify$/);
+    siteverifyBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+    return jsonResponse({ action: "member_login", hostname: "portal.gymfusion.com.au", success: true });
+  });
+
+  assert.equal(await verifyTurnstileToken("fresh-token"), true);
+  assert.deepEqual(siteverifyBody, { response: "fresh-token", secret: "test-turnstile-secret" });
+});
+
+test("Turnstile action and hostname mismatches fail closed", async () => {
+  for (const result of [
+    { hostname: "portal.gymfusion.com.au", success: true },
+    { action: "other_action", hostname: "portal.gymfusion.com.au", success: true },
+    { action: "member_login", hostname: "other.example", success: true },
+    { action: "member_login", success: true },
+    { action: "member_login", hostname: "portal.gymfusion.com.au", success: false },
+  ]) {
+    installFetch(async (url) => {
+      assert.match(url, /challenges\.cloudflare\.com\/turnstile\/v0\/siteverify$/);
+      return jsonResponse(result);
+    });
+    assert.equal(await verifyTurnstileToken("fresh-token"), false);
+  }
 });
 
 function createDurableBindings(sharedStorage = new Map<string, Map<string, unknown>>()): {

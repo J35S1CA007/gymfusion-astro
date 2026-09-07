@@ -7,6 +7,10 @@ const SESSION_TTL_SECONDS = 8 * 60 * 60;
 const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000;
 const PENDING_TTL_MS = 5 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 12_000;
+const TURNSTILE_SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+const TURNSTILE_MAX_TOKEN_LENGTH = 2048;
+const TURNSTILE_ACTION = "member_login";
+const TURNSTILE_HOSTNAME = "portal.gymfusion.com.au";
 
 type CookieOptions = {
   httpOnly?: boolean;
@@ -32,6 +36,8 @@ type WixConfig = {
 };
 
 type RuntimeValueKey = "MEMBER_LOGIN_URL" | "MEMBERS_PORTAL_URL" | "WIX_API_BASE_URL" | "WIX_AUTH_REDIRECT_URI" | "WIX_HEADLESS_CLIENT_ID" | "WIX_PASSWORD_RESET_REDIRECT_URI";
+
+type TurnstileRuntimeBindings = AuthRuntimeBindings & { TURNSTILE_SECRET_KEY?: string };
 
 export class AuthProblem extends Error {
   readonly code: string;
@@ -149,6 +155,30 @@ async function wixRequest<T>(url: string, init: RequestInit): Promise<T> {
   } catch (error) {
     if (error instanceof AuthProblem) throw error;
     throw new AuthProblem(error instanceof DOMException && error.name === "AbortError" ? "timeout" : "network");
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function verifyTurnstileToken(token: unknown, bindings?: TurnstileRuntimeBindings): Promise<boolean> {
+  if (typeof token !== "string" || token.length === 0 || token.length > TURNSTILE_MAX_TOKEN_LENGTH) return false;
+  const secret = String(bindings?.TURNSTILE_SECRET_KEY ?? process.env.TURNSTILE_SECRET_KEY ?? "").trim();
+  if (!secret) return false;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const response = await fetch(TURNSTILE_SITEVERIFY_URL, {
+      body: JSON.stringify({ secret, response: token }),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+      signal: controller.signal,
+    });
+    if (!response.ok) return false;
+    const payload = await response.json() as { action?: unknown; hostname?: unknown; success?: unknown };
+    return payload.success === true && payload.action === TURNSTILE_ACTION && payload.hostname === TURNSTILE_HOSTNAME;
+  } catch {
+    return false;
   } finally {
     clearTimeout(timer);
   }
