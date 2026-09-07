@@ -11,7 +11,8 @@
 		"WIX_AUTH_REDIRECT_URI": "https://portal.gymfusion.com.au/api/auth/callback",
 		"WIX_PASSWORD_RESET_REDIRECT_URI": "https://portal.gymfusion.com.au/login?reset=complete",
 		"MEMBER_LOGIN_URL": "https://portal.gymfusion.com.au/login",
-		"MEMBERS_PORTAL_URL": "https://portal.gymfusion.com.au/dashboard"
+		"MEMBERS_PORTAL_URL": "https://portal.gymfusion.com.au/dashboard",
+		"TURNSTILE_SITE_KEY": "0x4AAAAAAEsCmiNnrjJGoIKZ"
 	},
 	"durable_objects": {
 		"bindings": [
