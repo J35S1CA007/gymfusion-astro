@@ -1,0 +1,32 @@
+{
+	"name": "gymfusion-member-login",
+	"main": "./src/worker.ts",
+	"compatibility_date": "2026-09-04",
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist"
+	},
+	"vars": {
+		"WIX_HEADLESS_CLIENT_ID": "8060e954-da1f-4eaf-81c9-4bdf0611c5f6",
+		"WIX_AUTH_REDIRECT_URI": "https://portal.gymfusion.com.au/api/auth/callback",
+		"WIX_PASSWORD_RESET_REDIRECT_URI": "https://portal.gymfusion.com.au/login?reset=complete",
+		"MEMBER_LOGIN_URL": "https://portal.gymfusion.com.au/login",
+		"MEMBERS_PORTAL_URL": "https://portal.gymfusion.com.au/dashboard"
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "MEMBER_LOGIN_AUTH_STATE",
+				"class_name": "MemberLoginAuthDurableObject"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": [
+				"MemberLoginAuthDurableObject"
+			]
+		}
+	]
+}
