@@ -1,0 +1,1467 @@
+---
+import backgroundUrl from '../../assets/background-members-login-screen.png';
+import spiralLogoUrl from '../../assets/member-login-page-logos/vibrant_gf_spiral_transparent.png';
+import spiralUrl from '../../assets/gf-spiral-pattern-transparent.png';
+import { env } from 'cloudflare:workers';
+import { createEmbeddedAuth } from '../lib/better-auth';
+import { getActiveIdentityMapping } from '../lib/identity-mapping';
+
+const db = (env as unknown as { BETTER_AUTH_DB: D1Database }).BETTER_AUTH_DB;
+const auth = createEmbeddedAuth(db, new URL(Astro.request.url).origin);
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+const mapping = session ? await getActiveIdentityMapping(db, session.user.id) : undefined;
+const portalUrl = mapping ? String((env as { MEMBERS_PORTAL_URL?: string }).MEMBERS_PORTAL_URL ?? '/dashboard') : undefined;
+const turnstileSiteKey = String((env as { TURNSTILE_SITE_KEY?: string }).TURNSTILE_SITE_KEY ?? "").trim();
+if (portalUrl) return Astro.redirect(portalUrl);
+---
+
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="GYMFUSION Members Login" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <title>GYMFUSION Members Login</title>
+  </head>
+  <body style={`--gf-background: url("${backgroundUrl.src}");`}>
+    <header class="site-header" data-site-header>
+      <div class="desktop-menu-slot">
+        <button class="menu-pill" type="button" data-desktop-menu-button aria-expanded="false" aria-controls="desktop-site-menu">
+          <svg class="menu-icon" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+            <path class="line line-top" d="M5 8h18"></path>
+            <path class="line line-middle" d="M5 14h18"></path>
+            <path class="line line-bottom" d="M5 20h18"></path>
+          </svg>
+          <span class="menu-label">Menu</span>
+        </button>
+        <div class="desktop-menu-overlay" data-desktop-menu-overlay hidden>
+          <nav class="desktop-site-menu" id="desktop-site-menu" aria-label="Desktop navigation" hidden>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/" rel="noreferrer" target="_blank"><span class="site-menu-link__label">Home</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/our-services" rel="noreferrer" target="_blank"><span class="site-menu-link__label">Our Services</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/privacy-policy" rel="noreferrer" target="_blank"><span class="site-menu-link__label">Privacy Policy</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/accessibility-inclusion-statement" rel="noreferrer" target="_blank"><span class="site-menu-link__label">Accessibility &amp; Inclusion</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/our-policies" rel="noreferrer" target="_blank"><span class="site-menu-link__label">Our Policies</span></a>
+            <a class="site-menu-link" href="https://www.gymfusion.com.au/terms-and-conditions" rel="noreferrer" target="_blank"><span class="site-menu-link__label">T&amp;Cs</span></a>
+          </nav>
+        </div>
+      </div>
+      <div class="brand-slot" aria-hidden="true">
+        <img class="brand-logo" src={spiralLogoUrl.src} alt="" loading="eager" decoding="async" />
+      </div>
+      <div class="mobile-menu-slot">
+        <button
+          class="mobile-navigation-button"
+          id="gfMobileMenuButton"
+          type="button"
+          aria-label="Open navigation"
+          aria-controls="mobile-site-menu"
+          aria-expanded="false"
+        >
+          <svg class="mobile-navigation-icon" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="mobile-navigation-icon-gradient" x1="2" y1="2" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#9d0aff"></stop>
+                <stop offset="31%" stop-color="#de0796"></stop>
+                <stop offset="68%" stop-color="#fd1d1d"></stop>
+                <stop offset="100%" stop-color="#fc9e19"></stop>
+              </linearGradient>
+            </defs>
+            <path class="line line-top" d="M5 8h18"></path>
+            <path class="line line-middle" d="M5 14h18"></path>
+            <path class="line line-bottom" d="M5 20h18"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+    <div class="mobile-menu-overlay" data-mobile-menu-overlay id="mobile-site-menu-overlay" hidden aria-hidden="true">
+      <nav class="mobile-site-menu" id="mobile-site-menu" aria-label="Mobile navigation">
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/" rel="noreferrer" target="_blank" data-mobile-menu-link><span>Home</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/our-services" rel="noreferrer" target="_blank" data-mobile-menu-link><span>Our Services</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/privacy-policy" rel="noreferrer" target="_blank" data-mobile-menu-link><span>Privacy Policy</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/accessibility-inclusion-statement" rel="noreferrer" target="_blank" data-mobile-menu-link><span>Accessibility &amp; Inclusion</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/our-policies" rel="noreferrer" target="_blank" data-mobile-menu-link><span>Our Policies</span></a>
+        <a class="mobile-site-menu__button" href="https://www.gymfusion.com.au/terms-and-conditions" rel="noreferrer" target="_blank" data-mobile-menu-link><span>T&amp;Cs</span></a>
+      </nav>
+    </div>
+
+    <main class="login-stage">
+      <section class="login-panel" aria-labelledby="login-title">
+        <img class="spiral" src={spiralUrl.src} alt="" aria-hidden="true" />
+        <div class="artboard">
+          <div class="title-wrap">
+            <h1 id="login-title" class="title" data-login-title>WELCOME BACK</h1>
+          </div>
+
+          <div class="subtitle-wrap">
+            <p class="title-subtitle copy-enter" data-login-subtitle>
+              <span class="subtitle-line">Login to access your </span>
+              <span class="subtitle-line">GYMFUSION Members Portal</span>
+            </p>
+          </div>
+
+          <form class="form" data-auth-form novalidate>
+            <label class="field field--warm" for="email">
+              <span class="label">Email</span>
+              <span class="field-shell">
+                <input id="email" class="input" name="email" type="email" autocomplete="email" placeholder="Enter your email" required />
+              </span>
+            </label>
+
+            <div class="field field--cool" id="password-field">
+              <label class="label" for="password" data-password-label>Password</label>
+              <span class="field-shell field-shell--password">
+                <input id="password" class="input" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required />
+                <span class="password-controls" data-password-controls>
+                  <button class="password-control" type="button" data-password-toggle aria-pressed="false" aria-label="Show password">
+                    <svg class="password-control__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M2.5 12s3.6-6.5 9.5-6.5S21.5 12 21.5 12s-3.6 6.5-9.5 6.5S2.5 12 2.5 12Z" fill="none" stroke="currentColor" stroke-width="1.7" />
+                      <circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.7" />
+                    </svg>
+                  </button>
+                  <button class="password-control password-control--clear" type="button" data-password-clear aria-label="Clear password" hidden>
+                    <svg class="password-control__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
+                    </svg>
+                  </button>
+                </span>
+              </span>
+            </div>
+
+            <div class="password-spacer" aria-hidden="true"></div>
+
+            <p class="form-message" data-message role="alert" aria-live="polite"></p>
+
+            <div data-turnstile-widget data-turnstile-site-key={turnstileSiteKey}></div>
+
+            <div class="cta-stack" data-login-actions data-mode="login">
+              <button class="help-button" type="button" data-help><svg class="action-icon action-icon--help help-icon-default" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><circle cx="8" cy="8" r="6.25"/><path d="m5.75 6.75c0-1 2-2 2.25-2s2.25 1.0335 2.25 2c0 1.5-1.5 1.5-2.25 2m0 2.5v0"/></g></svg><svg class="action-icon action-icon--help help-icon-inverted" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 23a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 16 25m1.142-7.754v2.501h-2.25V15h2.125a2.376 2.376 0 0 0 0-4.753h-1.5a2.38 2.38 0 0 0-2.375 2.375v.638h-2.25A4.63 4.63 0 0 1 15.517 8h1.5a4.624 4.624 0 0 1 .125 9.246"/></svg><span>Help</span></button>
+              <button class="cta" type="submit" data-submit><span>Login</span><svg class="action-icon action-icon--login" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M11 7 9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5zm9 12h-8v2h10V3H12v2h8z"/></svg></button>
+              <button class="forgot" type="button" aria-controls="password-field" aria-expanded="true" data-forgot hidden>Forgot Password?</button>
+            </div>
+          </form>
+
+          <section class="help-panel" data-help-panel hidden aria-labelledby="help-title">
+            <h2 id="help-title" class="help-title">HELP?</h2>
+            <p class="help-copy">Login to access your GYMFUSION Members Portal</p>
+            <div class="help-actions">
+              <button class="help-action" type="button" data-help-forgot><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 1a5 5 0 0 0-5 5v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5m0 1.9c1.71 0 3.1 1.39 3.1 3.1v2H8.9V6c0-1.71 1.39-3.1 3.1-3.1m.19 7.6c.94 0 1.69.21 2.23.62q.81.63.81 1.68c0 .44-.15.83-.44 1.2c-.29.36-.67.64-1.13.85c-.26.15-.43.3-.52.47c-.09.18-.14.4-.14.68h-2c0-.5.1-.84.29-1.08c.21-.24.55-.52 1.07-.84c.26-.14.47-.32.64-.54c.14-.21.22-.46.22-.74c0-.3-.09-.52-.27-.69c-.18-.18-.45-.26-.76-.26c-.27 0-.49.07-.69.21c-.16.14-.26.35-.26.63H9.27c-.05-.69.23-1.29.78-1.65c.54-.36 1.25-.54 2.14-.54M11 17h2v2h-2z"/></svg><span>Forgot Password</span></button>
+              <button class="help-action" type="button" data-help-create><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M14 15c0 1.11-.89 2-2 2a2 2 0 0 1-2-2c0-1.11.89-2 2-2a2 2 0 0 1 2 2m-.91 5c.12.72.37 1.39.72 2H6a2 2 0 0 1-2-2V10c0-1.11.89-2 2-2h1V6c0-2.76 2.24-5 5-5s5 2.24 5 5v2h1a2 2 0 0 1 2 2v3.09c-.33-.05-.66-.09-1-.09s-.67.04-1 .09V10H6v10zM9 8h6V6c0-1.66-1.34-3-3-3S9 4.34 9 6zm12.34 7.84l-3.59 3.59l-1.59-1.59L15 19l2.75 3l4.75-4.75z"/></svg><span>Create a password!</span></button>
+              <button class="help-action" type="button" data-help-return><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 11H7.14l3.63-4.36a1 1 0 1 0-1.54-1.28l-5 6a1 1 0 0 0-.09.15c0 .05 0 .08-.07.13A1 1 0 0 0 4 12a1 1 0 0 0 .07.36c0 .05 0 .08.07.13a1 1 0 0 0 .09.15l5 6A1 1 0 0 0 10 19a1 1 0 0 0 .64-.23a1 1 0 0 0 .13-1.41L7.14 13H19a1 1 0 0 0 0-2"/></svg><span>Back</span></button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer is:inline></script>
+    <script>
+      const turnstileSiteKey = document.querySelector<HTMLElement>('[data-turnstile-widget]')?.dataset.turnstileSiteKey || '';
+      const form = document.querySelector<HTMLFormElement>('[data-auth-form]')!;
+      const email = document.querySelector<HTMLInputElement>('#email')!;
+      const password = document.querySelector<HTMLInputElement>('#password')!;
+      const passwordField = document.querySelector<HTMLElement>('#password-field')!;
+      const passwordControls = document.querySelector<HTMLElement>('[data-password-controls]')!;
+      const passwordToggle = document.querySelector<HTMLButtonElement>('[data-password-toggle]')!;
+      const passwordClear = document.querySelector<HTMLButtonElement>('[data-password-clear]')!;
+      const message = document.querySelector<HTMLElement>('[data-message]')!;
+      const title = document.querySelector<HTMLElement>('[data-login-title]')!;
+      const titleSubtitle = document.querySelector<HTMLElement>('[data-login-subtitle]')!;
+      const artboard = document.querySelector<HTMLElement>('.artboard')!;
+      const titleWrap = document.querySelector<HTMLElement>('.title-wrap')!;
+      const actions = document.querySelector<HTMLElement>('[data-login-actions]')!;
+      const forgot = document.querySelector<HTMLButtonElement>('[data-forgot]')!;
+      const submit = document.querySelector<HTMLButtonElement>('[data-submit]')!;
+      const loginIcon = '<svg class="action-icon action-icon--login" style="width:20px;height:20px;display:block;flex:0 0 auto;margin-left:5px" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M11 7 9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5zm9 12h-8v2h10V3H12v2h8z"/></svg>';
+      const resetIcon = '<svg class="action-icon action-icon--reset" style="width:20px;height:20px;display:block;flex:0 0 auto;margin-left:5px" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20 4H6c-1.103 0-2 .897-2 2v5h2V8l6.4 4.8a1 1 0 0 0 1.2 0L20 8v9h-8v2h8c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2m-7 6.75L6.666 6h12.668z"/><path fill="currentColor" d="M2 12h7v2H2zm2 3h6v2H4zm3 3h4v2H7z"/></svg>';
+      const backIcon = '<svg class="action-icon action-icon--back" style="width:20px;height:20px;display:block;flex:0 0 auto;margin-right:5px" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 11H7.14l3.63-4.36a1 1 0 1 0-1.54-1.28l-5 6a1 1 0 0 0-.09.15c0 .05 0 .08-.07.13A1 1 0 0 0 4 12a1 1 0 0 0 .07.36c0 .05 0 .08.07.13a1 1 0 0 0 .09.15l5 6A1 1 0 0 0 10 19a1 1 0 0 0 .64-.23a1 1 0 0 0 .13-1.41L7.14 13H19a1 1 0 0 0 0-2"/></svg>';
+      const helpButton = document.querySelector<HTMLButtonElement>('[data-help]')!;
+      const helpPanel = document.querySelector<HTMLElement>('[data-help-panel]')!;
+      const helpAnimated = Array.from(document.querySelectorAll<HTMLElement>('[data-help-panel] .help-copy'));
+      const helpForgot = document.querySelector<HTMLButtonElement>('[data-help-forgot]')!;
+      const helpCreate = document.querySelector<HTMLButtonElement>('[data-help-create]')!;
+      const helpReturn = document.querySelector<HTMLButtonElement>('[data-help-return]')!;
+      const passwordInput = document.querySelector<HTMLInputElement>('#password')!;
+      const desktopMenuButton = document.querySelector<HTMLButtonElement>('[data-desktop-menu-button]')!;
+      const desktopMenuOverlay = document.querySelector<HTMLElement>('[data-desktop-menu-overlay]')!;
+      const desktopMenu = document.querySelector<HTMLElement>('#desktop-site-menu')!;
+      const mobileMenuButton = document.querySelector<HTMLButtonElement>('#gfMobileMenuButton')!;
+      const mobileMenuOverlay = document.querySelector<HTMLElement>('[data-mobile-menu-overlay]')!;
+      const mobileMenu = document.querySelector<HTMLElement>('#mobile-site-menu')!;
+      const mobileMenuLinks = Array.from(document.querySelectorAll<HTMLElement>('[data-mobile-menu-link]'));
+      let recoveryMode = false;
+      let requestInFlight = false;
+      let activeMenuMode = '';
+      let mobileMenuRevealFrame: number | null = null;
+      let mobileMenuRevealTimer: number | null = null;
+      let turnstileWidgetId: string | null = null;
+      let turnstileReady: Promise<TurnstileApi> | null = null;
+      let turnstileAttempt = 0;
+      let activeTurnstileAttempt: { id: number; widgetId: string; resolve: (token: string) => void; reject: (error: Error) => void } | null = null;
+
+      type TurnstileApi = {
+        render: (container: HTMLElement, options: Record<string, unknown>) => string;
+        execute: (widgetId: string) => void;
+        remove?: (widgetId: string) => void;
+        reset: (widgetId: string) => void;
+      };
+
+      const getTurnstile = (): Promise<TurnstileApi> => {
+        if (turnstileReady) return turnstileReady;
+        turnstileReady = new Promise((resolve, reject) => {
+          const started = Date.now();
+          const wait = () => {
+            const api = (window as Window & { turnstile?: TurnstileApi }).turnstile;
+            if (api) return resolve(api);
+            if (Date.now() - started >= 8000) return reject(new Error('Turnstile is unavailable.'));
+            window.setTimeout(wait, 50);
+          };
+          wait();
+        });
+        return turnstileReady;
+      };
+
+      const getTurnstileToken = async (): Promise<string> => {
+        if (!turnstileSiteKey) throw new Error('Turnstile is unavailable.');
+        const api = await getTurnstile();
+        const container = document.querySelector<HTMLElement>('[data-turnstile-widget]');
+        if (!container) throw new Error('Turnstile is unavailable.');
+        if (turnstileWidgetId !== null) {
+          api.remove?.(turnstileWidgetId);
+          turnstileWidgetId = null;
+        }
+        const attemptId = ++turnstileAttempt;
+        return new Promise((resolve, reject) => {
+          const isCurrent = () => activeTurnstileAttempt?.id === attemptId;
+          const rejectCurrent = () => {
+            if (!isCurrent()) return;
+            activeTurnstileAttempt = null;
+            reject(new Error('Turnstile verification failed.'));
+          };
+          const widgetId = api.render(container, {
+            appearance: 'interaction-only',
+            action: 'member_login',
+            callback: (token: string) => {
+              if (!isCurrent()) return;
+              activeTurnstileAttempt = null;
+              resolve(token);
+            },
+            'error-callback': rejectCurrent,
+            'expired-callback': rejectCurrent,
+            execution: 'execute',
+            sitekey: turnstileSiteKey,
+            'unsupported-callback': rejectCurrent,
+          });
+          activeTurnstileAttempt = { id: attemptId, reject, resolve, widgetId };
+          turnstileWidgetId = widgetId;
+          try {
+            api.execute(widgetId);
+          } catch {
+            if (activeTurnstileAttempt?.id === attemptId) {
+              activeTurnstileAttempt = null;
+              reject(new Error('Turnstile verification failed.'));
+            }
+          }
+        });
+      };
+
+      const setMessage = (text: string, kind = '') => {
+        message.textContent = text;
+        message.dataset.kind = kind;
+      };
+      const clearError = () => {
+        if (message.dataset.kind === 'error') setMessage('');
+      };
+
+      let transitionTimer: number | null = null;
+      let isTransitioning = false;
+      let recoveryVariant: 'forgot' | 'create' = 'forgot';
+
+      const updatePasswordControls = () => {
+        const canInteract = !recoveryMode && !requestInFlight;
+        const hasPassword = Boolean(password.value);
+        const passwordVisible = password.type === 'text';
+
+        passwordField.dataset.revealed = String(passwordVisible);
+        passwordControls.dataset.hasValue = String(hasPassword);
+        passwordToggle.disabled = !canInteract;
+        passwordToggle.setAttribute('aria-pressed', String(passwordVisible));
+        passwordToggle.setAttribute('aria-label', passwordVisible ? 'Hide password' : 'Show password');
+        passwordClear.hidden = !canInteract || !hasPassword;
+        passwordClear.disabled = !canInteract || !hasPassword;
+      };
+
+      const syncPasswordVisibility = (visible: boolean) => {
+        password.type = visible ? 'text' : 'password';
+        updatePasswordControls();
+      };
+
+      email.addEventListener('input', clearError);
+      password.addEventListener('input', () => {
+        clearError();
+        updatePasswordControls();
+      });
+
+      const syncButtonLabels = (collapsed: boolean, animate = true) => {
+        recoveryMode = collapsed;
+        artboard.classList.toggle('is-reset-mode', collapsed);
+        titleWrap.classList.toggle('is-reset-mode', collapsed);
+        title.innerHTML = collapsed
+          ? recoveryVariant === 'create'
+            ? '<span class="title-line">CREATE</span><span class="title-line">PASS</span>'
+            : '<span class="title-line">FORGOT</span><span class="title-line">PASS<span class="title-punctuation">?</span></span>'
+          : '<span class="title-line">WELCOME</span><span class="title-line">BACK</span>';
+        titleSubtitle.innerHTML = collapsed
+          ? recoveryVariant === 'create'
+            ? '<span class="subtitle-line">We’ll send you a new email to create a password.</span>'
+            : '<span class="subtitle-line">We will email instructions </span><span class="subtitle-line">to reset your password.</span>'
+          : '<span class="subtitle-line">Login to access your </span><span class="subtitle-line">GYMFUSION Members Portal</span>';
+        forgot.innerHTML = collapsed ? `${backIcon}<span>Back</span>` : 'Forgot Password?';
+        forgot.hidden = !collapsed;
+        helpButton.hidden = collapsed;
+        forgot.setAttribute('aria-expanded', String(!collapsed));
+        submit.innerHTML = collapsed ? `<span>Send Email</span>${resetIcon}` : `<span>Login</span>${loginIcon}`;
+        actions.dataset.mode = collapsed ? 'recovery' : 'login';
+        passwordInput.required = !collapsed;
+        syncPasswordVisibility(false);
+
+        if (animate) {
+          title.classList.remove('copy-enter');
+          titleSubtitle.classList.remove('copy-enter');
+          void titleWrap.offsetWidth;
+          title.classList.add('copy-enter');
+          titleSubtitle.classList.add('copy-enter');
+        }
+      };
+
+      const setRecoveryMode = (next: boolean) => {
+        if (transitionTimer !== null) {
+          window.clearTimeout(transitionTimer);
+          transitionTimer = null;
+        }
+
+        if (next) {
+          form.classList.remove('is-password-returning', 'is-password-entering');
+          syncButtonLabels(true);
+          passwordInput.blur();
+          form.classList.add('is-password-exiting');
+
+          transitionTimer = window.setTimeout(() => {
+            form.classList.add('is-password-collapsed');
+            transitionTimer = window.setTimeout(() => {
+              form.classList.remove('is-password-exiting');
+              transitionTimer = null;
+            }, 500);
+          }, 55);
+          return;
+        }
+
+        form.classList.remove('is-password-exiting');
+        syncButtonLabels(false);
+        form.classList.add('is-password-returning');
+        form.classList.remove('is-password-collapsed');
+
+        transitionTimer = window.setTimeout(() => {
+          form.classList.add('is-password-entering');
+          transitionTimer = window.setTimeout(() => {
+            form.classList.remove('is-password-collapsed', 'is-password-returning', 'is-password-entering');
+            transitionTimer = null;
+          }, 420);
+        }, 110);
+      };
+
+      const setDesktopMenuOpen = (open: boolean) => {
+        desktopMenu.hidden = !open;
+        desktopMenuOverlay.hidden = !open;
+        desktopMenuButton.classList.toggle('is-open', open);
+        desktopMenuButton.setAttribute('aria-expanded', String(open));
+        if (!open && activeMenuMode === 'desktop') activeMenuMode = '';
+        if (open) activeMenuMode = 'desktop';
+      };
+
+      const resetMobileMenuButtons = () => {
+        mobileMenuLinks.forEach((button) => {
+          button.classList.remove('is-visible');
+          button.style.animationDelay = '0ms';
+        });
+      };
+
+      const playMobileMenuButtons = () => {
+        mobileMenuLinks.forEach((button, index) => {
+          button.style.animationDelay = `${index * 200}ms`;
+          button.classList.add('is-visible');
+        });
+      };
+
+      const clearMobileMenuReveal = () => {
+        if (mobileMenuRevealFrame !== null) {
+          cancelAnimationFrame(mobileMenuRevealFrame);
+          mobileMenuRevealFrame = null;
+        }
+        if (mobileMenuRevealTimer !== null) {
+          clearTimeout(mobileMenuRevealTimer);
+          mobileMenuRevealTimer = null;
+        }
+      };
+
+      const setMobileMenuScrollLock = (open: boolean) => {
+        document.documentElement.classList.toggle('mobile-site-menu-open', open);
+        document.body.classList.toggle('mobile-site-menu-open', open);
+      };
+
+      const setMobileMenuOpen = (open: boolean) => {
+        const header = document.querySelector<HTMLElement>('[data-site-header]');
+        if (header) header.dataset.mobileMenuOpen = open ? 'true' : 'false';
+        mobileMenuButton.classList.toggle('is-open', open);
+        mobileMenuButton.setAttribute('aria-expanded', String(open));
+        mobileMenuButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+        mobileMenuOverlay.hidden = !open;
+        mobileMenuOverlay.classList.toggle('is-open', open);
+        mobileMenuOverlay.setAttribute('aria-hidden', String(!open));
+        setMobileMenuScrollLock(open);
+        clearMobileMenuReveal();
+        if (!open && activeMenuMode === 'mobile') activeMenuMode = '';
+        if (!open) {
+          resetMobileMenuButtons();
+          return;
+        }
+        activeMenuMode = 'mobile';
+        resetMobileMenuButtons();
+        mobileMenuRevealFrame = window.requestAnimationFrame(() => {
+          mobileMenuRevealTimer = window.setTimeout(() => {
+            playMobileMenuButtons();
+            mobileMenuRevealTimer = null;
+          }, 180);
+          mobileMenuRevealFrame = null;
+        });
+      };
+
+      const closeMenus = () => {
+        setDesktopMenuOpen(false);
+        setMobileMenuOpen(false);
+      };
+
+      const setBusy = (busy: boolean, label: string) => {
+        requestInFlight = busy;
+        submit.disabled = busy;
+        forgot.disabled = busy;
+        submit.innerHTML = busy ? label : (recoveryMode ? `<span>Send Email</span>${resetIcon}` : `<span>Login</span>${loginIcon}`);
+        updatePasswordControls();
+      };
+
+      const setHelpMode = (next: boolean) => {
+        helpPanel.hidden = !next;
+        form.hidden = next;
+        titleWrap.hidden = next;
+        titleSubtitle.hidden = next;
+        artboard.classList.toggle('is-help-mode', next);
+        if (next) {
+          setMessage('');
+          helpPanel.classList.remove('help-enter');
+          helpAnimated.forEach((element) => element.classList.remove('copy-enter'));
+          void helpPanel.offsetWidth;
+          helpPanel.classList.add('help-enter');
+          helpAnimated.forEach((element) => element.classList.add('copy-enter'));
+          helpReturn.focus();
+        } else {
+          email.focus();
+        }
+      };
+
+      const openRecoveryFromHelp = (variant: 'forgot' | 'create') => {
+        recoveryVariant = variant;
+        setHelpMode(false);
+        setRecoveryMode(true);
+        syncButtonLabels(true);
+        email.focus();
+      };
+
+      forgot.addEventListener('click', () => {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        setMessage('');
+        const isCollapsed = form.classList.contains('is-password-collapsed');
+        if (isCollapsed) {
+          setRecoveryMode(false);
+          setHelpMode(true);
+        } else {
+          setRecoveryMode(true);
+        }
+        window.setTimeout(() => {
+          isTransitioning = false;
+        }, isCollapsed ? 560 : 610);
+      });
+      helpButton.addEventListener('click', () => {
+        if (!requestInFlight && !recoveryMode) setHelpMode(true);
+      });
+      helpForgot.addEventListener('click', () => openRecoveryFromHelp('forgot'));
+      helpCreate.addEventListener('click', () => openRecoveryFromHelp('create'));
+      helpReturn.addEventListener('click', () => setHelpMode(false));
+      passwordToggle.addEventListener('click', () => {
+        if (passwordToggle.disabled) return;
+        syncPasswordVisibility(password.type !== 'text');
+        password.focus();
+        password.setSelectionRange(password.value.length, password.value.length);
+      });
+      passwordClear.addEventListener('click', () => {
+        if (passwordClear.disabled) return;
+        password.value = '';
+        clearError();
+        updatePasswordControls();
+        password.focus();
+      });
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (requestInFlight) return;
+        if (!email.checkValidity() || (!recoveryMode && !password.value)) {
+          setMessage(recoveryMode ? 'Enter a valid email address.' : 'Enter a valid email and password.', 'error');
+          (email.checkValidity() ? password : email).focus();
+          return;
+        }
+        setBusy(true, recoveryMode ? 'Sending...' : 'Connecting...');
+        setMessage(recoveryMode ? 'Sending reset instructions...' : 'Connecting securely...');
+        try {
+          if (recoveryMode && localResetSuccessTest) {
+            window.setTimeout(() => {
+              setMessage('If an account matches that email, reset instructions have been sent.', 'success');
+              setBusy(false, '');
+            }, 0);
+            return;
+          }
+          const turnstileToken = recoveryMode ? undefined : await getTurnstileToken();
+          const response = await fetch(recoveryMode ? '/api/auth/recovery' : '/api/auth/login', {
+            body: JSON.stringify(recoveryMode ? { email: email.value } : { email: email.value, password: password.value, turnstileToken }),
+            credentials: 'same-origin',
+            headers: { 'content-type': 'application/json' },
+            method: 'POST',
+          });
+          const payload = await response.json() as { error?: string; redirectUrl?: string };
+          if (!response.ok) throw new Error(payload.error || 'We could not complete that request. Please try again.');
+          if (!recoveryMode && payload.redirectUrl) {
+            window.location.assign(payload.redirectUrl);
+            return;
+          }
+          setMessage('If an account matches that email, reset instructions have been sent.', 'success');
+          setBusy(false, '');
+        } catch (error) {
+          const errorText = error instanceof Error ? error.message : '';
+          const safeMessage = /we could not reach the member service/i.test(errorText)
+            ? 'We could not reach the member service.\nPlease try again.'
+            : /failed to fetch|networkerror|network request/i.test(errorText)
+              ? 'We could not reach the member service.\nPlease try again.'
+              : (errorText || 'We could not complete that request. Please try again.');
+          setMessage(safeMessage, 'error');
+          setBusy(false, '');
+          if (turnstileWidgetId !== null) {
+            const api = (window as Window & { turnstile?: TurnstileApi }).turnstile;
+            api?.reset(turnstileWidgetId);
+            api?.remove?.(turnstileWidgetId);
+            turnstileWidgetId = null;
+          }
+          activeTurnstileAttempt = null;
+        }
+      });
+      updatePasswordControls();
+
+      desktopMenuButton.addEventListener('click', () => {
+        const nextOpen = desktopMenu.hidden;
+        closeMenus();
+        if (nextOpen) setDesktopMenuOpen(true);
+      });
+      desktopMenu?.addEventListener('mouseleave', () => setDesktopMenuOpen(false));
+
+      mobileMenuButton.addEventListener('click', () => {
+        const nextOpen = mobileMenuOverlay.hidden;
+        closeMenus();
+        if (nextOpen) setMobileMenuOpen(true);
+      });
+      mobileMenuLinks.forEach((link) => {
+        link.addEventListener('click', () => setMobileMenuOpen(false));
+      });
+      mobileMenuOverlay.addEventListener('click', (event) => {
+        if (event.target === mobileMenuOverlay) setMobileMenuOpen(false);
+      });
+
+      document.addEventListener('pointerdown', (event) => {
+        if (!(event.target instanceof Node) || !activeMenuMode) return;
+        if (activeMenuMode === 'desktop') {
+          if (desktopMenu.contains(event.target) || desktopMenuButton.contains(event.target)) return;
+          closeMenus();
+          return;
+        }
+        if (mobileMenu.contains(event.target) || mobileMenuButton.contains(event.target)) return;
+        closeMenus();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          closeMenus();
+        }
+      });
+      window.addEventListener('resize', closeMenus);
+
+      syncButtonLabels(false, false);
+      const params = new URLSearchParams(window.location.search);
+      const localResetSuccessTest = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && params.get('reset') === 'complete';
+      const authError = params.get('auth_error');
+      if (authError) setMessage(authError, 'error');
+      if (params.get('reset') === 'complete') setMessage('Your password was reset. You can now log in.', 'success');
+      fetch('/api/auth/session', { credentials: 'same-origin' }).then(async (response) => {
+        if (response.ok) {
+          const payload = await response.json() as { redirectUrl?: string };
+          window.location.assign(payload.redirectUrl || '/dashboard');
+        }
+      }).catch(() => {});
+    </script>
+  </body>
+</html>
+
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap");
+  @font-face { font-family: "Separated"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/SEPARATED.ttf") format("truetype"); font-display: swap; }
+  @font-face { font-family: "Pacifico"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Pacifico-Regular.ttf") format("truetype"); font-display: swap; }
+  @font-face { font-family: "Gamuth Sans"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Gamuth Sans"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+
+  :root { color-scheme: dark; --ink: #fff; --muted: rgba(255,255,255,.78); --field-text: #111; --gradient: linear-gradient(111deg, rgba(255,146,78,.8) 4.821134868421053%, rgba(255,0,6,.8) 23.183936403508774%, rgba(255,0,87,.8) 42.61924342105263%, rgba(160,0,255,.8) 74.0234375%, rgba(133,84,250,.8) 83.62801535087719%); --cta-gradient: linear-gradient(111deg, rgba(157, 10, 255, 1) 0%, rgba(222, 7, 150, 1) 31%, rgba(253, 29, 29, 1) 68%, rgba(252, 158, 25, 1) 100%); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-width: 320px; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
+  body { min-height: 100svh; color: var(--ink); background: #09020f var(--gf-background) center / cover fixed no-repeat; font-family: "Gamuth Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  button, input { font: inherit; }
+  button { cursor: pointer; touch-action: manipulation; }
+  button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    width: 100%;
+    min-height: 65px;
+    padding: 0 16px;
+    background: #000;
+    overflow: visible;
+  }
+  .desktop-menu-slot {
+    position: relative;
+    grid-column: 1;
+    justify-self: center;
+    align-self: center;
+    transform: translateX(-65px);
+    display: grid;
+    place-items: center;
+    z-index: 2;
+    overflow: visible;
+  }
+  .brand-slot {
+    position: static;
+    grid-column: 2;
+    justify-self: center;
+    align-self: center;
+    display: grid;
+    place-items: center;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .brand-logo {
+    display: block;
+    width: clamp(34px, 4.4vw, 46px);
+    height: auto;
+  }
+  .mobile-menu-slot {
+    display: none;
+  }
+  .menu-pill {
+    --pill-font-size: clamp(12px, min(5cqw, 23cqh), 16px);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55em;
+    min-width: 7.9em;
+    min-height: 2.65em;
+    padding: 0.64em 1.22em;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: var(--pill-font-size);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #f6fbff;
+    box-shadow: none;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+    z-index: 20;
+    isolation: isolate;
+    transform: translate(0, 0);
+    animation: breathe 3.6s ease-in-out infinite;
+  }
+  .menu-pill::before {
+    content: "";
+    position: absolute;
+    inset: -10px;
+    border-radius: inherit;
+    background: var(--cta-gradient);
+    filter: blur(8px);
+    opacity: 0.62;
+    z-index: -1;
+    transition: opacity 0.16s ease;
+  }
+  .menu-pill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: inherit;
+    background: var(--cta-gradient);
+    pointer-events: none;
+    z-index: -1;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+  .menu-pill > * {
+    position: relative;
+    z-index: 2;
+  }
+  .menu-label {
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 1em;
+  }
+  .menu-icon {
+    width: 1.45em;
+    height: 1.45em;
+    stroke: currentColor;
+    stroke-width: 2.25px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    flex: none;
+    transition: transform 0.25s;
+    overflow: visible;
+  }
+  .menu-icon .line {
+    transition: transform 0.25s, opacity 0.2s;
+    transform-origin: center;
+  }
+  .menu-pill:hover,
+  .menu-pill:focus-visible,
+  .menu-pill.is-open {
+    transform: translate(0, -2px) scale(1.05);
+    animation: none;
+    background: #05020a;
+    box-shadow: none;
+    outline: none;
+  }
+  .menu-pill:hover::before,
+  .menu-pill:focus-visible::before,
+  .menu-pill.is-open::before {
+    opacity: 0.72;
+  }
+  .menu-pill:hover .menu-icon,
+  .menu-pill:focus-visible .menu-icon,
+  .menu-pill.is-open .menu-icon {
+    transform: none;
+  }
+  .menu-pill.is-open .line-top {
+    transform: translateY(4px) rotate(45deg);
+  }
+  .menu-pill.is-open .line-middle {
+    opacity: 0;
+  }
+  .menu-pill.is-open .line-bottom {
+    transform: translateY(-4px) rotate(-45deg);
+  }
+  .desktop-menu-overlay {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: -8px;
+    right: auto;
+    z-index: 240;
+    pointer-events: auto;
+    transform: none;
+  }
+  .desktop-menu-overlay[hidden],
+  .desktop-site-menu[hidden] {
+    display: none !important;
+  }
+  .desktop-site-menu {
+    display: grid;
+    width: 204px;
+    height: 314px;
+    grid-template-rows: repeat(6, 37px);
+    align-content: start;
+    row-gap: 11px;
+    padding: 17px 0 0;
+    box-sizing: border-box;
+    border: 1px solid #ffffff05;
+    background: linear-gradient(#030105db, #030105f5);
+    box-shadow: 0 24px 60px #0000009e;
+  }
+  .desktop-site-menu .site-menu-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 180px;
+    height: 37px;
+    min-height: 37px;
+    max-height: 37px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    border: 0;
+    background: #05020a;
+    color: #fff;
+    font-family: "Sora", Arial, Helvetica, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .desktop-site-menu .site-menu-link::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(111deg, #9d0aff80 0%, #de079680 31%, #fd1d1d80 68%, #fc9e1980 100%), #05020a;
+    z-index: 0;
+  }
+  .desktop-site-menu .site-menu-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: linear-gradient(100deg, #a600ff 0%, #f0008c 38%, #ff174d 66%, #ff8a00 100%);
+    pointer-events: none;
+    z-index: 1;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+  .desktop-site-menu .site-menu-link__label {
+    position: relative;
+    z-index: 2;
+  }
+  .desktop-site-menu .site-menu-link:hover,
+  .desktop-site-menu .site-menu-link:focus-visible {
+    background: linear-gradient(111deg, #9d0aff57 0%, #de079657 31%, #fd1d1d57 68%, #fc9e1957 100%), #050107;
+    filter: none;
+    outline: none;
+    outline-offset: 0;
+  }
+  .desktop-site-menu .site-menu-link:hover::before,
+  .desktop-site-menu .site-menu-link:focus-visible::before {
+    background: linear-gradient(111deg, #9d0aff70 0%, #de079670 31%, #fd1d1d70 68%, #fc9e1970 100%), #050107;
+  }
+  .mobile-menu-overlay {
+    display: none;
+  }
+  .login-stage { display: grid; place-items: center; min-height: calc(100svh - 65px); padding: 34px 16px 46px; }
+  .login-panel { position: relative; isolation: isolate; width: min(620px, 100%); min-height: min(603px, calc(100svh - 120px)); overflow: hidden; border: 1px solid #fff; border-radius: 0; background: transparent; box-shadow: 0 24px 90px rgba(0,0,0,.52); }
+  .login-panel::before { position: absolute; inset: 0; z-index: -2; background: var(--gradient); content: ""; }
+  .login-panel::after { position: absolute; inset: 0; z-index: -1; background: linear-gradient(135deg, rgba(0,0,0,.22), rgba(0,0,0,.14)); content: ""; }
+  .spiral { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1; mix-blend-mode: normal; }
+  .artboard {
+    width: min(860px, 100%);
+    min-height: clamp(560px, 76vh, 620px);
+    display: grid;
+    gap: clamp(14px, 2.2vw, 22px);
+    align-items: start;
+    align-content: center;
+    justify-items: center;
+    position: relative;
+    animation: rise 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    overflow: hidden;
+  }
+  .artboard.is-reset-mode {
+    animation: none;
+    transform: translateY(clamp(12px, 1vw, 14px));
+  }
+  .title-wrap {
+    width: 100%;
+    position: relative;
+    display: grid;
+    place-items: center;
+    margin-top: 25px;
+    padding-top: clamp(4px, 1vw, 10px);
+    padding-bottom: 0;
+  }
+  .title {
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    font-family: "Separated", "Gamuth Display", sans-serif;
+    font-weight: 400;
+    font-size: clamp(3.5rem, 10vw, 6.2rem);
+    line-height: 0.82;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--ink);
+    transform: translateX(0.02em);
+    -webkit-user-select: none;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  :global(.title-line) { display: block; line-height: 0.82; }
+  :global(.title-punctuation) { font-family: "Separated", "Gamuth Display", sans-serif; font-weight: inherit; }
+  .subtitle-wrap {
+    width: 100%;
+    display: grid;
+    place-items: center;
+    min-height: clamp(36px, 5.5vw, 48px);
+    margin: clamp(2px, 0.8vw, 8px) 0;
+  }
+  .title-subtitle {
+    margin: 0;
+    font-family: "Gamuth Sans Light", "Gamuth Sans", system-ui, sans-serif;
+    font-weight: 300;
+    font-size: clamp(0.8rem, 2.2vw, 1.05rem);
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.88);
+    text-align: center;
+    max-width: 90%;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  :global(.subtitle-line) { display: block; }
+  .title-subtitle.copy-enter {
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-delay: 350ms;
+  }
+  .copy-enter { animation: copy-enter 500ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .form {
+    width: min(360px, 100%);
+    display: grid;
+    gap: clamp(14px, 2.2vw, 20px);
+    justify-items: start;
+    margin-bottom: 0;
+    transition: none;
+  }
+  .field {
+    width: 100%;
+    display: grid;
+    gap: 8px;
+    position: relative;
+  }
+  .field--cool {
+    margin-top: clamp(2px, 0.8vw, 4px);
+    overflow: hidden;
+    max-height: 140px;
+    transition: max-height 500ms ease 0ms, opacity 500ms ease 0ms, margin-top 500ms ease 0ms, transform 500ms ease 0ms;
+    will-change: max-height, opacity, margin-top, transform;
+  }
+  .field--cool:focus-within { overflow: visible; }
+  .field--cool .field-shell { will-change: transform, opacity; }
+  .field--cool .label { will-change: transform, opacity; }
+  .field--warm,
+  .cta-stack { will-change: transform; }
+  .field--warm { transition: none; }
+  .cta-stack {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas: "help forgot login";
+    gap: clamp(10px, 1.5vw, 12px);
+    margin-bottom: 20px;
+    padding-top: clamp(10px, 1.5vw, 16px);
+    transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .cta-stack[data-mode="login"] { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "help login"; }
+  .cta-stack[data-mode="recovery"] { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "forgot login"; }
+  .form:not(.is-password-collapsed) .cta-stack { margin-bottom: 25px; }
+  .label {
+    position: relative;
+    z-index: 1;
+    margin-left: 0;
+    font-family: "Gamuth Sans", system-ui, sans-serif;
+    font-size: clamp(0.84rem, 2vw, 1.12rem);
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-shadow: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .field-shell { position: relative; width: 100%; height: clamp(50px, 10vw, 58px); }
+  .field-shell--password { display: block; }
+  .input {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.32);
+    border-radius: 8px;
+    padding: 0 clamp(16px, 2.6vw, 26px) 0 clamp(16px, 2.6vw, 26px);
+    background: #ffffff;
+    color: var(--field-text);
+    font-size: clamp(0.98rem, 2.2vw, 1.3rem);
+    line-height: 1;
+    outline: none;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.28) inset;
+  }
+  .field-shell--password .input { padding-right: clamp(72px, 12vw, 92px); }
+  .password-controls {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transform: translateY(-50%);
+    z-index: 2;
+  }
+  .password-control {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.06);
+    color: rgba(18, 18, 18, 0.88);
+    box-shadow: none;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, opacity 160ms ease;
+  }
+  .password-control:hover,
+  .password-control:active {
+    background: rgba(0, 0, 0, 0.11);
+    border-color: rgba(0, 0, 0, 0.2);
+    color: rgba(10, 10, 10, 0.98);
+  }
+  .password-control:active { transform: translateY(1px) scale(0.98); }
+  .password-control:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.78);
+    outline-offset: 3px;
+  }
+  .password-control:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+  .password-control__icon {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
+  .password-control--clear[hidden] { display: none; }
+  .input::placeholder {
+    color: rgba(22, 22, 22, 0.52);
+    opacity: 1;
+    font-size: clamp(0.86rem, 1.8vw, 0.95rem);
+    line-height: 1.1;
+  }
+  .field-shell:focus-within { outline: 3px solid #ffffff; outline-offset: 4px; border-radius: 8px; }
+  .input:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(24, 24, 24, 0.12); }
+  .form-message {
+    min-height: 24px;
+    margin: 1px auto 12px;
+    max-width: 28ch;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+    white-space: pre-line;
+  }
+  .form-message:empty { display: none; }
+  .form:has(.form-message:not(:empty)) .form-message { margin-bottom: 0; }
+  .form:has(.form-message:not(:empty)) .cta-stack { padding-top: 0; }
+  .form-message[data-kind="error"] {
+    max-width: 22ch;
+    color: #fff4f4;
+  }
+  .form-message[data-kind="success"] { color: #f0fff5; }
+  .cta,
+  .forgot,
+  .help-button,
+  .help-action {
+    width: 100%;
+    height: clamp(44px, 5vw, 52px);
+    padding: 0 clamp(8px, 1.4vw, 15px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ffffff;
+    border-radius: 8px;
+    background: #000000;
+    color: #ffffff;
+    font-family: "Gamuth Sans", system-ui, sans-serif;
+    font-size: clamp(13px, 2.4vw, 15px);
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .action-icon { width: 1.15em; height: 1.15em; flex: 0 0 auto; display: block; }
+  .cta .action-icon { width: 20px; height: 20px; margin-left: 5px; }
+  .help-button .action-icon { width: 20px; height: 20px; margin-right: 7px; }
+  .help-action { gap: 8px; align-items: center; }
+  .action-icon { align-self: center; vertical-align: middle; }
+  .help-action .action-icon { width: 20px; height: 20px; }
+  .help-action[data-help-forgot] .action-icon { transform: translateX(-3px); }
+  .help-action[data-help-forgot] > span { transform: translateX(-3px); }
+  .help-icon-inverted { display: none; }
+  .help-button:hover .help-icon-default,
+  .help-button:active .help-icon-default,
+  .help-button:focus-visible .help-icon-default { display: none; }
+  .help-button:hover .help-icon-inverted,
+  .help-button:active .help-icon-inverted,
+  .help-button:focus-visible .help-icon-inverted { display: block; }
+  .cta { grid-area: login; margin-top: 5px; }
+  .forgot { grid-area: forgot; margin-top: 5px; white-space: nowrap; text-align: center; }
+  .forgot[hidden] { display: none !important; }
+  .help-button[hidden] { display: none !important; }
+  .help-button { grid-area: help; margin-top: 5px; }
+  .cta:hover,
+  .cta:active,
+  .forgot:hover,
+  .forgot:active,
+  .help-button:hover,
+  .help-button:active,
+  .help-action:hover,
+  .help-action:active {
+    transform: translateY(-1px);
+    background: #ffffff;
+    color: #000000;
+    border-color: #000000;
+    box-shadow: 0 20px 36px rgba(0, 0, 0, 0.08);
+  }
+  .cta:active,
+  .forgot:active,
+  .help-button:active,
+  .help-action:active { transform: translateY(2px) scale(0.99); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.03); }
+  .cta:focus-visible,
+  .forgot:focus-visible,
+  .help-button:focus-visible,
+  .help-action:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.78); outline-offset: 4px; }
+  .help-panel { padding: 12px 0 18px; text-align: center; }
+  .help-panel.help-enter .help-copy { animation-duration: 1s; animation-timing-function: linear; animation-delay: 350ms; }
+  .title-wrap[hidden],
+  .title-subtitle[hidden],
+  .form[hidden],
+  .help-panel[hidden] { display: none !important; }
+  .help-title { position: relative; top: 12px; display: flex; flex-direction: column; align-items: center; margin: -33px 0 22px; font-family: "Separated", "Gamuth Display", sans-serif; font-weight: 400; font-size: clamp(calc(3.5rem + 20px), calc(10vw + 20px), calc(6.2rem + 20px)); line-height: .82; letter-spacing: .04em; text-transform: uppercase; text-align: center; color: var(--ink); transform: translateX(.02em); }
+  .help-copy { display: flex; align-items: center; justify-content: center; min-height: 48px; margin: 0 auto 28px; max-width: 28ch; font-size: clamp(0.8rem, 2.2vw, 1.05rem); line-height: 1.35; text-align: center; color: var(--ink); }
+  .help-actions { display: grid; gap: 12px; width: min(100%, 360px); margin: 0 auto; }
+  .help-action { width: 100%; }
+  .help-action[data-help-return] { width: min(38%, 140px); justify-self: center; justify-content: center; margin-top: 24px; }
+  .cta-stack[data-mode="recovery"] .forgot { width: calc(100% - 98px); justify-self: center; }
+  .cta-stack[data-mode="recovery"] .cta { width: calc(100% - 98px); justify-self: center; }
+  .password-spacer { display: none; }
+  .form.is-password-exiting .field--cool,
+  .form.is-password-collapsed .field--cool,
+  .form.is-password-returning .field--cool,
+  .form.is-password-entering .field--cool { pointer-events: none; }
+  .form.is-password-collapsed .field--cool { max-height: 0; margin-top: 0; }
+  .form.is-password-collapsed .form-message { transform: translateY(-18px); }
+  .form.is-password-exiting .field--cool .field-shell,
+  .form.is-password-exiting .field--cool .label { animation: password-slide-out 200ms cubic-bezier(0.22, 0.3, 0.36, 1) forwards; }
+  .form.is-password-entering .field--cool .field-shell,
+  .form.is-password-entering .field--cool .label { animation: password-slide-in 300ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .form.is-password-collapsed .field--cool .field-shell,
+  .form.is-password-collapsed .field--cool .label,
+  .form.is-password-returning .field--cool .field-shell,
+  .form.is-password-returning .field--cool .label { transform: translateX(112%); opacity: 0; }
+  .form.is-password-collapsed .cta-stack { transform: translateY(-20px); }
+  .form.is-password-returning .cta-stack { transform: translateY(0); }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(12px) scale(0.992); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes password-slide-out {
+    0% { transform: translateX(0); opacity: 1; }
+    18% { opacity: 1; }
+    100% { transform: translateX(112%); opacity: 0; }
+  }
+  @keyframes password-slide-in {
+    0% { transform: translateX(112%); opacity: 0; }
+    18% { opacity: 1; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes copy-enter {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  button:disabled { cursor: wait; opacity: .68; }
+  @media (max-width: 1023px) {
+    :global(html.mobile-site-menu-open),
+    :global(body.mobile-site-menu-open) {
+      overflow: hidden !important;
+      overscroll-behavior: none !important;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 160;
+      padding: 0 12px;
+      height: 64px;
+      min-height: 64px;
+      background: #000;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    .site-header[data-mobile-menu-open="true"] {
+      background: #000;
+    }
+    .desktop-menu-slot {
+      display: none;
+    }
+    .mobile-menu-slot {
+      position: static;
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: start;
+      align-self: center;
+      display: grid;
+      width: 51px;
+      height: 51px;
+      margin: 0;
+      transform: translateX(6px);
+      z-index: 3;
+    }
+    .brand-logo {
+      width: 50px;
+    }
+    .mobile-navigation-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 51px;
+      height: 51px;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+    .mobile-navigation-button:active {
+      transform: scale(0.92);
+    }
+    .mobile-navigation-button.is-open .line-top {
+      transform: translateY(6px) rotate(45deg);
+    }
+    .mobile-navigation-button.is-open .line-middle {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    .mobile-navigation-button.is-open .line-bottom {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+    .mobile-navigation-icon {
+      width: 35px;
+      height: 35px;
+      overflow: visible;
+      fill: none;
+      stroke: url("#mobile-navigation-icon-gradient");
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .mobile-navigation-icon .line {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 160ms ease;
+    }
+    .mobile-menu-overlay {
+      position: fixed;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 88px 20px calc(24px + env(safe-area-inset-bottom));
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.68);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 150;
+    }
+    .mobile-menu-overlay[hidden] {
+      display: none !important;
+    }
+    .mobile-menu-overlay.is-open,
+    .mobile-menu-overlay:not([hidden]) {
+      display: flex;
+    }
+    .mobile-site-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: min(calc(100vw - 24px), 340px);
+      margin: auto;
+      transform: none;
+    }
+    .mobile-site-menu__button {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: calc(100% - 4px);
+      min-height: 64px;
+      margin-left: 4px;
+      padding: 12px 18px;
+      border: 3px solid transparent;
+      background:
+        linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)) padding-box,
+        linear-gradient(100deg, rgba(115, 0, 165, 0.96) 0%, rgba(205, 0, 108, 0.96) 48%, rgba(219, 76, 0, 0.96) 78%, rgba(255, 138, 0, 0.96) 100%) padding-box,
+        linear-gradient(100deg, #9d0aff 0%, #de0796 38%, #fd1d1d 66%, #fc9e19 100%) border-box;
+      color: #ffffff;
+      font-family: "Sora", Arial, Helvetica, sans-serif;
+      font-size: clamp(16px, 4.8vw, 22px);
+      font-weight: 600;
+      line-height: 1.2;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      touch-action: manipulation;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: filter 160ms ease, box-shadow 160ms ease;
+      opacity: 0;
+      transform: translateY(2px) scale(0.996);
+      visibility: hidden;
+      pointer-events: none;
+      will-change: opacity, transform;
+    }
+    .mobile-site-menu__button span {
+      position: relative;
+      z-index: 2;
+    }
+    .mobile-site-menu__button.is-visible {
+      opacity: 1;
+      animation: mobileMenuButtonReveal 1s cubic-bezier(0.2, 0.95, 0.3, 1) both;
+      transform: translateY(0) scale(1);
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .mobile-site-menu__button.is-visible:nth-child(1) {
+      animation-name: mobileMenuButtonRevealNoLift;
+    }
+    .mobile-site-menu__button:hover {
+      filter: brightness(1.01);
+    }
+    .mobile-site-menu__button:active {
+      transform: scale(0.98);
+    }
+    @keyframes mobileMenuButtonReveal {
+      0% { opacity: 0; transform: translateY(2px) scale(0.996); }
+      68% { opacity: 1; transform: translateY(-1px) scale(1.02); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes mobileMenuButtonRevealNoLift {
+      0% { opacity: 0; transform: scale(0.996); }
+      68% { opacity: 1; transform: scale(1.02); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .desktop-menu-overlay {
+      display: none !important;
+    }
+  }
+  @media (min-width: 601px) {
+    .form:not(.is-password-collapsed) .cta-stack { transform: translateY(-8px); }
+    .cta-stack[data-mode="recovery"] .forgot,
+    .cta-stack[data-mode="recovery"] .cta { width: min(174px, 100%); }
+  }
+  @media (max-width: 600px) {
+    :root { --gradient: linear-gradient(111deg, rgba(255,146,78,.86) 4.821134868421053%, rgba(255,0,6,.86) 23.183936403508774%, rgba(255,0,87,.86) 42.61924342105263%, rgba(160,0,255,.86) 74.0234375%, rgba(133,84,250,.86) 83.62801535087719%); }
+    .login-stage { min-height: max(780px, calc(100svh - 64px)); padding: 90px 10px; place-items: center; }
+    .login-panel { width: min(calc(100vw - 56px), 320px); height: auto; min-height: 0; }
+    .artboard {
+      height: 500px;
+      min-height: 500px;
+      gap: 12px;
+    }
+    .artboard.is-reset-mode {
+      height: 500px;
+      min-height: 500px;
+      margin-top: 0;
+      transform: none;
+    }
+    .artboard:not(.is-reset-mode) .title {
+      margin-top: 5px;
+    }
+    .title,
+    .help-title {
+      font-size: clamp(1.85rem, 7.8vw, 2.5rem);
+      line-height: 1;
+      white-space: nowrap;
+      transform: none;
+    }
+    .artboard:not(.is-reset-mode) .title { font-size: clamp(calc(1.85rem + 10px), calc(7.8vw + 10px), calc(2.5rem + 10px)); }
+    .artboard.is-reset-mode .title { font-size: clamp(calc(1.85rem + 10px), calc(7.8vw + 10px), calc(2.5rem + 10px)); }
+    .artboard.is-reset-mode .title-subtitle { font-size: clamp(0.8rem, 2.2vw, 1.05rem); line-height: 1.35; }
+    .help-copy { font-size: clamp(0.8rem, 2.2vw, 1.05rem); line-height: 1.35; }
+    .help-title { font-size: clamp(calc(1.85rem + 30px), calc(7.8vw + 30px), calc(2.5rem + 30px)); }
+    .title-line { display: inline; }
+    .form {
+      width: min(100%, 340px);
+      margin-bottom: 0;
+      gap: 14px;
+    }
+    .form.is-password-collapsed .form-message,
+    .form.is-password-collapsed .cta-stack { transform: translateY(-16px); }
+    .artboard.is-reset-mode .form { margin-bottom: 0; }
+    .field { width: min(100%, 280px); justify-self: center; gap: 6px; }
+    .label { font-size: 11px; padding: 0; color: #ffffff; }
+    .field-shell { height: 44px; }
+    .input { width: 100%; min-height: 0; padding: 0 12px; background: #ffffff; border-color: #ffffff; }
+    .field-shell--password .input { padding-right: 68px; }
+    .password-controls { right: 8px; gap: 4px; }
+    .password-control { width: 26px; height: 26px; }
+    .password-control__icon { width: 14px; height: 14px; }
+    .form-message { min-height: 20px; margin: 0 auto 8px; font-size: 12px; }
+    .cta-stack,
+    .cta-stack[data-mode="login"] { grid-template-columns: 1fr; grid-template-areas: "login" "help"; gap: clamp(8px, 2vw, 12px); }
+    .cta-stack[data-mode="recovery"] { grid-template-columns: 1fr; grid-template-areas: "login" "forgot"; }
+    .cta,
+    .forgot,
+    .help-button { width: min(calc(100% - 64px), 240px); justify-self: center; height: clamp(48px, 6vw, 56px); margin-top: 0; padding: 0 clamp(9px, 1.4vw, 14px); font-size: clamp(13px, 3vw, 15px); background: #000000; color: #ffffff; border-color: #ffffff; }
+    .cta-stack[data-mode="recovery"] .cta { width: min(calc(100% - 162px), 142px); }
+    .cta-stack[data-mode="recovery"] .forgot { width: min(calc(100% - 162px), 142px); }
+  }
+  @media (max-width: 480px) {
+    .title,
+    .help-title { font-size: clamp(1.72rem, 8.2vw, 2.15rem); }
+    .artboard:not(.is-reset-mode) .title { font-size: clamp(calc(1.72rem + 10px), calc(8.2vw + 10px), calc(2.15rem + 10px)); }
+    .artboard.is-reset-mode .title { font-size: clamp(calc(1.72rem + 10px), calc(8.2vw + 10px), calc(2.15rem + 10px)); }
+    .help-title { font-size: clamp(calc(1.72rem + 30px), calc(8.2vw + 30px), calc(2.15rem + 30px)); }
+    .form { width: min(100%, 320px); gap: 12px; }
+    .form.is-password-collapsed .cta-stack { transform: translateY(-16px); }
+    .field { width: min(100%, 280px); gap: 6px; }
+    .label { font-size: 11px; }
+    .field-shell { height: 44px; }
+    .input { font-size: 1rem; padding: 0 12px; }
+    .input::placeholder { font-size: clamp(0.88rem, 2.6vw, 0.95rem); }
+    .cta,
+    .forgot,
+    .help-button { height: clamp(46px, 5.8vw, 54px); font-size: clamp(12.5px, 3vw, 14px); padding: 0 clamp(8px, 1.3vw, 13px); }
+  }
+  @media (max-width: 360px) {
+    .title,
+    .help-title { font-size: 1.65rem; }
+    .artboard:not(.is-reset-mode) .title { font-size: calc(1.65rem + 10px); }
+    .artboard.is-reset-mode .title { font-size: calc(1.65rem + 10px); }
+    .help-title { font-size: calc(1.65rem + 30px); }
+  }
+  @media (max-width: 340px) {
+    .login-panel { width: min(calc(100vw - 48px), 320px); }
+  }
+</style>
+
