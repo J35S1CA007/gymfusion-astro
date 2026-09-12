@@ -10,4 +10,3 @@ CREATE TABLE IF NOT EXISTS better_auth_identity_mapping (
 
 CREATE INDEX IF NOT EXISTS idx_better_auth_identity_mapping_status
   ON better_auth_identity_mapping(status);
-

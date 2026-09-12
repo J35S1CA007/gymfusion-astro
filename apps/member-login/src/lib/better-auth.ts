@@ -47,4 +47,3 @@ export function createEmbeddedAuth(db: D1Database, baseURL: string, sendPassword
     trustedOrigins: [baseURL],
   });
 }
-

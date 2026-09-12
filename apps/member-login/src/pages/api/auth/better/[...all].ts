@@ -18,4 +18,3 @@ export const ALL: APIRoute = ({ request }) => {
     : sendResetPasswordEmail(config, input)
   ).handler(request);
 };
-

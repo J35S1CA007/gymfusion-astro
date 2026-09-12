@@ -18,4 +18,3 @@ export async function getActiveIdentityMapping(db: D1Database, betterAuthUserId:
   ).bind(betterAuthUserId).first<IdentityMapping>();
   return row ?? undefined;
 }
-

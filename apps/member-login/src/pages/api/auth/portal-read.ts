@@ -35,4 +35,3 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ authenticated: false }, { status: 401 });
   }
 };
-

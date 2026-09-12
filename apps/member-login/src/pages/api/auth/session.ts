@@ -16,4 +16,3 @@ export const GET: APIRoute = async ({ request }) => {
     return Response.json({ authenticated: false }, { status: 401 });
   }
 };
-

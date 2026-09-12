@@ -20,4 +20,3 @@ export const GET: APIRoute = async ({ request, redirect }) => {
   }
   return response;
 };
-

@@ -49,4 +49,3 @@ CREATE TABLE IF NOT EXISTS portal_account_status (
   status TEXT NOT NULL CHECK (status IN ('ACTIVE', 'REVOKED')),
   updated_at INTEGER NOT NULL
 );
-

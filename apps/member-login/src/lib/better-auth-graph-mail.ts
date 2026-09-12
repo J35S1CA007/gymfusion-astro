@@ -79,4 +79,3 @@ export async function sendResetPasswordEmail(config: GraphMailConfig, input: {
 }) {
   await sendGraphMail(config, createPortalResetPasswordEmail(input));
 }
-

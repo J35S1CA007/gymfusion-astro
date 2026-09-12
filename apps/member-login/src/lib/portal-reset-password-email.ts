@@ -28,4 +28,3 @@ export function createPortalResetPasswordEmail(input: {
       .replace(">Create Password</a>", ">Reset Password</a>"),
   };
 }
-

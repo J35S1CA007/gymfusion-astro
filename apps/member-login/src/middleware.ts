@@ -28,4 +28,3 @@ export const onRequest = defineMiddleware(async (context, next) => {
     .replaceAll("/fonts/", "/__portal_fonts/");
   return new Response(rewritten, { status: response.status, headers: response.headers });
 });
-
