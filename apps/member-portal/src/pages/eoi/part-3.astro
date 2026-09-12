@@ -1,0 +1,61 @@
+---
+import PortalLayout from "../../layouts/PortalLayout.astro";
+import PortalShell from "../../components/portal/PortalShell";
+import { loadPortalPage } from "../../lib/portal-page";
+import "../../styles/global.css";
+const session = await loadPortalPage(Astro.request, Astro.locals);
+if (session.kind === "redirect") return new Response(null, { status: 303, headers: { Location: "/login", "Cache-Control": "no-store" } });
+if (session.kind === "unavailable") Astro.response.status = 503;
+---
+{session.kind === "authenticated" ? <PortalLayout title="Accessibility & Support Needs" description="EOI Part 3"><PortalShell client:load active="eoi" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref="/api/auth/logout"><main class="eoi-part3" aria-labelledby="part3-title">
+  <p class="eyebrow">EOI Part 3 - Accessibility & Support Needs</p>
+  <h1 id="part3-title">Accessibility & Support Needs</h1>
+  <p>No diagnosis required. Let us know anything that may affect how you move or recover.</p>
+  <form id="part3-form" novalidate>
+    <fieldset><legend>Past injuries, current conditions and pain</legend><p>Select all that apply.</p><div class="options">
+      <label><input type="checkbox" name="injuries" value="previous_recovered" /> Previous injury (Fully recovered, but worth noting)</label>
+      <label><input type="checkbox" name="injuries" value="previous_limitation" /> Previous injury (may cause occasional discomfort or limitation)</label>
+      <label><input type="checkbox" name="injuries" value="current_injury" /> Current injury (e.g., sprain, strain, tear, fracture etc)</label>
+      <label><input type="checkbox" name="injuries" value="no_issues" /> No issues — I do not have any injuries, pain, or areas that aren’t 100%</label>
+      <label><input type="checkbox" name="injuries" value="chronic_condition" /> Chronic condition or pain</label>
+      <label><input type="checkbox" name="injuries" value="something_else" /> Something else? (Please specify)</label>
+    </div></fieldset>
+    <label for="injury-details">Please provide relevant details about the issue, including what it is, which movements aggravate it, anything that tends to trigger flare-ups, how you currently manage it, and whether you have previously done or are currently doing physiotherapy</label>
+    <textarea id="injury-details" name="injuryDetails" minlength="30" maxlength="350" required placeholder="e.g., My wrist doesn’t love weight-bearing or pushing movements, but it’s not injured."></textarea>
+    <fieldset><legend>Disability or Other Conditions/Factors Enquiry</legend><p>Select all that apply, or leave blank if none apply / you prefer not to say.</p><div class="options">
+      <label><input type="checkbox" name="needs" value="disability" /> Yes — I have a disability that may influence how I train or participate</label>
+      <label><input type="checkbox" name="needs" value="health_condition" /> Yes — I have a long-term or ongoing health condition that may affect how I train or participate (not already mentioned)</label>
+      <label><input type="checkbox" name="needs" value="neurodivergence" /> Yes — I am neurodivergent and may benefit from specific communication or environmental considerations</label>
+      <label><input type="checkbox" name="needs" value="other_factor" /> Yes — I have another condition or factor that may influence how I train or participate (not previously mentioned).</label>
+      <label><input type="checkbox" name="needs" value="none" /> No — I do not have any long-term or ongoing health conditions that affect how I train or participate.</label>
+    </div></fieldset>
+    <label for="needs-details">Please share any details you feel comfortable providing that may help us understand your needs or support your participation</label>
+    <textarea id="needs-details" name="needsDetails" required></textarea>
+    <p id="part3-error" class="error" role="alert" hidden></p><p id="part3-success" class="success" role="status" hidden>Part 3 has been submitted.</p><button type="submit">Submit Part 3</button>
+  </form>
+</main></PortalShell></PortalLayout> : <main>Members Portal is temporarily unavailable.</main>}
+<style>
+  .eoi-part3 { width: min(940px, 100%); margin: 0 auto; padding: 20px; background: #f5f5f5; color: #000; font-family: "Gamuth Sans", Arial, sans-serif; }
+  .eoi-part3 form { display: grid; gap: 26px; margin: 0; padding: 34px 34px 44px; border: 1px solid rgba(0,0,0,.16); border-radius: 24px; background: #fff; box-shadow: 0 24px 70px rgba(0,0,0,.08); }
+  .eoi-part3 h1 { font-size: clamp(32px, 5.5vw, 60px); line-height: .95; letter-spacing: -.04em; margin: 0; }.eyebrow { color: #4b4b4b; font-size: 11.5px; letter-spacing: .085em; text-transform: uppercase; font-weight: 700; }
+  .eoi-part3 fieldset { border: 1px solid rgba(0,0,0,.16); border-radius: 24px; padding: 22px; background: linear-gradient(180deg,#fff 0%,#fcfcfc 100%); box-shadow: 0 1px 2px rgba(0,0,0,.04),0 10px 24px rgba(0,0,0,.04); }.eoi-part3 legend, .eoi-part3 label { font-weight: 700; }.eoi-part3 .options { display: grid; gap: 12px; margin-top: 16px; }.eoi-part3 .options label { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; font-weight: 400; }
+  .eoi-part3 textarea { min-height: 120px; resize: vertical; border: 1.25px solid rgba(0,0,0,.16); border-radius: 12px; padding: 12px; font: inherit; }.eoi-part3 textarea:focus-visible, .eoi-part3 input:focus-visible { outline: 3px solid rgba(0,0,0,.18); outline-offset: 2px; border-color: rgba(0,0,0,.86); }.eoi-part3 button { justify-self: start; min-height: 46px; padding: 10px 20px; border: 1px solid #000; border-radius: 999px; background: #000; color: #fff; font-weight: 700; cursor: pointer; }.error { color: #a00000; }.success { color: #176b36; } @media (max-width: 720px) { .eoi-part3 { padding: 10px; }.eoi-part3 form { padding: 18px 18px 28px; } }
+</style>
+<script>
+  const form = document.querySelector<HTMLFormElement>("#part3-form");
+  const error = document.querySelector<HTMLElement>("#part3-error");
+  const success = document.querySelector<HTMLElement>("#part3-success");
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const injuryDetails = (form.elements.namedItem("injuryDetails") as HTMLTextAreaElement).value.trim();
+    const needsDetails = (form.elements.namedItem("needsDetails") as HTMLTextAreaElement).value.trim();
+    if (injuryDetails.length < 30 || injuryDetails.length > 350 || !needsDetails) { if (error) { error.textContent = "Please complete the required details fields."; error.hidden = false; } return; }
+    if (error) error.hidden = true;
+    const values = (name: string) => [...form.querySelectorAll<HTMLInputElement>(`[name=${name}]:checked`)].map((input) => input.value);
+    const payload = { formPart: "3", formVersion: "1", submissionID: `EOI-P3-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, submittedAt: new Date().toISOString(), answers: { injuries: values("injuries"), injuryDetails, needs: values("needs"), needsDetails }, normalizedAnswers: [{ fieldName: "injuries", value: values("injuries") }, { fieldName: "injuryDetails", value: injuryDetails }, { fieldName: "needs", value: values("needs") }, { fieldName: "needsDetails", value: needsDetails }], calculatedFields: {}, conditionalFollowups: [] };
+    const response = await fetch("/api/rfm-part3", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+    if (!response.ok) { if (error) { error.textContent = "We couldn’t submit Part 3. Please try again."; error.hidden = false; } return; }
+    if (success) success.hidden = false;
+    const button = form.querySelector<HTMLButtonElement>("button[type=submit]"); if (button) button.disabled = true;
+  });
+</script>

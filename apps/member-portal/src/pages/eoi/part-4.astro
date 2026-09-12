@@ -1,0 +1,50 @@
+---
+import PortalLayout from "../../layouts/PortalLayout.astro";
+import PortalShell from "../../components/portal/PortalShell";
+import { loadPortalPage } from "../../lib/portal-page";
+import structure from "../../../reference/EOI Parts 2-4/EOI Part 4 Fitness Profile/eoi-part-4-form-structure.json";
+import "../../styles/global.css";
+
+const session = await loadPortalPage(Astro.request, Astro.locals);
+if (session.kind === "redirect") return new Response(null, { status: 303, headers: { Location: "/login", "Cache-Control": "no-store" } });
+if (session.kind === "unavailable") Astro.response.status = 503;
+const questions = structure.form.questions.filter((question) => question.isAnswerField && question.fieldType !== "hidden");
+const clean = (value: unknown) => String(value || "").replace(/,tag,[^,]*/g, "").replace(/,tag/g, "").replace(/\s+/g, " ").trim();
+---
+{session.kind === "authenticated" ? <PortalLayout title="Fitness Profile" description="EOI Part 4"><PortalShell client:load active="eoi" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref="/api/auth/logout"><main class="eoi-part4" aria-labelledby="part4-title">
+  <p class="eyebrow">EOI Part 4 - Fitness Profile</p>
+  <h1 id="part4-title">{structure.form.publicTitle}</h1>
+  <form id="part4-form" novalidate>
+    {questions.map((question) => <div class="question" data-field-id={question.id} data-field-type={question.fieldType}>
+      <label for={`field-${question.id}`}>{clean(question.questionText)}{question.required ? " *" : ""}</label>
+      {question.fieldType === "checkbox" || question.fieldType === "multiselect" ? <div class="options">{question.options.map((option) => <label><input type="checkbox" name={question.id} value={option.value} /> {option.label}</label>)}</div> : question.fieldType === "radio" ? <div class="options">{question.options.map((option) => <label><input type="radio" name={question.id} value={option.value} required={question.required} /> {option.label}</label>)}</div> : question.fieldType === "textarea" ? <textarea id={`field-${question.id}`} name={question.id} required={question.required} placeholder={question.placeholder}></textarea> : <input id={`field-${question.id}`} name={question.id} type="number" required={question.required} min="0" />}
+    </div>)}
+    <p id="part4-error" class="error" role="alert" hidden></p><p id="part4-success" class="success" role="status" hidden>Part 4 has been submitted.</p><button type="submit">Submit Part 4</button>
+  </form>
+</main></PortalShell></PortalLayout> : <main>Members Portal is temporarily unavailable.</main>}
+<style>
+  .eoi-part4 { width: min(940px, 100%); margin: 0 auto; padding: 20px; background: #f5f5f5; color: #000; font-family: "Gamuth Sans", Arial, sans-serif; }.eoi-part4 form { display: grid; gap: 26px; margin: 0; padding: 34px 34px 44px; border: 1px solid rgba(0,0,0,.16); border-radius: 24px; background: #fff; box-shadow: 0 24px 70px rgba(0,0,0,.08); }.eoi-part4 h1 { font-size: clamp(32px, 5.5vw, 60px); line-height: .95; letter-spacing: -.04em; margin: 0 0 26px; }.eyebrow { color: #4b4b4b; font-size: 11.5px; letter-spacing: .085em; text-transform: uppercase; font-weight: 700; }.question { display: grid; gap: 12px; }.question > label { font-weight: 700; }.options { display: grid; gap: 12px; }.options label { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; font-weight: 400; }.question input[type=number], .question textarea { width: 100%; box-sizing: border-box; border: 1.25px solid rgba(0,0,0,.16); border-radius: 12px; padding: 12px; font: inherit; }.question textarea { min-height: 120px; resize: vertical; }.question input:focus-visible, .question textarea:focus-visible { outline: 3px solid rgba(0,0,0,.18); outline-offset: 2px; border-color: rgba(0,0,0,.86); }.eoi-part4 button { justify-self: start; min-height: 46px; padding: 10px 20px; border: 1px solid #000; border-radius: 999px; background: #000; color: #fff; font-weight: 700; cursor: pointer; }.error { color: #a00000; }.success { color: #176b36; } @media (max-width: 720px) { .eoi-part4 { padding: 10px; }.eoi-part4 form { padding: 18px 18px 28px; } }
+</style>
+<script>
+  const form = document.querySelector<HTMLFormElement>("#part4-form");
+  const error = document.querySelector<HTMLElement>("#part4-error");
+  const success = document.querySelector<HTMLElement>("#part4-success");
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    const answers: Record<string, unknown> = {};
+    const normalizedAnswers = [];
+    for (const group of form.querySelectorAll<HTMLElement>("[data-field-id]")) {
+      const fieldName = group.dataset.fieldId;
+      if (!fieldName) continue;
+      const inputs = [...group.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(`[name='${fieldName}']`)];
+      const value = inputs[0]?.type === "checkbox" ? inputs.filter((input) => (input as HTMLInputElement).checked).map((input) => input.value) : inputs[0]?.value || "";
+      answers[fieldName] = value; normalizedAnswers.push({ fieldName, value });
+    }
+    const payload = { formPart: "4", formVersion: "1", submissionID: `EOI-P4-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, submittedAt: new Date().toISOString(), answers, normalizedAnswers, calculatedFields: {}, conditionalFollowups: [] };
+    const response = await fetch("/api/rfm-part4", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+    if (!response.ok) { if (error) { error.textContent = "We couldn’t submit Part 4. Please try again."; error.hidden = false; } return; }
+    if (success) success.hidden = false;
+    const button = form.querySelector<HTMLButtonElement>("button[type=submit]"); if (button) button.disabled = true;
+  });
+</script>

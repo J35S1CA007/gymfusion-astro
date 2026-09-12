@@ -1,0 +1,39 @@
+---
+const token = Astro.url.searchParams.get("token") ?? "";
+---
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="activation-token" content={token} />
+    <title>Create Password | GYMFUSION</title>
+  </head>
+  <body>
+    <main>
+      <h1>Create your password</h1>
+      <form data-password-form>
+        <label for="password">New password</label>
+        <input id="password" name="password" type="password" minlength="8" required />
+        <button type="submit">Create Password</button>
+        <p data-message role="alert"></p>
+      </form>
+    </main>
+    <script is:inline>
+      const activationToken = document.querySelector('meta[name="activation-token"]')?.getAttribute('content') || '';
+      const form = document.querySelector('[data-password-form]');
+      const message = document.querySelector('[data-message]');
+      form?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const password = new FormData(/** @type {HTMLFormElement} */ (form)).get('password');
+        const response = await fetch('/api/auth/better/reset-password', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ token: activationToken, newPassword: password }),
+        });
+        if (message) message.textContent = response.ok ? 'Password created. You can now log in.' : 'This link is invalid or expired.';
+      });
+    </script>
+  </body>
+</html>
+
