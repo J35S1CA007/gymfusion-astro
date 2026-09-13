@@ -1,38 +1,29 @@
 import assert from "node:assert/strict";
-import { readFile, stat } from "node:fs/promises";
+import { spawn } from "node:child_process";
 import { createServer } from "node:http";
-import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
 const baseURL = "http://127.0.0.1:4327";
+const authURL = "http://127.0.0.1:4321";
 const appRoot = fileURLToPath(new URL("..", import.meta.url));
-const distRoot = resolve(appRoot, "dist");
-const contentTypes = {
-  ".css": "text/css",
-  ".html": "text/html; charset=utf-8",
-  ".js": "text/javascript",
-  ".json": "application/json",
-  ".png": "image/png",
-  ".svg": "image/svg+xml",
-  ".woff": "font/woff",
-  ".woff2": "font/woff2",
-};
 
-const server = createServer(async (request, response) => {
-  try {
-    const pathname = new URL(request.url || "/", baseURL).pathname;
-    let filePath = resolve(distRoot, `.${pathname}`);
-    assert.ok(filePath === distRoot || filePath.startsWith(`${distRoot}${sep}`));
-    if ((await stat(filePath)).isDirectory()) filePath = resolve(filePath, "index.html");
-    const body = await readFile(filePath);
-    response.writeHead(200, { "Content-Type": contentTypes[extname(filePath)] || "application/octet-stream" });
-    response.end(body);
-  } catch {
-    response.writeHead(404);
-    response.end("Not found");
+async function startPreview() {
+  const child = spawn("npm", ["run", "dev", "--", "--host", "127.0.0.1", "--port", "4327"], {
+    cwd: appRoot,
+    stdio: "ignore",
+    env: { ...process.env, MEMBER_LOGIN_SERVICE_URL: authURL },
+  });
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    try {
+      const response = await fetch(`${baseURL}/eoi/part-2`);
+      if (response.status > 0) return child;
+    } catch {}
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
-});
+  child.kill();
+  throw new Error("Astro preview server did not start");
+}
 
 async function drawSignature(page) {
   const canvas = page.locator("canvas[data-signature-pad]");
@@ -47,15 +38,28 @@ async function drawSignature(page) {
 }
 
 let browser;
+let preview;
+let authServer;
 try {
-  await new Promise((resolveListen) => server.listen(4327, "127.0.0.1", resolveListen));
+  authServer = createServer((request, response) => {
+    if (new URL(request.url || "/", authURL).pathname !== "/api/auth/session") {
+      response.writeHead(404).end();
+      return;
+    }
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify({ authenticated: true, member: { displayName: "Synthetic Member" } }));
+  });
+  await new Promise((resolveListen) => authServer.listen(4321, "127.0.0.1", resolveListen));
+  preview = await startPreview();
   browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: { width: 1100, height: 1000 } });
+  const context = await browser.newContext();
+  const page = await context.newPage({ viewport: { width: 1100, height: 1000 } });
   page.setDefaultTimeout(10_000);
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
-  const response = await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+  await context.addCookies([{ name: "better-auth.session_token", value: "synthetic-session", url: baseURL }]);
+  const response = await page.goto(`${baseURL}/eoi/part-2`, { waitUntil: "domcontentloaded" });
   assert.equal(response?.status(), 200, "native health profile route must render");
   assert.equal(await page.locator("iframe").count(), 0, "Astro form must not use an iframe");
   await page.locator("canvas[data-signature-pad]").waitFor();
@@ -64,7 +68,8 @@ try {
     1,
     "Shadix signature pad must be mounted",
   );
-  await page.locator("[data-datetimepicker-provider='@shadix-ui/datetimepicker'][data-datetimepicker-ready='true']").waitFor();
+  await page.locator("[data-datetimepicker-provider='@shadix-ui/datetimepicker']").waitFor({ state: "attached" });
+  await page.waitForFunction(() => document.querySelector("[data-datetimepicker-provider='@shadix-ui/datetimepicker']")?.getAttribute("data-datetimepicker-ready") === "true");
   const expectedDate = await page.evaluate(() => {
     const date = new Date();
     const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
@@ -232,9 +237,9 @@ try {
   assert.equal(await page.locator("[data-show-when-breathing-followup='other multiple'].is-visible").count(), 1);
   assert.equal(await page.locator(".gf-followup-item[data-show-when-breathing-followup].is-visible").count(), 1);
 
-  const mobilePage = await browser.newPage({ viewport: { width: 320, height: 700 } });
+  const mobilePage = await context.newPage({ viewport: { width: 320, height: 700 } });
   await mobilePage.goto(baseURL, { waitUntil: "domcontentloaded" });
-  await mobilePage.locator("[data-datetimepicker-ready='true']").waitFor();
+  await mobilePage.locator("[data-datetimepicker-provider='@shadix-ui/datetimepicker']").waitFor({ state: "attached" });
   await mobilePage.locator("#healthInformationDateTrigger").scrollIntoViewIfNeeded();
   await mobilePage.locator("#healthInformationDateTrigger").click();
   const [shellBox, pickerBox] = await Promise.all([
@@ -253,5 +258,6 @@ try {
   console.log("health-profile browser tests passed");
 } finally {
   await browser?.close();
-  await new Promise((resolveClose) => server.close(resolveClose));
+  preview?.kill();
+  await new Promise((resolveClose) => authServer?.close(resolveClose));
 }
