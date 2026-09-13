@@ -1,12 +1,9 @@
 import type { APIRoute } from "astro";
-import { env } from "cloudflare:workers";
-import { getSession, submitRfmPart4 } from "../../../lib/auth";
+import { submitPortalPart } from "../../../lib/portal-submission";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const session = await getSession(request, env);
-    if (!session) return Response.json({ ok: false, code: "UNAUTHENTICATED" }, { status: 401 });
-    const result = await submitRfmPart4(session, await request.json());
-    return result ? Response.json({ ok: true, ...result }) : Response.json({ ok: false, code: "TEMPORARY_PROCESSING_ERROR" }, { status: 502 });
+    const result = await submitPortalPart(request, "4", await request.json());
+    return Response.json(result.ok ? result : { ok: false, code: result.code }, { status: result.status });
   } catch { return Response.json({ ok: false, code: "INVALID_SUBMISSION" }, { status: 400 }); }
 };

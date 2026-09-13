@@ -435,7 +435,7 @@ export async function getMemberPortalRead(session: SessionRecord, view: string):
   }
 }
 
-export async function submitRfmPart2(session: SessionRecord, payload: unknown): Promise<{ submissionID?: string; duplicate?: boolean } | undefined> {
+export async function submitEoiPart2(session: SessionRecord, payload: unknown): Promise<{ submissionID?: string; duplicate?: boolean } | undefined> {
   try {
     return await wixRequest<{ submissionID?: string; duplicate?: boolean }>("https://www.wixapis.com/velo/v1/http/invoke/rfm_part2_health_safety_submit", {
       body: JSON.stringify(payload),
@@ -447,7 +447,7 @@ export async function submitRfmPart2(session: SessionRecord, payload: unknown): 
   }
 }
 
-export async function submitRfmPart3(session: SessionRecord, payload: unknown): Promise<{ submissionID?: string; duplicate?: boolean } | undefined> {
+export async function submitEoiPart3(session: SessionRecord, payload: unknown): Promise<{ submissionID?: string; duplicate?: boolean } | undefined> {
   try {
     return await wixRequest<{ submissionID?: string; duplicate?: boolean }>("https://www.wixapis.com/velo/v1/http/invoke/rfm_part3_accessibility_submit", {
       body: JSON.stringify(payload), headers: { authorization: `Bearer ${session.accessToken}`, "content-type": "application/json" }, method: "POST",
@@ -455,7 +455,7 @@ export async function submitRfmPart3(session: SessionRecord, payload: unknown): 
   } catch { return undefined; }
 }
 
-export async function submitRfmPart4(session: SessionRecord, payload: unknown): Promise<{ submissionID?: string; duplicate?: boolean } | undefined> {
+export async function submitEoiPart4(session: SessionRecord, payload: unknown): Promise<{ submissionID?: string; duplicate?: boolean } | undefined> {
   try {
     return await wixRequest<{ submissionID?: string; duplicate?: boolean }>("https://www.wixapis.com/velo/v1/http/invoke/rfm_part4_fitness_goals_submit", {
       body: JSON.stringify(payload), headers: { authorization: `Bearer ${session.accessToken}`, "content-type": "application/json" }, method: "POST",

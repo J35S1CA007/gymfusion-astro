@@ -11,13 +11,15 @@
     "check": "astro check",
     "build": "astro check && astro build",
     "test:browser": "node scripts/member-login-browser-tests.mjs",
+    "test:portal-submission-e2e": "node --experimental-strip-types --experimental-test-module-mocks --experimental-loader ./tests/wix-test-loader.mjs --test tests/portal-submission-e2e.test.ts",
     "test": "npm run build && npm run test:browser",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.3.0",
-    "astro": "^7.3.1"
+    "astro": "^7.3.1",
+    "better-auth": "^1.7.4"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",

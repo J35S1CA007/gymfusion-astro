@@ -1,14 +1,18 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { getMemberContext, getSession } from "../../../lib/auth";
+import { createEmbeddedAuth } from "../../../lib/better-auth";
+import { getActiveIdentityMapping } from "../../../lib/identity-mapping";
+import { buildMemberSessionProjection } from "../../../lib/member-session-projection";
 
 export const GET: APIRoute = async ({ request }) => {
   try {
-    const session = await getSession(request, env);
+    const db = (env as unknown as { BETTER_AUTH_DB: D1Database }).BETTER_AUTH_DB;
+    const auth = createEmbeddedAuth(db, new URL(request.url).origin);
+    const session = await auth.api.getSession({ headers: request.headers });
     if (!session) return Response.json({ authenticated: false }, { status: 401 });
-    const member = await getMemberContext(session);
-    if (!member) return Response.json({ authenticated: false }, { status: 401 });
-    return Response.json({ authenticated: true, member }, { status: 200 });
+    const mapping = await getActiveIdentityMapping(db, session.user.id);
+    if (!mapping) return Response.json({ authenticated: false }, { status: 401 });
+    return Response.json({ authenticated: true, member: buildMemberSessionProjection(session.user) }, { status: 200 });
   } catch {
     return Response.json({ authenticated: false }, { status: 401 });
   }

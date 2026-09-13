@@ -3,10 +3,14 @@ import backgroundUrl from '../../assets/background-members-login-screen.png';
 import spiralLogoUrl from '../../assets/member-login-page-logos/vibrant_gf_spiral_transparent.png';
 import spiralUrl from '../../assets/gf-spiral-pattern-transparent.png';
 import { env } from 'cloudflare:workers';
-import { getPortalUrl, getSession } from '../lib/auth';
+import { createEmbeddedAuth } from '../lib/better-auth';
+import { getActiveIdentityMapping } from '../lib/identity-mapping';
 
-const session = await getSession(Astro.request, env);
-const portalUrl = session ? getPortalUrl(Astro.request, env) : undefined;
+const db = (env as unknown as { BETTER_AUTH_DB: D1Database }).BETTER_AUTH_DB;
+const auth = createEmbeddedAuth(db, new URL(Astro.request.url).origin);
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+const mapping = session ? await getActiveIdentityMapping(db, session.user.id) : undefined;
+const portalUrl = mapping ? String((env as { MEMBERS_PORTAL_URL?: string }).MEMBERS_PORTAL_URL ?? '/dashboard') : undefined;
 const turnstileSiteKey = String((env as { TURNSTILE_SITE_KEY?: string }).TURNSTILE_SITE_KEY ?? "").trim();
 if (portalUrl) return Astro.redirect(portalUrl);
 ---
@@ -92,7 +96,7 @@ if (portalUrl) return Astro.redirect(portalUrl);
           </div>
 
           <div class="subtitle-wrap">
-            <p class="title-subtitle" data-login-subtitle>
+            <p class="title-subtitle copy-enter" data-login-subtitle>
               <span class="subtitle-line">Login to access your </span>
               <span class="subtitle-line">GYMFUSION Members Portal</span>
             </p>
@@ -133,10 +137,21 @@ if (portalUrl) return Astro.redirect(portalUrl);
             <div data-turnstile-widget data-turnstile-site-key={turnstileSiteKey}></div>
 
             <div class="cta-stack" data-login-actions data-mode="login">
-              <button class="cta" type="submit" data-submit>Login</button>
-              <button class="forgot" type="button" aria-controls="password-field" aria-expanded="true" data-forgot>Forgot Password?</button>
+              <button class="help-button" type="button" data-help><svg class="action-icon action-icon--help help-icon-default" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><circle cx="8" cy="8" r="6.25"/><path d="m5.75 6.75c0-1 2-2 2.25-2s2.25 1.0335 2.25 2c0 1.5-1.5 1.5-2.25 2m0 2.5v0"/></g></svg><svg class="action-icon action-icon--help help-icon-inverted" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 23a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 16 25m1.142-7.754v2.501h-2.25V15h2.125a2.376 2.376 0 0 0 0-4.753h-1.5a2.38 2.38 0 0 0-2.375 2.375v.638h-2.25A4.63 4.63 0 0 1 15.517 8h1.5a4.624 4.624 0 0 1 .125 9.246"/></svg><span>Help</span></button>
+              <button class="cta" type="submit" data-submit><span>Login</span><svg class="action-icon action-icon--login" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M11 7 9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5zm9 12h-8v2h10V3H12v2h8z"/></svg></button>
+              <button class="forgot" type="button" aria-controls="password-field" aria-expanded="true" data-forgot hidden>Forgot Password?</button>
             </div>
           </form>
+
+          <section class="help-panel" data-help-panel hidden aria-labelledby="help-title">
+            <h2 id="help-title" class="help-title">HELP?</h2>
+            <p class="help-copy">Login to access your GYMFUSION Members Portal</p>
+            <div class="help-actions">
+              <button class="help-action" type="button" data-help-forgot><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 1a5 5 0 0 0-5 5v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5m0 1.9c1.71 0 3.1 1.39 3.1 3.1v2H8.9V6c0-1.71 1.39-3.1 3.1-3.1m.19 7.6c.94 0 1.69.21 2.23.62q.81.63.81 1.68c0 .44-.15.83-.44 1.2c-.29.36-.67.64-1.13.85c-.26.15-.43.3-.52.47c-.09.18-.14.4-.14.68h-2c0-.5.1-.84.29-1.08c.21-.24.55-.52 1.07-.84c.26-.14.47-.32.64-.54c.14-.21.22-.46.22-.74c0-.3-.09-.52-.27-.69c-.18-.18-.45-.26-.76-.26c-.27 0-.49.07-.69.21c-.16.14-.26.35-.26.63H9.27c-.05-.69.23-1.29.78-1.65c.54-.36 1.25-.54 2.14-.54M11 17h2v2h-2z"/></svg><span>Forgot Password</span></button>
+              <button class="help-action" type="button" data-help-create><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M14 15c0 1.11-.89 2-2 2a2 2 0 0 1-2-2c0-1.11.89-2 2-2a2 2 0 0 1 2 2m-.91 5c.12.72.37 1.39.72 2H6a2 2 0 0 1-2-2V10c0-1.11.89-2 2-2h1V6c0-2.76 2.24-5 5-5s5 2.24 5 5v2h1a2 2 0 0 1 2 2v3.09c-.33-.05-.66-.09-1-.09s-.67.04-1 .09V10H6v10zM9 8h6V6c0-1.66-1.34-3-3-3S9 4.34 9 6zm12.34 7.84l-3.59 3.59l-1.59-1.59L15 19l2.75 3l4.75-4.75z"/></svg><span>Create a password!</span></button>
+              <button class="help-action" type="button" data-help-return><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 11H7.14l3.63-4.36a1 1 0 1 0-1.54-1.28l-5 6a1 1 0 0 0-.09.15c0 .05 0 .08-.07.13A1 1 0 0 0 4 12a1 1 0 0 0 .07.36c0 .05 0 .08.07.13a1 1 0 0 0 .09.15l5 6A1 1 0 0 0 10 19a1 1 0 0 0 .64-.23a1 1 0 0 0 .13-1.41L7.14 13H19a1 1 0 0 0 0-2"/></svg><span>Back</span></button>
+            </div>
+          </section>
         </div>
       </section>
     </main>
@@ -159,6 +174,15 @@ if (portalUrl) return Astro.redirect(portalUrl);
       const actions = document.querySelector<HTMLElement>('[data-login-actions]')!;
       const forgot = document.querySelector<HTMLButtonElement>('[data-forgot]')!;
       const submit = document.querySelector<HTMLButtonElement>('[data-submit]')!;
+      const loginIcon = '<svg class="action-icon action-icon--login" style="width:20px;height:20px;display:block;flex:0 0 auto;margin-left:5px" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M11 7 9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5zm9 12h-8v2h10V3H12v2h8z"/></svg>';
+      const resetIcon = '<svg class="action-icon action-icon--reset" style="width:20px;height:20px;display:block;flex:0 0 auto;margin-left:5px" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20 4H6c-1.103 0-2 .897-2 2v5h2V8l6.4 4.8a1 1 0 0 0 1.2 0L20 8v9h-8v2h8c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2m-7 6.75L6.666 6h12.668z"/><path fill="currentColor" d="M2 12h7v2H2zm2 3h6v2H4zm3 3h4v2H7z"/></svg>';
+      const backIcon = '<svg class="action-icon action-icon--back" style="width:20px;height:20px;display:block;flex:0 0 auto;margin-right:5px" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 11H7.14l3.63-4.36a1 1 0 1 0-1.54-1.28l-5 6a1 1 0 0 0-.09.15c0 .05 0 .08-.07.13A1 1 0 0 0 4 12a1 1 0 0 0 .07.36c0 .05 0 .08.07.13a1 1 0 0 0 .09.15l5 6A1 1 0 0 0 10 19a1 1 0 0 0 .64-.23a1 1 0 0 0 .13-1.41L7.14 13H19a1 1 0 0 0 0-2"/></svg>';
+      const helpButton = document.querySelector<HTMLButtonElement>('[data-help]')!;
+      const helpPanel = document.querySelector<HTMLElement>('[data-help-panel]')!;
+      const helpAnimated = Array.from(document.querySelectorAll<HTMLElement>('[data-help-panel] .help-copy'));
+      const helpForgot = document.querySelector<HTMLButtonElement>('[data-help-forgot]')!;
+      const helpCreate = document.querySelector<HTMLButtonElement>('[data-help-create]')!;
+      const helpReturn = document.querySelector<HTMLButtonElement>('[data-help-return]')!;
       const passwordInput = document.querySelector<HTMLInputElement>('#password')!;
       const desktopMenuButton = document.querySelector<HTMLButtonElement>('[data-desktop-menu-button]')!;
       const desktopMenuOverlay = document.querySelector<HTMLElement>('[data-desktop-menu-overlay]')!;
@@ -253,6 +277,7 @@ if (portalUrl) return Astro.redirect(portalUrl);
 
       let transitionTimer: number | null = null;
       let isTransitioning = false;
+      let recoveryVariant: 'forgot' | 'create' = 'forgot';
 
       const updatePasswordControls = () => {
         const canInteract = !recoveryMode && !requestInFlight;
@@ -284,14 +309,20 @@ if (portalUrl) return Astro.redirect(portalUrl);
         artboard.classList.toggle('is-reset-mode', collapsed);
         titleWrap.classList.toggle('is-reset-mode', collapsed);
         title.innerHTML = collapsed
-          ? '<span class="title-line">FORGOT</span><span class="title-line">PASS<span class="title-punctuation">?</span></span>'
+          ? recoveryVariant === 'create'
+            ? '<span class="title-line">CREATE</span><span class="title-line">PASS</span>'
+            : '<span class="title-line">FORGOT</span><span class="title-line">PASS<span class="title-punctuation">?</span></span>'
           : '<span class="title-line">WELCOME</span><span class="title-line">BACK</span>';
         titleSubtitle.innerHTML = collapsed
-          ? '<span class="subtitle-line">We will email instructions </span><span class="subtitle-line">to reset your password.</span>'
+          ? recoveryVariant === 'create'
+            ? '<span class="subtitle-line">We’ll send you a new email to create a password.</span>'
+            : '<span class="subtitle-line">We will email instructions </span><span class="subtitle-line">to reset your password.</span>'
           : '<span class="subtitle-line">Login to access your </span><span class="subtitle-line">GYMFUSION Members Portal</span>';
-        forgot.textContent = collapsed ? 'Return to Login' : 'Forgot Password?';
+        forgot.innerHTML = collapsed ? `${backIcon}<span>Back</span>` : 'Forgot Password?';
+        forgot.hidden = !collapsed;
+        helpButton.hidden = collapsed;
         forgot.setAttribute('aria-expanded', String(!collapsed));
-        submit.textContent = collapsed ? 'Reset Password' : 'Login';
+        submit.innerHTML = collapsed ? `<span>Send Email</span>${resetIcon}` : `<span>Login</span>${loginIcon}`;
         actions.dataset.mode = collapsed ? 'recovery' : 'login';
         passwordInput.required = !collapsed;
         syncPasswordVisibility(false);
@@ -416,8 +447,35 @@ if (portalUrl) return Astro.redirect(portalUrl);
         requestInFlight = busy;
         submit.disabled = busy;
         forgot.disabled = busy;
-        submit.textContent = busy ? label : (recoveryMode ? 'Reset Password' : 'Login');
+        submit.innerHTML = busy ? label : (recoveryMode ? `<span>Send Email</span>${resetIcon}` : `<span>Login</span>${loginIcon}`);
         updatePasswordControls();
+      };
+
+      const setHelpMode = (next: boolean) => {
+        helpPanel.hidden = !next;
+        form.hidden = next;
+        titleWrap.hidden = next;
+        titleSubtitle.hidden = next;
+        artboard.classList.toggle('is-help-mode', next);
+        if (next) {
+          setMessage('');
+          helpPanel.classList.remove('help-enter');
+          helpAnimated.forEach((element) => element.classList.remove('copy-enter'));
+          void helpPanel.offsetWidth;
+          helpPanel.classList.add('help-enter');
+          helpAnimated.forEach((element) => element.classList.add('copy-enter'));
+          helpReturn.focus();
+        } else {
+          email.focus();
+        }
+      };
+
+      const openRecoveryFromHelp = (variant: 'forgot' | 'create') => {
+        recoveryVariant = variant;
+        setHelpMode(false);
+        setRecoveryMode(true);
+        syncButtonLabels(true);
+        email.focus();
       };
 
       forgot.addEventListener('click', () => {
@@ -425,11 +483,22 @@ if (portalUrl) return Astro.redirect(portalUrl);
         isTransitioning = true;
         setMessage('');
         const isCollapsed = form.classList.contains('is-password-collapsed');
-        setRecoveryMode(!isCollapsed);
+        if (isCollapsed) {
+          setRecoveryMode(false);
+          setHelpMode(true);
+        } else {
+          setRecoveryMode(true);
+        }
         window.setTimeout(() => {
           isTransitioning = false;
         }, isCollapsed ? 560 : 610);
       });
+      helpButton.addEventListener('click', () => {
+        if (!requestInFlight && !recoveryMode) setHelpMode(true);
+      });
+      helpForgot.addEventListener('click', () => openRecoveryFromHelp('forgot'));
+      helpCreate.addEventListener('click', () => openRecoveryFromHelp('create'));
+      helpReturn.addEventListener('click', () => setHelpMode(false));
       passwordToggle.addEventListener('click', () => {
         if (passwordToggle.disabled) return;
         syncPasswordVisibility(password.type !== 'text');
@@ -541,7 +610,7 @@ if (portalUrl) return Astro.redirect(portalUrl);
       fetch('/api/auth/session', { credentials: 'same-origin' }).then(async (response) => {
         if (response.ok) {
           const payload = await response.json() as { redirectUrl?: string };
-          window.location.assign(payload.redirectUrl || '/members');
+          window.location.assign(payload.redirectUrl || '/dashboard');
         }
       }).catch(() => {});
     </script>
@@ -900,13 +969,15 @@ if (portalUrl) return Astro.redirect(portalUrl);
   .cta-stack {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-areas: "forgot login";
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas: "help forgot login";
     gap: clamp(10px, 1.5vw, 12px);
     margin-bottom: 20px;
     padding-top: clamp(10px, 1.5vw, 16px);
     transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
   }
+  .cta-stack[data-mode="login"] { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "help login"; }
+  .cta-stack[data-mode="recovery"] { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "forgot login"; }
   .form:not(.is-password-collapsed) .cta-stack { margin-bottom: 25px; }
   .label {
     position: relative;
@@ -1011,7 +1082,9 @@ if (portalUrl) return Astro.redirect(portalUrl);
   }
   .form-message[data-kind="success"] { color: #f0fff5; }
   .cta,
-  .forgot {
+  .forgot,
+  .help-button,
+  .help-action {
     width: 100%;
     height: clamp(44px, 5vw, 52px);
     padding: 0 clamp(8px, 1.4vw, 15px);
@@ -1033,12 +1106,34 @@ if (portalUrl) return Astro.redirect(portalUrl);
     -webkit-user-select: none;
     user-select: none;
   }
+  .action-icon { width: 1.15em; height: 1.15em; flex: 0 0 auto; display: block; }
+  .cta .action-icon { width: 20px; height: 20px; margin-left: 5px; }
+  .help-button .action-icon { width: 20px; height: 20px; margin-right: 7px; }
+  .help-action { gap: 8px; align-items: center; }
+  .action-icon { align-self: center; vertical-align: middle; }
+  .help-action .action-icon { width: 20px; height: 20px; }
+  .help-action[data-help-forgot] .action-icon { transform: translateX(-3px); }
+  .help-action[data-help-forgot] > span { transform: translateX(-3px); }
+  .help-icon-inverted { display: none; }
+  .help-button:hover .help-icon-default,
+  .help-button:active .help-icon-default,
+  .help-button:focus-visible .help-icon-default { display: none; }
+  .help-button:hover .help-icon-inverted,
+  .help-button:active .help-icon-inverted,
+  .help-button:focus-visible .help-icon-inverted { display: block; }
   .cta { grid-area: login; margin-top: 5px; }
   .forgot { grid-area: forgot; margin-top: 5px; white-space: nowrap; text-align: center; }
+  .forgot[hidden] { display: none !important; }
+  .help-button[hidden] { display: none !important; }
+  .help-button { grid-area: help; margin-top: 5px; }
   .cta:hover,
   .cta:active,
   .forgot:hover,
-  .forgot:active {
+  .forgot:active,
+  .help-button:hover,
+  .help-button:active,
+  .help-action:hover,
+  .help-action:active {
     transform: translateY(-1px);
     background: #ffffff;
     color: #000000;
@@ -1046,9 +1141,26 @@ if (portalUrl) return Astro.redirect(portalUrl);
     box-shadow: 0 20px 36px rgba(0, 0, 0, 0.08);
   }
   .cta:active,
-  .forgot:active { transform: translateY(2px) scale(0.99); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.03); }
+  .forgot:active,
+  .help-button:active,
+  .help-action:active { transform: translateY(2px) scale(0.99); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.03); }
   .cta:focus-visible,
-  .forgot:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.78); outline-offset: 4px; }
+  .forgot:focus-visible,
+  .help-button:focus-visible,
+  .help-action:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.78); outline-offset: 4px; }
+  .help-panel { padding: 12px 0 18px; text-align: center; }
+  .help-panel.help-enter .help-copy { animation-duration: 1s; animation-timing-function: linear; animation-delay: 350ms; }
+  .title-wrap[hidden],
+  .title-subtitle[hidden],
+  .form[hidden],
+  .help-panel[hidden] { display: none !important; }
+  .help-title { position: relative; top: 12px; display: flex; flex-direction: column; align-items: center; margin: -33px 0 22px; font-family: "Separated", "Gamuth Display", sans-serif; font-weight: 400; font-size: clamp(calc(3.5rem + 20px), calc(10vw + 20px), calc(6.2rem + 20px)); line-height: .82; letter-spacing: .04em; text-transform: uppercase; text-align: center; color: var(--ink); transform: translateX(.02em); }
+  .help-copy { display: flex; align-items: center; justify-content: center; min-height: 48px; margin: 0 auto 28px; max-width: 28ch; font-size: clamp(0.8rem, 2.2vw, 1.05rem); line-height: 1.35; text-align: center; color: var(--ink); }
+  .help-actions { display: grid; gap: 12px; width: min(100%, 360px); margin: 0 auto; }
+  .help-action { width: 100%; }
+  .help-action[data-help-return] { width: min(38%, 140px); justify-self: center; justify-content: center; margin-top: 24px; }
+  .cta-stack[data-mode="recovery"] .forgot { width: calc(100% - 98px); justify-self: center; }
+  .cta-stack[data-mode="recovery"] .cta { width: calc(100% - 98px); justify-self: center; }
   .password-spacer { display: none; }
   .form.is-password-exiting .field--cool,
   .form.is-password-collapsed .field--cool,
@@ -1264,6 +1376,8 @@ if (portalUrl) return Astro.redirect(portalUrl);
   }
   @media (min-width: 601px) {
     .form:not(.is-password-collapsed) .cta-stack { transform: translateY(-8px); }
+    .cta-stack[data-mode="recovery"] .forgot,
+    .cta-stack[data-mode="recovery"] .cta { width: min(174px, 100%); }
   }
   @media (max-width: 600px) {
     :root { --gradient: linear-gradient(111deg, rgba(255,146,78,.86) 4.821134868421053%, rgba(255,0,6,.86) 23.183936403508774%, rgba(255,0,87,.86) 42.61924342105263%, rgba(160,0,255,.86) 74.0234375%, rgba(133,84,250,.86) 83.62801535087719%); }
@@ -1275,22 +1389,26 @@ if (portalUrl) return Astro.redirect(portalUrl);
       gap: 12px;
     }
     .artboard.is-reset-mode {
-      height: 340px;
-      min-height: 340px;
-      margin-top: 5px;
+      height: 500px;
+      min-height: 500px;
+      margin-top: 0;
       transform: none;
     }
     .artboard:not(.is-reset-mode) .title {
       margin-top: 5px;
     }
-    .title {
+    .title,
+    .help-title {
       font-size: clamp(1.85rem, 7.8vw, 2.5rem);
       line-height: 1;
-      flex-direction: row;
-      gap: 0.3em;
       white-space: nowrap;
       transform: none;
     }
+    .artboard:not(.is-reset-mode) .title { font-size: clamp(calc(1.85rem + 10px), calc(7.8vw + 10px), calc(2.5rem + 10px)); }
+    .artboard.is-reset-mode .title { font-size: clamp(calc(1.85rem + 10px), calc(7.8vw + 10px), calc(2.5rem + 10px)); }
+    .artboard.is-reset-mode .title-subtitle { font-size: clamp(0.8rem, 2.2vw, 1.05rem); line-height: 1.35; }
+    .help-copy { font-size: clamp(0.8rem, 2.2vw, 1.05rem); line-height: 1.35; }
+    .help-title { font-size: clamp(calc(1.85rem + 30px), calc(7.8vw + 30px), calc(2.5rem + 30px)); }
     .title-line { display: inline; }
     .form {
       width: min(100%, 340px);
@@ -1309,12 +1427,21 @@ if (portalUrl) return Astro.redirect(portalUrl);
     .password-control { width: 26px; height: 26px; }
     .password-control__icon { width: 14px; height: 14px; }
     .form-message { min-height: 20px; margin: 0 auto 8px; font-size: 12px; }
-    .cta-stack { grid-template-columns: 1fr; grid-template-areas: "login" "forgot"; gap: clamp(8px, 2vw, 12px); }
+    .cta-stack,
+    .cta-stack[data-mode="login"] { grid-template-columns: 1fr; grid-template-areas: "login" "help"; gap: clamp(8px, 2vw, 12px); }
+    .cta-stack[data-mode="recovery"] { grid-template-columns: 1fr; grid-template-areas: "login" "forgot"; }
     .cta,
-    .forgot { width: min(calc(100% - 64px), 240px); justify-self: center; height: clamp(48px, 6vw, 56px); margin-top: 0; padding: 0 clamp(9px, 1.4vw, 14px); font-size: clamp(13px, 3vw, 15px); background: #000000; color: #ffffff; border-color: #ffffff; }
+    .forgot,
+    .help-button { width: min(calc(100% - 64px), 240px); justify-self: center; height: clamp(48px, 6vw, 56px); margin-top: 0; padding: 0 clamp(9px, 1.4vw, 14px); font-size: clamp(13px, 3vw, 15px); background: #000000; color: #ffffff; border-color: #ffffff; }
+    .cta-stack[data-mode="recovery"] .cta { width: min(calc(100% - 162px), 142px); }
+    .cta-stack[data-mode="recovery"] .forgot { width: min(calc(100% - 162px), 142px); }
   }
   @media (max-width: 480px) {
-    .title { font-size: clamp(1.72rem, 8.2vw, 2.15rem); }
+    .title,
+    .help-title { font-size: clamp(1.72rem, 8.2vw, 2.15rem); }
+    .artboard:not(.is-reset-mode) .title { font-size: clamp(calc(1.72rem + 10px), calc(8.2vw + 10px), calc(2.15rem + 10px)); }
+    .artboard.is-reset-mode .title { font-size: clamp(calc(1.72rem + 10px), calc(8.2vw + 10px), calc(2.15rem + 10px)); }
+    .help-title { font-size: clamp(calc(1.72rem + 30px), calc(8.2vw + 30px), calc(2.15rem + 30px)); }
     .form { width: min(100%, 320px); gap: 12px; }
     .form.is-password-collapsed .cta-stack { transform: translateY(-16px); }
     .field { width: min(100%, 280px); gap: 6px; }
@@ -1323,10 +1450,15 @@ if (portalUrl) return Astro.redirect(portalUrl);
     .input { font-size: 1rem; padding: 0 12px; }
     .input::placeholder { font-size: clamp(0.88rem, 2.6vw, 0.95rem); }
     .cta,
-    .forgot { height: clamp(46px, 5.8vw, 54px); font-size: clamp(12.5px, 3vw, 14px); padding: 0 clamp(8px, 1.3vw, 13px); }
+    .forgot,
+    .help-button { height: clamp(46px, 5.8vw, 54px); font-size: clamp(12.5px, 3vw, 14px); padding: 0 clamp(8px, 1.3vw, 13px); }
   }
   @media (max-width: 360px) {
-    .title { font-size: 1.65rem; }
+    .title,
+    .help-title { font-size: 1.65rem; }
+    .artboard:not(.is-reset-mode) .title { font-size: calc(1.65rem + 10px); }
+    .artboard.is-reset-mode .title { font-size: calc(1.65rem + 10px); }
+    .help-title { font-size: calc(1.65rem + 30px); }
   }
   @media (max-width: 340px) {
     .login-panel { width: min(calc(100vw - 48px), 320px); }

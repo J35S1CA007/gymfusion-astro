@@ -83,7 +83,7 @@ await page.route("**/api/auth/login", async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 60));
     return route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "We could not complete that request. Please try again." }) });
   }
-  return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ redirectUrl: "/members" }) });
+  return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ redirectUrl: "/dashboard" }) });
 });
 await page.route("**/api/auth/recovery", async (route) => {
   const body = JSON.parse(route.request().postData() || "{}");
@@ -95,7 +95,7 @@ const resetPage = await browser.newPage({ viewport: { width: 390, height: 844 } 
 await mockTurnstile(resetPage);
 await resetPage.route("**/api/auth/session", async (route) => route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ authenticated: false }) }));
 await resetPage.goto(`${loginUrl}?reset=complete`);
-await resetPage.waitForSelector('[data-message]');
+await resetPage.waitForFunction(() => document.querySelector('[data-message]')?.textContent?.trim());
 assert.match(await resetPage.locator('[data-message]').innerText(), /password was reset/i);
 await resetPage.close();
 
@@ -141,16 +141,25 @@ assert.equal(duplicateLoginCalls, 1);
 await duplicatePage.close();
 
 const executionsBeforeRecovery = await page.evaluate(() => (/** @type {any} */ (window)).__testTurnstileExecutions || 0);
-await page.getByRole("button", { name: "Forgot Password?" }).click();
+await page.locator('[data-help]').dispatchEvent('click');
+await page.locator('[data-help-forgot]').click();
 assert.match((await page.getByRole("heading", { name: /FORGOT\s+PASS\?/ }).innerText()).replace(/\s+/g, " "), /^FORGOT PASS\?$/);
 await page.locator("#email").fill("member@example.com");
 await page.locator('[data-submit]').click();
 assert.match(await page.locator("[data-message]").innerText(), /reset instructions/);
 assert.equal(await page.evaluate(() => (/** @type {any} */ (window)).__testTurnstileExecutions || 0), executionsBeforeRecovery);
-await page.getByRole("button", { name: "Return to Login" }).click();
-assert.match((await page.getByRole("heading", { name: /WELCOME\s+BACK/ }).innerText()).replace(/\s+/g, " "), /^WELCOME BACK$/);
+await page.waitForFunction(() => !(/** @type {HTMLButtonElement | null} */ (document.querySelector('[data-forgot]')))?.disabled);
+await page.locator('[data-forgot]').click();
+await page.waitForTimeout(700);
+await page.waitForFunction(() => /^WELCOME\s*BACK$/.test(document.querySelector('[data-login-title]')?.textContent?.replace(/\s+/g, ' ').trim() || ''));
+assert.match((await page.locator('[data-login-title]').innerText()).replace(/\s+/g, " "), /^WELCOME\s*BACK$/);
 
-await page.getByRole("button", { name: "Forgot Password?" }).click();
+await page.waitForFunction(() => {
+  const button = document.querySelector('[data-help]');
+  return button instanceof HTMLButtonElement && !button.hidden && !button.disabled;
+});
+await page.locator('[data-help]').dispatchEvent('click');
+await page.locator('[data-help-forgot]').click();
 await page.locator("#email").fill("failure@example.com");
 await page.locator('[data-submit]').click();
 await waitForMessage(page, "could not complete");
@@ -228,13 +237,13 @@ await staleCallbackPage.close();
 const successPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
 await mockTurnstile(successPage);
 await successPage.route("**/api/auth/session", async (route) => route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ authenticated: false }) }));
-await successPage.route("**/api/auth/login", async (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ redirectUrl: "/members" }) }));
-await successPage.route("**/members", async (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<title>Members</title>" }));
+await successPage.route("**/api/auth/login", async (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ redirectUrl: "/dashboard" }) }));
+await successPage.route("**/dashboard", async (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<title>Dashboard</title>" }));
 await successPage.goto(loginUrl);
 await successPage.locator("#email").fill("member@example.com");
 await successPage.locator("#password").fill("good");
 await successPage.locator('[data-submit]').click();
-await successPage.waitForURL("**/members");
+await successPage.waitForURL("**/dashboard");
 await successPage.close();
 
 const networkFailurePage = await browser.newPage({ viewport: { width: 414, height: 896 } });
@@ -251,10 +260,10 @@ await networkFailurePage.close();
 
 const authenticatedPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
 await mockTurnstile(authenticatedPage);
-await authenticatedPage.route("**/api/auth/session", async (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ authenticated: true, redirectUrl: "/members" }) }));
-await authenticatedPage.route("**/members", async (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<title>Members</title>" }));
+await authenticatedPage.route("**/api/auth/session", async (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ authenticated: true, redirectUrl: "/dashboard" }) }));
+await authenticatedPage.route("**/dashboard", async (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<title>Dashboard</title>" }));
 await authenticatedPage.goto(loginUrl);
-await authenticatedPage.waitForURL("**/members");
+await authenticatedPage.waitForURL("**/dashboard");
 await authenticatedPage.close();
 
 await page.setViewportSize({ width: 320, height: 700 });

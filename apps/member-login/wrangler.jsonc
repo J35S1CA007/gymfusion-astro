@@ -2,17 +2,34 @@
 	"name": "gymfusion-member-login",
 	"main": "./src/worker.ts",
 	"compatibility_date": "2026-09-04",
+	"routes": [
+		{
+			"pattern": "portal.gymfusion.com.au",
+			"custom_domain": true
+		}
+	],
 	"assets": {
 		"binding": "ASSETS",
 		"directory": "./dist"
 	},
+	"d1_databases": [
+		{
+			"binding": "BETTER_AUTH_DB",
+			"database_name": "gymfusion-member-login-auth-integration",
+			"database_id": "f388c248-ee97-4672-90b4-c2c6f93ef341"
+		}
+	],
 	"vars": {
 		"WIX_HEADLESS_CLIENT_ID": "8060e954-da1f-4eaf-81c9-4bdf0611c5f6",
 		"WIX_AUTH_REDIRECT_URI": "https://portal.gymfusion.com.au/api/auth/callback",
 		"WIX_PASSWORD_RESET_REDIRECT_URI": "https://portal.gymfusion.com.au/login?reset=complete",
-		"MEMBER_LOGIN_URL": "https://portal.gymfusion.com.au/login",
-		"MEMBERS_PORTAL_URL": "https://portal.gymfusion.com.au/dashboard",
-		"TURNSTILE_SITE_KEY": "0x4AAAAAAEsCmiNnrjJGoIKZ"
+			"MEMBER_LOGIN_URL": "https://portal.gymfusion.com.au/login",
+			"MEMBERS_PORTAL_URL": "https://portal.gymfusion.com.au/dashboard",
+			"MEMBER_PORTAL_SERVICE_URL": "https://gymfusion-member-portal.jess-forte-98.workers.dev",
+			"GYMFUSION_TENANT_ID": "ce6cae47-9cb2-42b7-a63a-73337cb4541c",
+			"GYMFUSION_AUTOMATION_APP_CLIENT_ID": "e4142289-d91d-4b97-b2ab-4c318a4a6c2b",
+		"GYMFUSION_GRAPH_SENDER_EMAIL": "no-reply@gymfusion.com.au"
+		,"TURNSTILE_SITE_KEY": "0x4AAAAAAEsCmiNnrjJGoIKZ"
 	},
 	"durable_objects": {
 		"bindings": [
