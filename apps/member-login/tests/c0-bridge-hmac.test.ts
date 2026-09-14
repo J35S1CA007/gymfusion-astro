@@ -6,7 +6,7 @@ function store() { const used = new Map<string, number>(); return { has: (n: str
 const secret = "local-only-c0-bridge-secret"; const body = JSON.stringify({ provisioningEventId: "synthetic-event" }); const now = 1_757_320_000_000;
 
 test("uses the published Wix member read bridge path", () => {
-  assert.equal(MEMBER_PORTAL_READ_BRIDGE_PATH, "/_functions/memberPortalReadBridge");
+  assert.equal(MEMBER_PORTAL_READ_BRIDGE_PATH, "/_functions/member_portal_read_bridge");
 });
 
 test("signs and verifies the canonical request once", async () => { const request = buildC0BridgeRequest({ secret, body, now, nonce: "0123456789abcdef0123456789abcdef" }); assert.equal((await verifyC0BridgeRequest({ secret, body, headers: request.headers, nonceStore: store(), now })).ok, true); });

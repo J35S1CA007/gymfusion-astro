@@ -1,7 +1,7 @@
 import { createHash, createHmac, timingSafeEqual, randomBytes } from "node:crypto";
 
 export const C0_BRIDGE_PATH = "/_functions/portalActivationIdentityRead";
-export const MEMBER_PORTAL_READ_BRIDGE_PATH = "/_functions/memberPortalReadBridge";
+export const MEMBER_PORTAL_READ_BRIDGE_PATH = "/_functions/member_portal_read_bridge";
 export const C0_BRIDGE_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 export type C0BridgeHeaders = Record<string, string>;
