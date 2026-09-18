@@ -28,4 +28,17 @@
 		"GYMFUSION_GRAPH_SENDER_EMAIL": "no-reply@gymfusion.com.au"
 		,"TURNSTILE_SITE_KEY": "0x4AAAAAAEsCmiNnrjJGoIKZ"
 	}
+,
+  "durable_objects": {
+    "bindings": [
+      { "name": "SUPPORTING_EVIDENCE_COORDINATOR", "class_name": "SupportingEvidenceCoordinator" },
+      { "name": "PART2_SIGNATURE_COORDINATOR", "class_name": "Part2SignatureCoordinator" },
+      { "name": "DOCUMENT_STORAGE_REFERENCE_COORDINATOR", "class_name": "DocumentStorageReferenceCoordinator" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["SupportingEvidenceCoordinator"] },
+    { "tag": "v2", "new_sqlite_classes": ["Part2SignatureCoordinator"] },
+    { "tag": "v3", "new_sqlite_classes": ["DocumentStorageReferenceCoordinator"] }
+  ]
 }
