@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildC0BridgeRequest, verifyC0BridgeRequest } from "../src/lib/c0-bridge-hmac.ts";
+import { buildC0BridgeRequest, MEMBER_PORTAL_READ_PATH, verifyC0BridgeRequest } from "../src/lib/c0-bridge-hmac.ts";
 
 function store() { const used = new Map<string, number>(); return { has: (n: string) => used.has(n), reserve: (n: string, expiry: number) => { if (used.has(n)) return false; used.set(n, expiry); return true; } }; }
 const secret = "local-only-c0-bridge-secret"; const body = JSON.stringify({ provisioningEventId: "synthetic-event" }); const now = 1_757_320_000_000;
@@ -9,3 +9,11 @@ test("signs and verifies the canonical request once", async () => { const reques
 test("replay and same-nonce variants fail", async () => { const s = store(); const request = buildC0BridgeRequest({ secret, body, now, nonce: "0123456789abcdef0123456789abcdef" }); assert.equal((await verifyC0BridgeRequest({ secret, body, headers: request.headers, nonceStore: s, now })).ok, true); assert.equal((await verifyC0BridgeRequest({ secret, body, headers: request.headers, nonceStore: s, now })).ok, false); assert.equal((await verifyC0BridgeRequest({ secret, body: "{}", headers: request.headers, nonceStore: s, now })).ok, false); });
 for (const name of ["body", "path", "method", "timestamp", "nonce", "signature"]) test(`tampered ${name} fails`, async () => { const request = buildC0BridgeRequest({ secret, body, now, nonce: "0123456789abcdef0123456789abcdef" }); if (name === "body") assert.equal((await verifyC0BridgeRequest({ secret, body: "{\"x\":1}", headers: request.headers, nonceStore: store(), now })).ok, false); else if (name === "path") assert.equal((await verifyC0BridgeRequest({ secret, body, path: "/wrong", headers: request.headers, nonceStore: store(), now })).ok, false); else if (name === "method") assert.equal((await verifyC0BridgeRequest({ secret, body, method: "PUT", headers: request.headers, nonceStore: store(), now })).ok, false); else { const headers = { ...request.headers }; if (name === "timestamp") headers["X-GF-Timestamp"] = String(now - 301_000); if (name === "nonce") headers["X-GF-Nonce"] = "fedcba9876543210fedcba9876543210"; if (name === "signature") headers["X-GF-Signature"] = "00".repeat(32); assert.equal((await verifyC0BridgeRequest({ secret, body, headers, nonceStore: store(), now })).ok, false); } });
 test("missing secret, headers and malformed nonce fail closed", async () => { const request = buildC0BridgeRequest({ secret, body, now, nonce: "0123456789abcdef0123456789abcdef" }); assert.equal((await verifyC0BridgeRequest({ secret: "", body, headers: request.headers, nonceStore: store(), now })).ok, false); assert.equal((await verifyC0BridgeRequest({ secret, body, headers: {}, nonceStore: store(), now })).ok, false); assert.equal((await verifyC0BridgeRequest({ secret, body, headers: { ...request.headers, "X-GF-Nonce": "short" }, nonceStore: store(), now })).ok, false); });
+test("Portal read signs the canonical Wix endpoint and rejects unsigned or invalid requests", async () => {
+  const readBody = JSON.stringify({ view: "dashboard" });
+  const request = buildC0BridgeRequest({ secret, body: readBody, path: MEMBER_PORTAL_READ_PATH, now, nonce: "fedcba9876543210fedcba9876543210" });
+  assert.equal(MEMBER_PORTAL_READ_PATH, "/_functions/member_portal_read");
+  assert.equal((await verifyC0BridgeRequest({ secret, body: readBody, path: MEMBER_PORTAL_READ_PATH, headers: request.headers, nonceStore: store(), now })).ok, true);
+  assert.equal((await verifyC0BridgeRequest({ secret, body: readBody, path: MEMBER_PORTAL_READ_PATH, headers: {}, nonceStore: store(), now })).ok, false);
+  assert.equal((await verifyC0BridgeRequest({ secret, body: readBody, path: "/_functions/member_portal_read_bridge", headers: request.headers, nonceStore: store(), now })).ok, false);
+});

@@ -44,6 +44,9 @@ export async function submitPortalPart(request: Request, part: "2" | "3" | "4", 
   });
   const response = await (testAdapters.fetch ?? fetch)(`https://www.gymfusion.com.au${PATH}`, { method: "POST", body, headers: { ...bridge.headers, "content-type": "application/json" } });
   const result = await response.json().catch(() => null) as { ok?: boolean; code?: string; submissionID?: string; duplicate?: boolean } | null;
-  if (!response.ok || result?.ok !== true) return { ok: false as const, status: 502, code: "SUBMISSION_UNAVAILABLE" };
+  if (!response.ok || result?.ok !== true || typeof result.submissionID !== "string" || !result.submissionID.trim()) {
+    const status = response.status === 400 ? 400 : response.status === 401 ? 401 : 502;
+    return { ok: false as const, status, code: result?.code || "SUBMISSION_UNAVAILABLE" };
+  }
   return { ok: true as const, status: 200, submissionID: result.submissionID, duplicate: result.duplicate };
 }

@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { createEmbeddedAuth } from "../../../lib/better-auth";
 import { getActiveIdentityMapping } from "../../../lib/identity-mapping";
-import { buildC0BridgeRequest } from "../../../lib/c0-bridge-hmac";
+import { buildC0BridgeRequest, MEMBER_PORTAL_READ_PATH } from "../../../lib/c0-bridge-hmac";
 
 const allowedViews = new Set(["dashboard", "submissions", "profile", "account", "eoi", "supporting-evidence", "profile-change-requests"]);
 
@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (!mapping) return Response.json({ authenticated: false }, { status: 401 });
     const body = await request.json().catch(() => ({})) as { view?: unknown };
     const view = typeof body?.view === "string" && allowedViews.has(body.view) ? body.view : "dashboard";
-    const path = "/_functions/member_portal_read_bridge";
+    const path = MEMBER_PORTAL_READ_PATH;
     const bridge = buildC0BridgeRequest({
       secret: String((env as { C0_BRIDGE_SIGNING_SECRET?: string }).C0_BRIDGE_SIGNING_SECRET ?? ""),
       path,
