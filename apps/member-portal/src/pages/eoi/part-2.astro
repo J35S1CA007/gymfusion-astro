@@ -1079,7 +1079,7 @@ const part2AlreadyFinal = eoiRead?.kind === "authenticated" && hasCompletedPart2
           <span class="gf-kicker">EOI PART 2</span>
           <h2 id="part-2-complete-heading">Health Profile submitted</h2>
           <p>Your Health Profile has already been submitted for this EOI episode. It is now read-only.</p>
-          <a class="gf-nav-button gf-nav-button--dashboard" href="/eoi" data-return-eoi>Return to EOI</a>
+          <a class="gf-nav-button gf-nav-button--dashboard" href="/eoi" data-return-eoi>Return to Portal</a>
         </section>
       ) : (
       <form id="gfHealthProfileForm" novalidate>
@@ -1486,7 +1486,7 @@ const part2AlreadyFinal = eoiRead?.kind === "authenticated" && hasCompletedPart2
           <button type="button" class="gf-nav-button gf-nav-button--back" data-prev>Back</button>
           <button type="button" class="gf-nav-button gf-nav-button--continue" data-next>Continue</button>
           <button type="submit" class="gf-nav-button gf-nav-button--continue" data-submit hidden>Submit Health Profile</button>
-          <a class="gf-nav-button gf-nav-button--dashboard" href="/eoi" data-return-eoi hidden>Return to EOI</a>
+          <a class="gf-nav-button gf-nav-button--dashboard" href="/eoi" data-return-eoi hidden>Return to Portal</a>
         </div>
         <div class="gf-status" data-status aria-live="polite"></div>
       </form>
