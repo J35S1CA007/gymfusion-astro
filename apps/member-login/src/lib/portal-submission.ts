@@ -11,6 +11,15 @@ type SubmissionAdapters = {
   mapping?: (db: D1Database, userId: string) => Promise<{ fusionId: string; wixMemberId: string } | undefined>;
   fetch?: typeof fetch;
 };
+
+type SubmissionValidation =
+  | { ok: true; payload: unknown }
+  | { ok: false; status: number; code: string };
+
+type SubmissionOptions = {
+  validate?: (payload: unknown) => SubmissionValidation;
+};
+
 let testAdapters: SubmissionAdapters = {};
 
 export function setPortalSubmissionTestAdapters(adapters: SubmissionAdapters) {
@@ -21,7 +30,7 @@ export function clearPortalSubmissionTestAdapters() {
   testAdapters = {};
 }
 
-export async function submitPortalPart(request: Request, part: "2" | "3" | "4", payload: unknown) {
+export async function submitPortalPart(request: Request, part: "2" | "3" | "4", payload: unknown, options: SubmissionOptions = {}) {
   const baseURL = new URL(request.url).origin;
   const db = (env as unknown as { BETTER_AUTH_DB: D1Database }).BETTER_AUTH_DB;
   const auth = testAdapters.session ? null : createEmbeddedAuth(db, baseURL);
@@ -30,12 +39,14 @@ export async function submitPortalPart(request: Request, part: "2" | "3" | "4", 
   const userId = (session as { user?: { id?: string } }).user?.id;
   const mapping = testAdapters.mapping ? await testAdapters.mapping(db, String(userId ?? "")) : await getActiveIdentityMapping(db, String(userId ?? ""));
   if (!mapping) return { ok: false as const, status: 401, code: "UNAUTHENTICATED" };
+  const validation = options.validate ? options.validate(payload) : { ok: true as const, payload };
+  if (!validation.ok) return { ok: false as const, status: validation.status, code: validation.code };
   const body = JSON.stringify({
     operation: operationByPart[part],
     correlationId: crypto.randomUUID(),
     fusionId: mapping.fusionId,
     wixMemberId: mapping.wixMemberId,
-    payload,
+    payload: validation.payload,
   });
   const bridge = buildC0BridgeRequest({
     secret: String((env as { C0_BRIDGE_SIGNING_SECRET?: string }).C0_BRIDGE_SIGNING_SECRET ?? ""),

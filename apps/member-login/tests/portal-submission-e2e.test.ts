@@ -131,6 +131,20 @@ function payload(part: "2" | "3" | "4", id: string, answer: string) {
     calculatedFields: {},
     conditionalFollowups: [],
   };
+  if (part === "3") return {
+    formPart: 3,
+    formVersion: 1,
+    submissionID: id,
+    answers: {
+      injuries: ["current_injury"],
+      injuryDetails: `${answer} describes a current limitation that affects training safely.`,
+      needs: ["health_condition"],
+      needsDetails: `${answer} needs clear communication and suitable training adjustments.`,
+    },
+    normalizedAnswers: [],
+    calculatedFields: {},
+    conditionalFollowups: [],
+  };
   return { formPart: part, formVersion: "synthetic-v1", submissionID: id, answers: { answer }, normalizedAnswers: [{ fieldName: "syntheticAnswer", value: answer }], calculatedFields: {}, conditionalFollowups: [] };
 }
 async function execute(route: any, part: "2" | "3" | "4", id: string, answer: string, user = "synthetic-user-a", injected: Record<string, unknown> = {}) {
@@ -148,6 +162,50 @@ test("malformed successful bridge responses never become canonical submission su
   const result = await execute(post2, "2", "synthetic-malformed-success", "x");
   assert.equal(result.status, 502);
   assert.deepEqual(await result.json(), { ok: false, code: "SUBMISSION_UNAVAILABLE" });
+  setPortalSubmissionTestAdapters({ session: sessionAdapter, mapping: mappingAdapter, fetch: bridgeFetch });
+});
+
+test("Part 3 invalid contracts are rejected before downstream forwarding", async () => {
+  let bridgeCalls = 0;
+  setPortalSubmissionTestAdapters({
+    session: sessionAdapter,
+    mapping: mappingAdapter,
+    fetch: async (...args) => {
+      bridgeCalls += 1;
+      return bridgeFetch(...args);
+    },
+  });
+  const result = await execute(post3, "3", "synthetic-invalid-part3", "x", "synthetic-user-a", {
+    answers: {
+      injuries: ["no_issues", "current_injury"],
+      needs: ["none"],
+    },
+  });
+  assert.equal(result.status, 400);
+  assert.deepEqual(await result.json(), { ok: false, code: "INVALID_PART3_CONTRACT" });
+  assert.equal(bridgeCalls, 0);
+  setPortalSubmissionTestAdapters({ session: sessionAdapter, mapping: mappingAdapter, fetch: bridgeFetch });
+});
+
+test("Part 3 authentication takes precedence over contract validation", async () => {
+  let bridgeCalls = 0;
+  setPortalSubmissionTestAdapters({
+    session: async () => null,
+    mapping: mappingAdapter,
+    fetch: async (...args) => {
+      bridgeCalls += 1;
+      return bridgeFetch(...args);
+    },
+  });
+  const result = await execute(post3, "3", "synthetic-unauthenticated-invalid-part3", "x", "synthetic-user-a", {
+    answers: {
+      injuries: ["no_issues", "current_injury"],
+      needs: ["none"],
+    },
+  });
+  assert.equal(result.status, 401);
+  assert.deepEqual(await result.json(), { ok: false, code: "UNAUTHENTICATED" });
+  assert.equal(bridgeCalls, 0);
   setPortalSubmissionTestAdapters({ session: sessionAdapter, mapping: mappingAdapter, fetch: bridgeFetch });
 });
 
