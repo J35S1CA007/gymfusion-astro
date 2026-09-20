@@ -1,0 +1,17 @@
+---
+import PortalLayout from "../layouts/PortalLayout.astro";
+import PortalShell from "../components/portal/PortalShell";
+import PortalState from "../components/portal/PortalState.astro";
+import { env } from "cloudflare:workers";
+import { loadPortalPage } from "../lib/portal-page";
+import { readMemberPortalView } from "../lib/member-portal-read";
+import { sectionCopy } from "../lib/portal";
+import "../styles/global.css";
+const session = await loadPortalPage(Astro.request);
+if (session.kind === "redirect") return new Response(null, { status: 303, headers: { Location: "/login", "Cache-Control": "no-store" } });
+if (session.kind === "unavailable") Astro.response.status = 503;
+const copy = sectionCopy.profile;
+const profileRead = session.kind === "authenticated" ? await readMemberPortalView(Astro.request, env.MEMBER_LOGIN_SERVICE_URL, "profile") : { kind: "unavailable" as const };
+const profile = profileRead.kind === "authenticated" ? profileRead.data.profile as { firstName?: string; lastName?: string } : undefined;
+---
+{session.kind === "authenticated" ? <PortalLayout title={copy.title} description={copy.description}><PortalShell client:load active="profile" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref="/api/auth/logout"><section class="grid gap-5 sm:grid-cols-2"><div class="rounded-2xl border border-black/10 bg-white p-6 shadow-sm"><h2 class="font-heading text-2xl font-bold">Current profile</h2>{profile ? <dl class="mt-5 space-y-3"><div><dt class="text-sm text-black/55">First name</dt><dd class="font-semibold">{profile.firstName}</dd></div>{profile.lastName ? <div><dt class="text-sm text-black/55">Last name</dt><dd class="font-semibold">{profile.lastName}</dd></div> : null}</dl> : <p class="mt-4 text-black/65">Profile data is temporarily unavailable.</p>}</div><PortalState heading="Profile changes" body="Governed profile updates are handled through change requests. Profile image storage is not enabled." links={[{ href: "/profile/change-requests", label: "View change requests" }]} /></section></PortalShell></PortalLayout> : <main>Members Portal is temporarily unavailable.</main>}

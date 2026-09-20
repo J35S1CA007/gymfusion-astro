@@ -1,0 +1,17 @@
+---
+import PortalLayout from "../layouts/PortalLayout.astro";
+import PortalShell from "../components/portal/PortalShell";
+import PortalState from "../components/portal/PortalState.astro";
+import { loadPortalPage } from "../lib/portal-page";
+import { readMemberPortalView } from "../lib/member-portal-read";
+import { env } from "cloudflare:workers";
+import { sectionCopy } from "../lib/portal";
+import "../styles/global.css";
+const session = await loadPortalPage(Astro.request);
+if (session.kind === "redirect") return new Response(null, { status: 303, headers: { Location: "/login", "Cache-Control": "no-store" } });
+if (session.kind === "unavailable") Astro.response.status = 503;
+const copy = sectionCopy.submissions;
+const read = session.kind === "authenticated" ? await readMemberPortalView(Astro.request, env.MEMBER_LOGIN_SERVICE_URL, "submissions") : null;
+const items = read?.kind === "authenticated" && Array.isArray(read.data.items) ? read.data.items : [];
+---
+{session.kind === "authenticated" ? <PortalLayout title={copy.title} description={copy.description}><PortalShell client:load active="submissions" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref="/api/auth/logout"><PortalState heading="Your submissions" body={items.length ? `You have ${items.length} EOI Parts 2-4 submission${items.length === 1 ? "" : "s"}.` : "You have no EOI Parts 2-4 submissions yet."} links={[{ href: "/eoi", label: "Open Expression of Interest" }]} /></PortalShell></PortalLayout> : <main>Members Portal is temporarily unavailable.</main>}

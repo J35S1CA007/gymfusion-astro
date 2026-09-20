@@ -1,0 +1,13 @@
+---
+import PortalLayout from "../../layouts/PortalLayout.astro";
+import PortalShell from "../../components/portal/PortalShell";
+import PortalState from "../../components/portal/PortalState.astro";
+import { loadPortalPage } from "../../lib/portal-page";
+import { sectionCopy } from "../../lib/portal";
+import "../../styles/global.css";
+const session = await loadPortalPage(Astro.request);
+if (session.kind === "redirect") return new Response(null, { status: 303, headers: { Location: "/login", "Cache-Control": "no-store" } });
+if (session.kind === "unavailable") Astro.response.status = 503;
+const copy = sectionCopy["profile-change-requests"];
+---
+{session.kind === "authenticated" ? <PortalLayout title={copy.title} description={copy.description}><PortalShell client:load active="profile-change-requests" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref="/api/auth/logout"><PortalState heading="Profile change requests" body="Governed profile updates and their approval status will appear here once the authorised request service is connected." /></PortalShell></PortalLayout> : <main>Members Portal is temporarily unavailable.</main>}

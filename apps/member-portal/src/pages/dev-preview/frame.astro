@@ -1,0 +1,52 @@
+---
+import PortalLayout from "../../layouts/PortalLayout.astro";
+import FramePreview, { type PreviewState } from "../../components/portal/FramePreview";
+import type { DashboardProjection } from "../../components/portal/DashboardView";
+import "../../styles/global.css";
+
+const isDevelopmentPreview = import.meta.env.DEV;
+if (!isDevelopmentPreview) Astro.response.status = 404;
+const previewProjections = {
+  "active-complete": {
+    hasActiveEpisode: true,
+    part1: "COMPLETE",
+    nextAction: "Complete your Health Profile.",
+    currentStatus: "Your EOI is in progress.",
+    parts: {
+      part2: { status: "INCOMPLETE", availability: "AVAILABLE", href: "/eoi/part-2", actionLabel: "Continue" },
+      part3: { status: "INCOMPLETE", availability: "LOCKED" },
+      part4: { status: "INCOMPLETE", availability: "LOCKED" },
+    },
+    task: { title: "Complete your Health Profile", description: "Continue your EOI by completing Part 2. Parts 3 and 4 will unlock only when authorised.", href: "/eoi/part-2", actionLabel: "Continue Part 2" },
+  },
+  "active-incomplete": {
+    hasActiveEpisode: true,
+    part1: "INCOMPLETE",
+    nextAction: "Complete your Expression of Interest.",
+    currentStatus: "Your EOI is in progress.",
+    parts: {
+      part2: { status: "INCOMPLETE", availability: "LOCKED" },
+      part3: { status: "INCOMPLETE", availability: "LOCKED" },
+      part4: { status: "INCOMPLETE", availability: "LOCKED" },
+    },
+    task: { title: "Complete your Expression of Interest", description: "Finish Part 1 to continue your GYMFUSION journey.", href: "https://eoi.gymfusion.com.au", actionLabel: "Continue EOI" },
+  },
+  "no-active": { hasActiveEpisode: false, part1: null, nextAction: null, currentStatus: "No active enrolment or EOI in progress." },
+  "eoi-review": {
+    hasActiveEpisode: true,
+    part1: "COMPLETE",
+    nextAction: null,
+    currentStatus: "Your EOI is in the Review Phase",
+    parts: {
+      part2: { status: "COMPLETE", availability: "SUBMITTED", href: "/eoi/part-2", actionLabel: "View submission" },
+      part3: { status: "COMPLETE", availability: "SUBMITTED", href: "/eoi/part-3", actionLabel: "View submission" },
+      part4: { status: "COMPLETE", availability: "SUBMITTED", href: "/eoi/part-4", actionLabel: "View submission" },
+    },
+  },
+} satisfies Record<PreviewState, DashboardProjection>;
+---
+{isDevelopmentPreview ? (
+  <PortalLayout title="Members Portal Frame Preview" description="Development-only Members Portal frame preview">
+    <FramePreview client:load member={{ displayName: "Preview Member", initials: "PM" }} projections={previewProjections} />
+  </PortalLayout>
+) : <main>Not found</main>}

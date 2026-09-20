@@ -1,0 +1,68 @@
+---
+import { env } from "cloudflare:workers";
+import PortalLayout from "../layouts/PortalLayout.astro";
+import PortalShell from "../components/portal/PortalShell";
+import DashboardView, { type DashboardProjection } from "../components/portal/DashboardView";
+import { readMemberPortalView } from "../lib/member-portal-read";
+import { checkMemberLoginSession } from "../lib/member-login-session";
+import "../styles/global.css";
+
+const session = await checkMemberLoginSession(Astro.request, env.MEMBER_LOGIN_SERVICE_URL);
+const logoutHref = env.MEMBER_LOGIN_SERVICE_URL
+  ? new URL("/api/auth/logout", env.MEMBER_LOGIN_SERVICE_URL).href
+  : "/login";
+Astro.response.headers.set("Cache-Control", "no-store");
+
+if (session.kind === "redirect") {
+  return new Response(null, { status: 303, headers: { "Cache-Control": "no-store", Location: "/login" } });
+}
+if (session.kind === "unavailable") {
+  Astro.response.status = 503;
+}
+const read = session.kind === "authenticated"
+  ? await readMemberPortalView(Astro.request, env.MEMBER_LOGIN_SERVICE_URL, "dashboard")
+  : { kind: "unavailable" as const };
+const onboarding = read.kind === "authenticated"
+  ? read.data.onboarding as { hasActiveEpisode?: boolean; journeyPhase?: "EOI_PHASE" | "REVIEW_PHASE" | null; part1?: string | null; part2?: string; part3?: string; part4?: string; part2Availability?: string; part3Availability?: string; part4Availability?: string; nextAction?: string | null }
+  : undefined;
+const normalized = (value: unknown) => typeof value === "string" ? value.trim().toUpperCase() : "";
+const status = (value: unknown, declaredAvailability?: unknown): "COMPLETE" | "INCOMPLETE" => ["COMPLETE", "SUBMITTED"].includes(normalized(value)) || normalized(declaredAvailability) === "SUBMITTED" ? "COMPLETE" : "INCOMPLETE";
+const availability = (value: unknown, declaredAvailability: unknown, prerequisiteComplete = true): "AVAILABLE" | "LOCKED" | "SUBMITTED" => status(value, declaredAvailability) === "COMPLETE" ? "SUBMITTED" : normalized(declaredAvailability) === "AVAILABLE" || prerequisiteComplete ? "AVAILABLE" : "LOCKED";
+const part1Status = onboarding ? status(onboarding.part1) : "INCOMPLETE";
+const part2Status = onboarding ? status(onboarding.part2, onboarding.part2Availability) : "INCOMPLETE";
+const part3Status = onboarding ? status(onboarding.part3, onboarding.part3Availability) : "INCOMPLETE";
+const part4Status = onboarding ? status(onboarding.part4, onboarding.part4Availability) : "INCOMPLETE";
+const task = onboarding?.hasActiveEpisode === true
+  ? part1Status === "INCOMPLETE"
+    ? { title: "Complete your Expression of Interest", description: "Finish Part 1 to continue your GYMFUSION journey.", href: "https://eoi.gymfusion.com.au", actionLabel: "Continue EOI" }
+    : part2Status === "INCOMPLETE"
+      ? { title: "Complete your Health Profile", description: "Continue your EOI by completing Part 2. Parts 3 and 4 will unlock only when authorised.", href: "/eoi/part-2", actionLabel: "Continue Part 2" }
+      : part3Status === "INCOMPLETE"
+        ? { title: "Complete your Accessibility & Support Needs", description: "Continue your EOI by completing Part 3.", href: "/eoi/part-3", actionLabel: "Continue Part 3" }
+        : part4Status === "INCOMPLETE"
+          ? { title: "Complete your Fitness Profile", description: "Complete the final available part of your EOI.", href: "/eoi/part-4", actionLabel: "Continue Part 4" }
+          : undefined
+  : undefined;
+const projection: DashboardProjection | null = onboarding ? {
+  hasActiveEpisode: onboarding.hasActiveEpisode === true,
+  part1: onboarding.part1 === "COMPLETE" ? "COMPLETE" : onboarding.part1 === "INCOMPLETE" ? "INCOMPLETE" : null,
+  nextAction: null,
+  task,
+  currentStatus: onboarding.journeyPhase === "REVIEW_PHASE" ? "Your EOI is in the Review Phase" : onboarding.hasActiveEpisode === true ? "Your EOI is in progress." : "No active enrolment or EOI in progress.",
+  parts: {
+    part2: { status: part2Status, availability: availability(onboarding?.part2, onboarding?.part2Availability), href: "/eoi/part-2", actionLabel: part2Status === "COMPLETE" ? "View submission" : "Continue" },
+    part3: { status: part3Status, availability: availability(onboarding?.part3, onboarding?.part3Availability, part2Status === "COMPLETE"), href: "/eoi/part-3", actionLabel: part3Status === "COMPLETE" ? "View submission" : "Continue" },
+    part4: { status: part4Status, availability: availability(onboarding?.part4, onboarding?.part4Availability, part3Status === "COMPLETE"), href: "/eoi/part-4", actionLabel: part4Status === "COMPLETE" ? "View submission" : "Continue" },
+  },
+} : null;
+---
+
+{session.kind === "authenticated" ? (
+  <PortalLayout title="Dashboard" description="GYMFUSION Members Portal">
+    <PortalShell client:load active="dashboard" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref={logoutHref} title="Dashboard">
+      {projection ? <DashboardView projection={projection} /> : <section class="rounded-2xl border border-black/15 bg-white p-8"><h2 class="font-heading text-3xl font-bold">Portal overview</h2><p class="mt-4 text-black/65">Portal overview is temporarily unavailable.</p></section>}
+    </PortalShell>
+  </PortalLayout>
+) : (
+  <main>Members Portal is temporarily unavailable.</main>
+)}

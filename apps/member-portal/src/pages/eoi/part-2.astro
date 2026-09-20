@@ -2,10 +2,17 @@
 import HealthDateTimePicker from "../../components/HealthDateTimePicker";
 import HealthSignaturePad from "../../components/HealthSignaturePad";
 import { loadPortalPage } from "../../lib/portal-page";
+import { hasCompletedPart2 } from "../../lib/eoi-part-2-completion";
+import { readMemberPortalView } from "../../lib/member-portal-read";
+import { env } from "cloudflare:workers";
 
 const session = await loadPortalPage(Astro.request, Astro.locals);
 if (session.kind === "redirect") return new Response(null, { status: 303, headers: { Location: "/login", "Cache-Control": "no-store" } });
 if (session.kind === "unavailable") return new Response("Members Portal is temporarily unavailable.", { status: 503, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+const eoiRead = session.kind === "authenticated" && env.MEMBER_LOGIN_SERVICE_URL
+  ? await readMemberPortalView(Astro.request, env.MEMBER_LOGIN_SERVICE_URL, "eoi")
+  : null;
+const part2AlreadyFinal = eoiRead?.kind === "authenticated" && hasCompletedPart2(eoiRead.data);
 ---
 <!doctype html>
 <html lang="en-AU">
@@ -13,7 +20,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GYMFUSION Member Portal | Health Profile</title>
-  <style is:global>
+<style is:global>
     /*
       GYMFUSION HEALTH PROFILE - ASTRO MEMBER PORTAL
       Version: v1.1 target-state frontend
@@ -24,6 +31,8 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       1. Complete authenticated server-side submission integration before production.
       2. Keep health data out of Member profile fields; send to the approved EOI Parts 2-4 collections only.
     */
+
+    @import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Dancing+Script:wght@500&family=Great+Vibes&family=Pacifico&display=swap");
 
     @font-face {
       font-family: "Gamuth";
@@ -229,6 +238,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
     .gf-signature-meta {
       position: relative;
       margin-bottom: 28px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .gf-signature-meta:has(.gf-datetimepicker-trigger[aria-expanded="true"]) {
@@ -241,7 +251,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       gap: 8px;
     }
 
-    label, legend {
+    label, legend, .gf-question {
       display: block;
       font-weight: 800;
       color: #000;
@@ -683,6 +693,27 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
     }
     .gf-member-lock.is-visible { display: block; }
 
+    .gf-completion-state {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 34px;
+    }
+
+    .gf-completion-state h2 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .gf-completion-state p {
+      max-width: 620px;
+      color: var(--gf-muted);
+      font-size: 18px;
+    }
+
     .gf-invalid {
       border-color: #b00020 !important;
       box-shadow: 0 0 0 4px rgba(176, 0, 32, 0.12);
@@ -698,13 +729,119 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
     }
 
+    .gf-signature-method {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 0 0 16px;
+    }
+
+    .gf-signature-method legend,
+    .gf-signature-font-label {
+      color: var(--gf-muted);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .gf-signature-method legend {
+      margin-bottom: 16px;
+    }
+
+    .gf-signature-method-options,
+    .gf-signature-font-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .gf-signature-mode,
+    .gf-signature-font {
+      min-height: 52px;
+      padding: 10px 16px;
+      border: 1.25px solid var(--gf-line);
+      border-radius: 17px;
+      background: #fff;
+      color: #000;
+      font: inherit;
+      cursor: pointer;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .gf-signature-mode:hover,
+    .gf-signature-mode:focus-visible,
+    .gf-signature-font:hover,
+    .gf-signature-font:focus-visible,
+    .gf-signature-mode[aria-pressed="true"],
+    .gf-signature-font[aria-pressed="true"] {
+      border-color: #000;
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+      outline: none;
+    }
+
+    .gf-signature-mode[aria-pressed="true"],
+    .gf-signature-font[aria-pressed="true"] {
+      background: #000;
+      color: #fff;
+    }
+
+    .gf-signature-font-picker {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 2px;
+    }
+
+    .gf-signature-font-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .gf-signature-font {
+      min-height: 58px;
+      font-size: 25px;
+      line-height: 1;
+    }
+
+    .gf-signature-font[data-signature-font="Dancing Script"] { font-family: "Dancing Script", cursive; }
+    .gf-signature-font[data-signature-font="Caveat"] { font-family: "Caveat", cursive; }
+    .gf-signature-font[data-signature-font="Pacifico"] { font-family: "Pacifico", cursive; }
+    .gf-signature-font[data-signature-font="Great Vibes"] { font-family: "Great Vibes", cursive; }
+
+    .gf-typed-signature-preview {
+      display: grid;
+      min-height: 198px;
+      place-items: center;
+      padding: 24px;
+      color: #111;
+      font-size: clamp(38px, 6vw, 64px);
+      line-height: 1.1;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .gf-typed-signature-preview[hidden] {
+      display: none;
+    }
+
     .gf-signature-pad canvas {
       display: block;
       width: 100%;
       height: 198px;
-      cursor: crosshair;
+      cursor: -webkit-image-set(
+        url("https://cdn.sweezy-cursors.com/cursor_packs/2b1d5bd8-9c8c-4b51-90fb-bb428b14f0f3/fountain-pen-pen-nib-3d--cursor-image.png") 4x
+      ) 1 1, crosshair;
+      cursor: image-set(
+        url("https://cdn.sweezy-cursors.com/cursor_packs/2b1d5bd8-9c8c-4b51-90fb-bb428b14f0f3/fountain-pen-pen-nib-3d--cursor-image.png") 4x
+      ) 1 1, crosshair;
       touch-action: none;
       user-select: none;
+    }
+
+    .gf-signature-pad canvas[hidden] {
+      display: none !important;
     }
 
     .gf-signature-pad canvas:focus-visible {
@@ -714,8 +851,28 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
 
     .gf-signature-actions {
       display: flex;
-      justify-content: flex-end;
-      margin-top: 2px;
+      justify-content: flex-start;
+      margin-top: 8px;
+    }
+
+    .gf-signature-clear {
+      border: 0;
+      padding: 0;
+      color: var(--gf-muted);
+      background: transparent;
+      font: inherit;
+      font-size: 14px;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .gf-signature-clear:hover {
+      color: var(--gf-text);
+    }
+
+    .gf-signature-clear:focus-visible {
+      outline: 3px solid var(--gf-green);
+      outline-offset: 4px;
     }
 
     .gf-nav {
@@ -726,6 +883,10 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       padding: 24px 30px 30px;
       border-top: 1px solid var(--gf-line);
       align-items: center;
+    }
+
+    .gf-nav:has([data-prev][hidden]) {
+      justify-content: flex-end;
     }
 
     .gf-nav-button {
@@ -757,6 +918,25 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
     .gf-nav-button--back { --gf-button-accent: #e05555; }
     .gf-nav-button--clear { --gf-button-accent: #f2a51a; }
     .gf-nav-button--continue { --gf-button-accent: #78a941; }
+
+    .gf-nav-button--dashboard {
+      border-color: #000;
+      background: #000;
+      color: #fff;
+    }
+
+    .gf-nav-button--dashboard:hover:not([disabled]),
+    .gf-nav-button--dashboard:active:not([disabled]) {
+      background: #fff;
+      color: #000;
+    }
+
+    a.gf-nav-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
 
     .gf-nav-button[disabled] { opacity: 0.45; cursor: not-allowed; }
 
@@ -894,6 +1074,14 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       </header>
 
       <div class="gf-progress" aria-hidden="true"><span data-progress></span></div>
+      {part2AlreadyFinal ? (
+        <section class="gf-completion-state" aria-labelledby="part-2-complete-heading">
+          <span class="gf-kicker">EOI PART 2</span>
+          <h2 id="part-2-complete-heading">Health Profile submitted</h2>
+          <p>Your Health Profile has already been submitted for this EOI episode. It is now read-only.</p>
+          <a class="gf-nav-button gf-nav-button--dashboard" href="/eoi" data-return-eoi>Return to Portal</a>
+        </section>
+      ) : (
       <form id="gfHealthProfileForm" novalidate>
         <section class="gf-page is-active" data-page="0">
           <h2 class="gf-section-title">Collection of Health Information Notice</h2>
@@ -952,9 +1140,26 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
               </label>
             </div>
             <div class="gf-field" data-signature-field>
-              <label for="healthInformationSignaturePad">Signature</label>
+              <p class="gf-question">Signature</p>
+              <fieldset class="gf-signature-method">
+                <legend>Choose signature method</legend>
+                <div class="gf-signature-method-options" role="group" aria-label="Signature method">
+                  <button type="button" class="gf-signature-mode" data-signature-mode="draw" aria-pressed="true">Draw signature</button>
+                  <button type="button" class="gf-signature-mode" data-signature-mode="typed" aria-pressed="false">Choose a font</button>
+                </div>
+                <div class="gf-signature-font-picker" data-signature-font-options hidden>
+                  <p class="gf-signature-font-label">Choose font style</p>
+                  <div class="gf-signature-font-options" role="group" aria-label="Signature font style">
+                    <button type="button" class="gf-signature-font" data-signature-font="Dancing Script" aria-pressed="true">Dancing Script</button>
+                    <button type="button" class="gf-signature-font" data-signature-font="Great Vibes" aria-pressed="false">Great Vibes</button>
+                    <button type="button" class="gf-signature-font" data-signature-font="Caveat" aria-pressed="false">Caveat</button>
+                    <button type="button" class="gf-signature-font" data-signature-font="Pacifico" aria-pressed="false">Pacifico</button>
+                  </div>
+                </div>
+              </fieldset>
               <div class="gf-signature-pad">
                 <HealthSignaturePad client:load />
+                <div class="gf-typed-signature-preview" data-signature-typed-preview hidden aria-live="polite"></div>
               </div>
               <input id="healthInformationSignature" name="healthInformationSignature" type="hidden" required />
               <input id="healthInformationSignatureSvg" name="healthInformationSignatureSvg" type="hidden" />
@@ -962,6 +1167,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
               <input id="healthInformationSignatureSignedAt" name="healthInformationSignatureSignedAt" type="hidden" />
               <input id="healthInformationSignatureDocumentID" name="healthInformationSignatureDocumentID" type="hidden" />
               <div class="gf-signature-actions">
+                <button type="button" class="gf-signature-clear" data-clear-signature>Clear Signature</button>
               </div>
             </div>
           </div>
@@ -1002,7 +1208,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
               </div>
               <div class="gf-conditional" data-show-unless="dizzyBalanceEpisodes:No">
                 <div class="gf-field" data-show-if="dizzyBalanceEpisodes:Exercise only">
-                  <label>Would you like to share any additional information about these episodes?</label>
+                  <p class="gf-question">Would you like to share any additional information about these episodes?</p>
                   <div class="gf-choice-row">
                     <label class="gf-choice"><input type="radio" name="dizzyShareMore" value="Yes" />Yes –– I would like to share more information.</label>
                     <label class="gf-choice"><input type="radio" name="dizzyShareMore" value="No" />No thank-you –– I prefer not to provide further details.</label>
@@ -1014,7 +1220,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
                   <textarea id="dizzyEpisodeDetails" name="dizzyEpisodeDetails" required></textarea>
                 </div>
                 <div class="gf-field" data-show-if="dizzyBalanceEpisodes:Varies">
-                  <label>Would you like to let us know anything further about these episodes?</label>
+                  <p class="gf-question">Would you like to let us know anything further about these episodes?</p>
                   <div class="gf-choice-row">
                     <label class="gf-choice"><input type="radio" name="dizzyShareFurther" value="Yes" />Yes –– I would like to share more information.</label>
                     <label class="gf-choice"><input type="radio" name="dizzyShareFurther" value="No" />No thank-you –– I prefer not to provide further details.</label>
@@ -1026,7 +1232,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
                   <textarea id="dizzyMoreInformation" name="dizzyMoreInformation" required></textarea>
                 </div>
                 <div class="gf-field" data-show-if="dizzyBalanceEpisodes:Exercise and posture">
-                  <label>Is there anything else you'd like to tell us about these episodes?</label>
+                  <p class="gf-question">Is there anything else you'd like to tell us about these episodes?</p>
                   <div class="gf-choice-row">
                     <label class="gf-choice"><input type="radio" name="dizzyShareAnythingElse" value="Yes" />Yes –– I would like to share more information.</label>
                     <label class="gf-choice"><input type="radio" name="dizzyShareAnythingElse" value="No" />No thank-you –– I prefer not to provide further details.</label>
@@ -1043,7 +1249,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
         </section>
 
         <section class="gf-page" data-page="2">
-          <h2 class="gf-section-title">Breathing Comfort</h2>
+          <h2 class="gf-section-title">Breathing</h2>
           <p class="gf-section-note">Select any breathing or airway conditions relevant to training.</p>
 
           <div class="gf-card">
@@ -1066,28 +1272,28 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
                 <div class="gf-followup-section">
                   <div class="gf-followup-stack">
                     <div class="gf-followup-item" data-show-when-breathing-followup="airway">
-                      <label>Over the last 12 months, have you had any sudden breathing difficulties – similar to an asthma attack – that required urgent medical care?</label>
+                      <p class="gf-question">Over the last 12 months, have you had any sudden breathing difficulties – similar to an asthma attack – that required urgent medical care?</p>
                       <div class="gf-choice-row">
                         <label class="gf-choice"><input type="radio" name="urgentBreathingCare12m" value="No" required />No</label>
                         <label class="gf-choice"><input type="radio" name="urgentBreathingCare12m" value="Yes" />Yes</label>
                       </div>
                     </div>
                     <div class="gf-followup-item" data-show-when-breathing-followup="asthma">
-                      <label>Have you had an asthma attack requiring immediate medical attention at any time over the last 12 months?</label>
+                      <p class="gf-question">Have you had an asthma attack requiring immediate medical attention at any time over the last 12 months?</p>
                       <div class="gf-choice-row">
                         <label class="gf-choice"><input type="radio" name="asthmaAttackMedicalAttention12m" value="No" required />No</label>
                         <label class="gf-choice"><input type="radio" name="asthmaAttackMedicalAttention12m" value="Yes" />Yes</label>
                       </div>
                     </div>
                     <div class="gf-followup-item" data-show-when-breathing-followup="none">
-                      <label>Just to confirm, in the last 12 months, have you had any breathing episodes – even unexpected ones – that required urgent or emergency treatment?</label>
+                      <p class="gf-question">Just to confirm, in the last 12 months, have you had any breathing episodes – even unexpected ones – that required urgent or emergency treatment?</p>
                       <div class="gf-choice-row">
                         <label class="gf-choice"><input type="radio" name="unexpectedBreathingEmergency12m" value="No" required />No</label>
                         <label class="gf-choice"><input type="radio" name="unexpectedBreathingEmergency12m" value="Yes" />Yes</label>
                       </div>
                     </div>
                     <div class="gf-followup-item" data-show-when-breathing-followup="other multiple">
-                      <label>Over the last 12 months, have you had any breathing episodes – due to asthma or another condition – that required urgent or emergency treatment?</label>
+                      <p class="gf-question">Over the last 12 months, have you had any breathing episodes – due to asthma or another condition – that required urgent or emergency treatment?</p>
                       <div class="gf-choice-row">
                         <label class="gf-choice"><input type="radio" name="anyConditionBreathingEmergency12m" value="No" required />No</label>
                         <label class="gf-choice"><input type="radio" name="anyConditionBreathingEmergency12m" value="Yes" />Yes</label>
@@ -1095,10 +1301,10 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
                     </div>
                   </div>
                 </div>
-                <div class="gf-followup-section" data-show-when-any-answered="urgentBreathingCare12m|asthmaAttackMedicalAttention12m|unexpectedBreathingEmergency12m|anyConditionBreathingEmergency12m">
+                <div class="gf-followup-section" data-show-when-breathing-followup="airway asthma other multiple" data-show-when-any-answered="urgentBreathingCare12m|asthmaAttackMedicalAttention12m|unexpectedBreathingEmergency12m|anyConditionBreathingEmergency12m">
                   <p class="gf-followup-section-title">Triggers</p>
                   <div class="gf-followup-item">
-                    <label>Are you aware of any triggers, patterns, or environments that tend to bring your symptoms on or make them worse?</label>
+                    <p class="gf-question">Are you aware of any triggers, patterns, or environments that tend to bring your symptoms on or make them worse?</p>
                     <div class="gf-choice-row">
                       <label class="gf-choice"><input type="radio" name="breathingTriggersKnown" value="No" required />No</label>
                       <label class="gf-choice"><input type="radio" name="breathingTriggersKnown" value="Yes" />Yes</label>
@@ -1112,7 +1318,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
                 <div class="gf-followup-section" data-show-if-any="breathingConditions:Asthma" data-show-when-answered="breathingTriggersKnown">
                   <p class="gf-followup-section-title">Ventolin</p>
                   <div class="gf-followup-item">
-                    <label>Do you use an inhaler?</label>
+                    <p class="gf-question">Do you use an inhaler?</p>
                     <div class="gf-choice-row">
                       <label class="gf-choice"><input type="radio" name="inhalerUse" value="Ventolin" required />Yes – Ventolin</label>
                       <label class="gf-choice"><input type="radio" name="inhalerUse" value="Ventolin and preventer" />Yes – Ventolin and a preventer</label>
@@ -1123,7 +1329,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
                 <div class="gf-followup-section" data-show-if-any="inhalerUse:Ventolin|Ventolin and preventer">
                   <p class="gf-followup-section-title">Inhaler</p>
                   <div class="gf-followup-item">
-                    <label>Do you use a spacer with your Ventolin inhaler?</label>
+                    <p class="gf-question">Do you use a spacer with your Ventolin inhaler?</p>
                     <div class="gf-choice-row">
                       <label class="gf-choice"><input type="radio" name="spacerUse" value="Yes" required />Yes –– I use an spacer with my inhaler</label>
                       <label class="gf-choice"><input type="radio" name="spacerUse" value="No" />No –– I do not use a spacer with my inhaler</label>
@@ -1158,13 +1364,13 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
                 <label class="gf-choice"><input type="radio" name="bloodSugarCondition" value="No" />No</label>
               </div>
               <div class="gf-conditional" data-show-unless="bloodSugarCondition:No">
-                <label>Have you had difficulty controlling your blood sugar (glucose) in the last 3 months?</label>
+                <p class="gf-question">Have you had difficulty controlling your blood sugar (glucose) in the last 3 months?</p>
                 <div class="gf-choice-row">
                   <label class="gf-choice"><input type="checkbox" name="diabetesGlucoseControl3m" value="No difficulty" />No difficulty in the last 3 months</label>
                   <label class="gf-choice"><input type="checkbox" name="diabetesGlucoseControl3m" value="Difficulty" />Yes – difficulty in the last 3 months</label>
                   <label class="gf-choice"><input type="checkbox" name="diabetesGlucoseControl3m" value="Some challenges but managed" />Some challenges, currently well managed</label>
                 </div>
-                <label>Have you experienced any challenges managing your blood sugar because of this condition in the last 3 months?</label>
+                <p class="gf-question">Have you experienced any challenges managing your blood sugar because of this condition in the last 3 months?</p>
                 <div class="gf-choice-row">
                   <label class="gf-choice"><input type="radio" name="bloodSugarControl3m" value="No difficulty" required />No difficulty</label>
                   <label class="gf-choice"><input type="radio" name="bloodSugarControl3m" value="Difficulty" />Yes – difficulty</label>
@@ -1184,7 +1390,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
             <fieldset data-conditional-source="smokingVapingSkip">
               <legend>You’re welcome to skip smoking & vaping questions if you prefer.</legend>
               <div class="gf-skip-toggle">
-                <label class="gf-choice"><input type="checkbox" name="smokingVapingSkip" value="skip" required />I would prefer to skip these questions.</label>
+                <label class="gf-choice"><input type="checkbox" name="smokingVapingSkip" value="skip" />I would prefer to skip these questions.</label>
               </div>
             </fieldset>
           </div>
@@ -1199,19 +1405,18 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
                 <label class="gf-choice"><input type="checkbox" name="smokingVapingCurrent" value="Neither" />Neither</label>
               </div>
               <div class="gf-field">
-                <label>Or have you recently quit smoking or vaping?</label>
+                <p class="gf-question">Or have you recently quit smoking or vaping?</p>
                 <div class="gf-choice-row">
                   <label class="gf-choice"><input type="checkbox" name="recentlyQuit" value="Quit smoking within 6 months" />Quit smoking within 6 months</label>
                   <label class="gf-choice"><input type="checkbox" name="recentlyQuit" value="Quit vaping within 6 months" />Quit vaping within 6 months</label>
                 </div>
               </div>
               <div class="gf-conditional" data-show-if-any="smokingVapingCurrent:Smoke|Both">
-                <label>How often do you currently smoke?</label>
+                <p class="gf-question">How often do you currently smoke?</p>
                 <div class="gf-choice-row">
                   <label class="gf-choice"><input type="radio" name="smokingFrequency" value="Daily" />Daily</label>
                   <label class="gf-choice"><input type="radio" name="smokingFrequency" value="Weekly" />Weekly</label>
                   <label class="gf-choice"><input type="radio" name="smokingFrequency" value="Occasionally" />Occasionally</label>
-                  <label class="gf-choice"><input type="radio" name="smokingFrequency" value="Mistake" />I made a mistake</label>
                 </div>
                 <div class="gf-grid">
                   <div class="gf-field"><label for="smokingDaysPerWeek">Roughly how many days per week do you smoke?</label><input id="smokingDaysPerWeek" name="smokingDaysPerWeek" type="number" min="0" max="7" /></div>
@@ -1219,12 +1424,11 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
                 </div>
               </div>
               <div class="gf-conditional" data-show-if-any="smokingVapingCurrent:Vape|Both">
-                <label>How often do you currently vape?</label>
+                <p class="gf-question">How often do you currently vape?</p>
                 <div class="gf-choice-row">
                   <label class="gf-choice"><input type="radio" name="vapingFrequency" value="Daily" />Daily</label>
                   <label class="gf-choice"><input type="radio" name="vapingFrequency" value="Weekly" />Weekly</label>
                   <label class="gf-choice"><input type="radio" name="vapingFrequency" value="Occasionally" />Occasionally</label>
-                  <label class="gf-choice"><input type="radio" name="vapingFrequency" value="Mistake" />I made a mistake</label>
                 </div>
                 <div class="gf-grid">
                   <div class="gf-field"><label for="vapingDaysPerWeek">Roughly how many days per week do you vape?</label><input id="vapingDaysPerWeek" name="vapingDaysPerWeek" type="number" min="0" max="7" /></div>
@@ -1280,12 +1484,13 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
 
         <div class="gf-nav">
           <button type="button" class="gf-nav-button gf-nav-button--back" data-prev>Back</button>
-          <button type="button" class="gf-nav-button gf-nav-button--clear" data-clear-signature>Clear signature</button>
           <button type="button" class="gf-nav-button gf-nav-button--continue" data-next>Continue</button>
           <button type="submit" class="gf-nav-button gf-nav-button--continue" data-submit hidden>Submit Health Profile</button>
+          <a class="gf-nav-button gf-nav-button--dashboard" href="/eoi" data-return-eoi hidden>Return to Portal</a>
         </div>
         <div class="gf-status" data-status aria-live="polite"></div>
       </form>
+      )}
     </div>
   </div>
 
@@ -1294,10 +1499,10 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       "use strict";
 
       const CONFIG = Object.freeze({
-        formId: "rfm_part2_health_safety",
-        formPart: "PART_2_HEALTH_SAFETY",
-        formVersion: "v1.1.0-draft-2026-06-25",
-        submitEndpoint: "/_functions/rfm_part2_health_safety_submit",
+        formId: "eoi_part_2_health_profile",
+        formPart: "2",
+        formVersion: 1,
+        submitEndpoint: "/api/eoi/part-2",
         integrationPending: false,
       });
 
@@ -1364,20 +1569,31 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       });
 
       const form = document.getElementById("gfHealthProfileForm");
+      if (!form) return;
       const pages = Array.from(document.querySelectorAll(".gf-page"));
       const progress = document.querySelector("[data-progress]");
       const prevBtn = document.querySelector("[data-prev]");
       const nextBtn = document.querySelector("[data-next]");
       const submitBtn = document.querySelector("[data-submit]");
+      const returnEoiBtn = document.querySelector("[data-return-eoi]");
       const statusEl = document.querySelector("[data-status]");
       const signatureCanvas = document.querySelector("[data-signature-pad]");
       const clearSignatureBtn = document.querySelector("[data-clear-signature]");
+      const signatureModeButtons = Array.from(document.querySelectorAll("[data-signature-mode]"));
+      const signatureFontOptions = document.querySelector("[data-signature-font-options]");
+      const signatureFontButtons = Array.from(document.querySelectorAll("[data-signature-font]"));
+      const typedSignaturePreview = document.querySelector("[data-signature-typed-preview]");
+      const firstNameInput = document.getElementById("healthInformationFirstName");
+      const lastNameInput = document.getElementById("healthInformationLastName");
       const signatureInput = document.getElementById("healthInformationSignature");
       const signatureSvgInput = document.getElementById("healthInformationSignatureSvg");
       const signatureFileNameInput = document.getElementById("healthInformationSignatureFileName");
       const signatureSignedAtInput = document.getElementById("healthInformationSignatureSignedAt");
       const signatureDocumentIDInput = document.getElementById("healthInformationSignatureDocumentID");
       const healthInformationDateInput = document.getElementById("healthInformationDate");
+      let signatureMode = "draw";
+      let selectedSignatureFont = "Dancing Script";
+      let typedSignatureRenderVersion = 0;
       let pageIndex = 0;
 
       function localISODate() {
@@ -1410,6 +1626,68 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
           ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvasWidth} ${canvasHeight + 34}"><rect width="100%" height="100%" fill="white"/><image href="${signature}" width="${canvasWidth}" height="${canvasHeight}"/><text x="12" y="${canvasHeight + 22}" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000">${escapeXml(stampText)}</text></svg>`
           : "";
         if (hasSignature) clearValidationWarnings(document.querySelector("[data-signature-field]") || form);
+      }
+      function typedSignatureName() {
+        return [firstNameInput?.value, lastNameInput?.value].map((value) => value?.trim()).filter(Boolean).join(" ");
+      }
+      function setSignatureMode(mode) {
+        signatureMode = mode;
+        const typed = mode === "typed";
+        signatureModeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.signatureMode === mode)));
+        if (signatureFontOptions) signatureFontOptions.hidden = !typed;
+        if (signatureCanvas) {
+          signatureCanvas.hidden = typed;
+          signatureCanvas.tabIndex = typed ? -1 : 0;
+          signatureCanvas.setAttribute("aria-hidden", String(typed));
+        }
+        if (typed) {
+          void renderTypedSignature();
+        } else {
+          typedSignatureRenderVersion += 1;
+          if (typedSignaturePreview) {
+            typedSignaturePreview.hidden = true;
+            typedSignaturePreview.textContent = "";
+          }
+          window.dispatchEvent(new CustomEvent("gymfusion:signature-clear"));
+        }
+      }
+      async function renderTypedSignature() {
+        const renderVersion = ++typedSignatureRenderVersion;
+        const name = typedSignatureName();
+        if (!name || !typedSignaturePreview || signatureMode !== "typed") {
+          updateSignatureInputs(null);
+          if (typedSignaturePreview) {
+            typedSignaturePreview.hidden = false;
+            typedSignaturePreview.textContent = "";
+          }
+          return;
+        }
+        typedSignaturePreview.hidden = false;
+        typedSignaturePreview.textContent = name;
+        typedSignaturePreview.style.fontFamily = `"${selectedSignatureFont}", cursive`;
+        typedSignaturePreview.setAttribute("aria-label", `Typed signature preview: ${name}`);
+        try {
+          await document.fonts?.load(`58px "${selectedSignatureFont}"`);
+        } catch {
+          // The cursive fallback remains usable if the optional web font is unavailable.
+        }
+        if (renderVersion !== typedSignatureRenderVersion || signatureMode !== "typed") return;
+        const width = Math.max(signatureCanvas?.parentElement?.clientWidth || signatureCanvas?.clientWidth || 800, 320);
+        const height = signatureCanvas?.clientHeight || 198;
+        const ratio = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        context.scale(ratio, ratio);
+        const fontSize = Math.min(64, Math.max(38, width / (Math.max(name.length, 8) * 0.55)));
+        context.font = `500 ${fontSize}px "${selectedSignatureFont}", cursive`;
+        context.fillStyle = "#111";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(name, width / 2, height / 2);
+        updateSignatureInputs(canvas.toDataURL("image/png"));
       }
       function getValue(name) {
         const controls = controlsByName(name);
@@ -1736,15 +2014,17 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
         };
       }
       async function submitPayload() {
-        const response = await fetch("/api/rfm-part2", {
+        const response = await fetch(CONFIG.submitEndpoint, {
           method: "POST",
           headers: { "content-type": "application/json" },
           credentials: "same-origin",
           body: JSON.stringify(arguments[0])
         });
-        const result = await response.json();
-        if (!response.ok || result.ok !== true) throw new Error("Submission failed.");
-        return result;
+        const result = await response.json().catch(() => null);
+        const canonicalSubmissionID = typeof result?.submissionID === "string" ? result.submissionID.trim() : "";
+        const canonicalSuccess = /^eoi-p2-submission-[0-9a-f]{64}$/.test(canonicalSubmissionID);
+        if (!response.ok || result?.ok !== true || !canonicalSuccess) throw new Error("Submission failed.");
+        return { ...result, submissionID: canonicalSubmissionID };
       }
       initRequiredState();
       if (healthInformationDateInput && !healthInformationDateInput.value) healthInformationDateInput.value = localISODate();
@@ -1753,8 +2033,23 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       window.addEventListener("gymfusion:signature-change", (event) => {
         updateSignatureInputs(event.detail?.signature || null);
       });
+      signatureModeButtons.forEach((button) => button.addEventListener("click", () => setSignatureMode(button.dataset.signatureMode)));
+      signatureFontButtons.forEach((button) => button.addEventListener("click", () => {
+        selectedSignatureFont = button.dataset.signatureFont || "Dancing Script";
+        signatureFontButtons.forEach((fontButton) => fontButton.setAttribute("aria-pressed", String(fontButton === button)));
+        if (signatureMode !== "typed") setSignatureMode("typed");
+        else void renderTypedSignature();
+      }));
+      [firstNameInput, lastNameInput].forEach((input) => input?.addEventListener("input", () => {
+        if (signatureMode === "typed") void renderTypedSignature();
+      }));
       clearSignatureBtn?.addEventListener("click", () => {
         window.dispatchEvent(new CustomEvent("gymfusion:signature-clear"));
+        if (signatureMode === "typed") {
+          typedSignatureRenderVersion += 1;
+          if (typedSignaturePreview) typedSignaturePreview.textContent = "";
+          updateSignatureInputs(null);
+        }
         clearValidationWarnings(document.querySelector("[data-signature-field]") || form);
       });
       form.addEventListener("change", setConditionalVisibility);
@@ -1782,9 +2077,11 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
         submitBtn.disabled = true;
         statusEl.textContent = "Validating...";
         try {
-          await submitPayload(payload);
+          const result = await submitPayload(payload);
           statusEl.textContent = "Submitted. GYMFUSION staff will review your Health Profile.";
+          submitBtn.hidden = true;
           submitBtn.disabled = false;
+          if (result.submissionID) returnEoiBtn.hidden = false;
         } catch (error) {
           console.error(error);
           statusEl.textContent = "Submission failed. Please check your connection or contact GYMFUSION staff.";
