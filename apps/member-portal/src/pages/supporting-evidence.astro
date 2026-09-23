@@ -1,0 +1,13 @@
+---
+import PortalLayout from "../layouts/PortalLayout.astro";
+import PortalShell from "../components/portal/PortalShell";
+import PortalState from "../components/portal/PortalState.astro";
+import { loadPortalPage } from "../lib/portal-page";
+import { sectionCopy } from "../lib/portal";
+import "../styles/global.css";
+const session = await loadPortalPage(Astro.request);
+if (session.kind === "redirect") return new Response(null, { status: 303, headers: { Location: "/login", "Cache-Control": "no-store" } });
+if (session.kind === "unavailable") Astro.response.status = 503;
+const copy = sectionCopy["supporting-evidence"];
+---
+{session.kind === "authenticated" ? <PortalLayout title={copy.title} description={copy.description}><PortalShell client:load active="supporting-evidence" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref="/api/auth/logout"><PortalState heading="Supporting evidence" body="Evidence requests and voluntary evidence will appear here through the authorised member-safe service. Upload actions remain unavailable until that boundary is connected." /></PortalShell></PortalLayout> : <main>Members Portal is temporarily unavailable.</main>}
