@@ -1,9 +1,9 @@
 export type SessionCheckResult =
-  | { kind: "authenticated"; displayName: string }
+  | { kind: "authenticated"; displayName: string; email?: string }
   | { kind: "redirect" }
   | { kind: "unavailable" };
 
-type SessionPayload = { authenticated?: unknown; member?: { displayName?: unknown } };
+type SessionPayload = { authenticated?: unknown; member?: { displayName?: unknown; email?: unknown } };
 
 type SessionFetch = (input: string, init: RequestInit) => Promise<Response>;
 
@@ -46,7 +46,9 @@ export async function checkMemberLoginSession(
 
     const payload = await response.json() as SessionPayload;
     const displayName = typeof payload.member?.displayName === "string" ? payload.member.displayName.trim() : "";
-    return payload.authenticated === true && displayName ? { kind: "authenticated", displayName } : { kind: "unavailable" };
+    if (payload.authenticated !== true || !displayName) return { kind: "unavailable" };
+    const email = typeof payload.member?.email === "string" ? payload.member.email.trim() : "";
+    return email ? { kind: "authenticated", displayName, email } : { kind: "authenticated", displayName };
   } catch {
     return { kind: "unavailable" };
   } finally {

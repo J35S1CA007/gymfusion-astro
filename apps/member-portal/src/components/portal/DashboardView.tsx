@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export type DashboardStatus = "COMPLETE" | "INCOMPLETE";
-export type DashboardAvailability = "AVAILABLE" | "LOCKED";
+export type DashboardAvailability = "AVAILABLE" | "LOCKED" | "SUBMITTED";
 
 export type DashboardPart = {
   status: DashboardStatus;
@@ -54,7 +54,7 @@ function PartCard({ part, definition }: { part: DashboardPart; definition: (type
     <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-2">
         <StatusBadge status={part.status} />
-        <span className="text-xs font-semibold text-black/55">{locked ? "LOCKED" : "AVAILABLE"}</span>
+        <span className="text-xs font-semibold text-black/55">{locked ? "LOCKED" : part.availability === "SUBMITTED" ? "SUBMITTED" : "AVAILABLE"}</span>
       </div>
       {part.href && !locked ? <ActionLink href={part.href}>{part.actionLabel ?? "Open"}</ActionLink> : null}
     </div>
@@ -76,6 +76,22 @@ function TasksCard({ projection }: { projection: DashboardProjection }) {
       <div><h3 className="font-heading text-xl font-bold">{projection.task.title}</h3><p className="mt-2 max-w-2xl text-sm leading-6 text-black/65">{projection.task.description}</p></div>
       <ActionLink href={projection.task.href}>{projection.task.actionLabel}</ActionLink>
     </div> : <p className="mt-4 text-base leading-7 text-black/65">You’re all up to date.</p>}
+  </section>;
+}
+
+export function EoiProgress({ projection }: { projection: DashboardProjection }) {
+  if (!projection.part1) return null;
+  const part1: DashboardPart = {
+    status: projection.part1,
+    availability: projection.part1 === "COMPLETE" ? "SUBMITTED" : "AVAILABLE",
+    href: projection.part1 === "COMPLETE" ? "/submissions" : "https://eoi.gymfusion.com.au",
+    actionLabel: projection.part1 === "COMPLETE" ? "View submission" : "Continue EOI",
+  };
+  const parts = { part1, part2: projection.parts?.part2, part3: projection.parts?.part3, part4: projection.parts?.part4 };
+
+  return <section className="rounded-2xl border border-black/12 bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:p-7" aria-labelledby="dashboard-eoi-heading">
+    <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-bold uppercase tracking-[0.14em] text-black/50">EOI progress</p><h2 id="dashboard-eoi-heading" className="mt-2 font-heading text-2xl font-bold tracking-tight">Your Expression of Interest</h2></div></div>
+    <div className="mt-6 grid gap-4 md:grid-cols-2">{(<><PartCard part={parts.part1} definition={partDetails.part1} />{parts.part2 ? <PartCard part={parts.part2} definition={partDetails.part2} /> : null}{parts.part3 ? <PartCard part={parts.part3} definition={partDetails.part3} /> : null}{parts.part4 ? <PartCard part={parts.part4} definition={partDetails.part4} /> : null}</>)}</div>
   </section>;
 }
 

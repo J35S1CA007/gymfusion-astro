@@ -1,0 +1,30 @@
+---
+import PortalLayout from "../../layouts/PortalLayout.astro";
+import PortalShell from "../../components/portal/PortalShell";
+import EoiOverviewCards from "../../components/portal/EoiOverviewCards";
+import { EoiProgress, type DashboardProjection } from "../../components/portal/DashboardView";
+import "../../styles/global.css";
+
+const isDevelopmentPreview = import.meta.env.DEV;
+if (!isDevelopmentPreview) Astro.response.status = 404;
+
+const projection = {
+  hasActiveEpisode: true,
+  part1: "COMPLETE",
+  nextAction: null,
+  currentStatus: "Your EOI is in the Review Phase",
+  parts: {
+    part2: { status: "COMPLETE", availability: "SUBMITTED", href: "/eoi/part-2", actionLabel: "View submission" },
+    part3: { status: "COMPLETE", availability: "SUBMITTED", href: "/eoi/part-3", actionLabel: "View submission" },
+    part4: { status: "COMPLETE", availability: "SUBMITTED", href: "/eoi/part-4", actionLabel: "View submission" },
+  },
+} satisfies DashboardProjection;
+---
+{isDevelopmentPreview ? (
+  <PortalLayout title="Expression of Interest Preview" description="Development-only EOI preview">
+    <PortalShell client:load active="eoi" member={{ displayName: "Preview Member", initials: "PM" }} title="Expression of Interest" description="">
+      <EoiOverviewCards allPartsComplete={true} stageTwoProgress={3} />
+      <EoiProgress projection={projection} />
+    </PortalShell>
+  </PortalLayout>
+) : <main>Not found</main>}
