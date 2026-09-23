@@ -1,50 +1,1297 @@
 ---
-import PortalLayout from "../../layouts/PortalLayout.astro";
-import PortalShell from "../../components/portal/PortalShell";
 import { loadPortalPage } from "../../lib/portal-page";
+import HealthInformationNotice from "../../components/HealthInformationNotice.astro";
 import structure from "../../../reference/EOI Parts 2-4/EOI Part 4 Fitness Profile/eoi-part-4-form-structure.json";
-import "../../styles/global.css";
 
-const session = await loadPortalPage(Astro.request, Astro.locals);
+const isDevelopmentPreview = import.meta.env.DEV;
+const showSuccessPreview = isDevelopmentPreview && Astro.url.searchParams.get("preview") === "success";
+const session = isDevelopmentPreview
+  ? { kind: "authenticated" as const, displayName: "Preview Member" }
+  : await loadPortalPage(Astro.request, Astro.locals);
 if (session.kind === "redirect") return new Response(null, { status: 303, headers: { Location: "/login", "Cache-Control": "no-store" } });
-if (session.kind === "unavailable") Astro.response.status = 503;
-const questions = structure.form.questions.filter((question) => question.isAnswerField && question.fieldType !== "hidden");
+if (session.kind === "unavailable") return new Response("Members Portal is temporarily unavailable.", { status: 503, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+const sessionIntensityQuestionIds = new Set([
+  "55cc3276-4d53-4e13-9827-8a0472366f00",
+  "ea59c43f-23da-480f-aab6-881211429394",
+  "b6cfbb6c-c440-4e05-8c3d-1b4fca59dea4"
+]);
+const questions = structure.form.questions.filter((question) => question.isAnswerField && question.fieldType !== "hidden" && !sessionIntensityQuestionIds.has(question.id));
+const formSections = [
+  { key: "activity", title: "Weekly Activity", description: "Tell us how often you move and how much time you spend at each intensity.", questions: questions.filter((question) => question.order >= 6 && question.order <= 14) },
+  { key: "measurements", title: "Current Measurements", description: "Share your current height and weight, or provide an estimate if you are unsure.", questions: questions.filter((question) => question.order >= 22 && question.order <= 36) },
+  { key: "background", title: "Fitness Background", description: "Tell us about the activities, training, and gymnastics experience you have had.", questions: questions.filter((question) => question.order >= 42 && question.order <= 55) },
+  { key: "goals", title: "Goals and Preferences", description: "Share what you would like to achieve and how you prefer to train.", questions: questions.filter((question) => question.order >= 59 && question.order <= 63) }
+];
+const getStepIndex = (question: (typeof questions)[number]) => formSections.findIndex((section) => section.questions.some((item) => item.id === question.id));
+const fitnessBackgroundQuestionId = "95b1e51d-0ada-472c-8b52-a2eedb5d9d03";
+const fitnessBackgroundOtherFieldName = "fitnessBackgroundOther";
+const goalsQuestionId = "2cdb337f-3283-49eb-adaa-40b36b370403";
+const somethingElseOptionValue = "72339ac7-1547-4566-bdaa-7cfc6e75e378";
+const overallActivityQuestionId = "2f50a6ce-91f0-4b27-9c62-d1f200c49450";
+const heightChoiceQuestionId = "cb3f237d-53a1-4664-8c27-aa6567bc4300";
+const heightInputQuestionIds = new Set(["bd07595c-a567-4fab-a2f0-1ccb4eb28315", "b7628041-c31e-4cfa-bd2d-8036a896ae9f"]);
+const weightChoiceQuestionId = "fb588ef1-f6bb-4326-ae1d-28814d4d8d6b";
+const weightInputQuestionIds = new Set(["629ae559-1911-40bd-8c3d-a20899170ca7", "e2e36670-90a8-42cd-a4f9-f68bcb867e46"]);
+const goalsDetailsQuestionId = "98cba7c0-3215-4508-8d4f-eab41dbeef00";
+const goalsDisplayLabels = new Map([
+  ["d92c270c-490a-4db4-8dad-c3b5c2122ebf", "Improve lower body strength & control"],
+  ["4a61a38c-3e32-40b8-ab56-acd5c3de20bf", "Develop injury resilience/body durability"]
+]);
+const gymnasticsFollowUpLabels = new Map([
+  ["3d10e2f2-d2e4-4b65-941b-f19bcda23cb4", "What kind of gymnastics do you participate in? (Optional)"],
+  ["d931a68f-fa69-4063-9d9c-244d6aa220e3", "What kind of gymnastics experience have you had in the past? (Optional)"],
+  ["c7291f4d-fcd3-4f04-9f89-07c561a3110c", "What kind of gymnastics experience do you have? (Optional)"]
+]);
+const measurementConditionByQuestionId = new Map([
+  ["bd07595c-a567-4fab-a2f0-1ccb4eb28315", "height-known"],
+  ["b7628041-c31e-4cfa-bd2d-8036a896ae9f", "height-estimate"],
+  ["629ae559-1911-40bd-8c3d-a20899170ca7", "weight-known"],
+  ["e2e36670-90a8-42cd-a4f9-f68bcb867e46", "weight-estimate"],
+  ["de1f389b-103e-42b2-b861-83a14dcd629d", "weight-estimate-followup"],
+  [goalsDetailsQuestionId, "goals-something-else"]
+]);
+const minuteIntensityQuestionIds = new Set([
+  "05a45715-434c-4851-a042-855c59e6a220",
+  "aaf40be5-18ef-416e-b9d6-6e5b0fb3405c",
+  "f9f0265d-17d9-402f-b13d-44dc92e11db0"
+]);
+const intensityLabels = new Map([
+  ["05a45715-434c-4851-a042-855c59e6a220", "Light (RPE 1–2)"],
+  ["aaf40be5-18ef-416e-b9d6-6e5b0fb3405c", "Moderate (RPE 3–4)"],
+  ["f9f0265d-17d9-402f-b13d-44dc92e11db0", "Vigorous (RPE 5–10)"]
+]);
+const intensityInputUnits = new Map([
+  ["05a45715-434c-4851-a042-855c59e6a220", "minutes"],
+  ["aaf40be5-18ef-416e-b9d6-6e5b0fb3405c", "minutes"],
+  ["f9f0265d-17d9-402f-b13d-44dc92e11db0", "minutes"]
+]);
+const intensityQuestionIds = new Set([...minuteIntensityQuestionIds]);
+const unitQuestionIds = new Set([
+  "cb3f237d-53a1-4664-8c27-aa6567bc4300",
+  "fb588ef1-f6bb-4326-ae1d-28814d4d8d6b",
+  "bd07595c-a567-4fab-a2f0-1ccb4eb28315",
+  "b7628041-c31e-4cfa-bd2d-8036a896ae9f",
+  "629ae559-1911-40bd-8c3d-a20899170ca7",
+  "e2e36670-90a8-42cd-a4f9-f68bcb867e46"
+]);
+const fitnessBackgroundPrompt = structure.form.questions.find((question) => question.id === "7fbb7399-cdca-487f-90c3-870ff6af3040");
+const otherOptionValue = "ac6154ae-d805-4160-a1e2-770117b6ef04";
+const basicMovementsOptionValue = "2794ca4b-8e33-4a6e-b20e-f20a0098123d";
+const generalGymStrengthTrainingOptionValue = "f6e8c12e-44a7-4c0b-9f07-16d7ea8d7f8e";
+const removedGymnasticsMistakeOptionValue = "3f5e0b6f-612c-4823-9d77-ee7ba478dd35";
+const fitnessBackgroundDisplayLabels = new Map([
+  ["325ed625-b32a-425b-8cde-442409d10e94", "Acrobatics (Circus-style)"],
+  ["28a680da-0068-43be-8770-773d658b801c", "Aerial arts (Silks, lyra, aerial rope)"]
+]);
+const additionalFitnessOptions = new Map([
+  [generalGymStrengthTrainingOptionValue, { label: "General gym strength training — Traditional weightlifting, resistance machines, or free weights focused on strength and muscle building.", value: generalGymStrengthTrainingOptionValue, order: 0 }]
+]);
+const fitnessBackgroundCategories = [
+  { title: "Foundation & Mobility", values: ["2794ca4b-8e33-4a6e-b20e-f20a0098123d", "821a5033-e2ea-44d0-a6b9-b68e66301387", "42aa6969-04ee-4f7d-981c-d465daf39496", "8895a33f-6cfe-44f4-afc0-1af67ea21c91"] },
+  { title: "Strength & Functional Training", values: [generalGymStrengthTrainingOptionValue, "4e767d6f-93ea-4492-8f36-8040cde37b39", "ff565015-cd40-4912-a97f-bf2de243ef21", "33929d14-b203-4a27-9e37-43355261a025", "d42b1ba1-d22d-4648-b7f2-e6cf13c5c681", "b3dd7d8f-bf00-4792-8789-18e4d00dd8d0"] },
+  { title: "Sports, Dance & Performance", values: ["eac26e31-3dfd-4de7-b893-5ff4f738b5cc", "72131517-7d61-4cfc-9601-25b40d9d672d", "b16a5123-6702-4c31-9585-7920dd4fb8c3"] },
+  { title: "Gymnastics & Bodyweight Arts", values: ["690c0946-7f24-44a0-8ae2-9dcf43555397", "41242412-5118-421a-9ad2-36ed6431d4fd", "71a3b5f4-bdfd-41d9-ba66-14e6635e7c35", "325ed625-b32a-425b-8cde-442409d10e94", "28a680da-0068-43be-8770-773d658b801c", "ddb57723-0146-4ea1-9554-1a6755a6a3c9", "cf54f0aa-06b2-46b0-ab70-ab61e5844168"] },
+  { title: "Combat & Martial Arts", values: ["4590c8f7-9d1a-4018-9fd4-ac20246faf64", "5864393c-e7d5-48f9-9382-bc6423e2ccae", "c6ca99e5-cc69-4daa-83bd-6b15bac765b9"] },
+  { title: "Tactical & Service Conditioning", values: ["3e4810d8-3cb5-4d19-a698-a0f50cd409b4", "3792d8b7-c2ca-470e-8a0f-c193e04c57a5", "2f7b1085-3427-4e08-94bb-2e04b36d6e95", "933db423-a03e-4a00-bad3-12be31e61de0", "e409a7aa-ebc9-4c03-8639-ad94fa782872"] },
+  { title: "Other Experience", values: [otherOptionValue] }
+];
+const fitnessCategoryByFirstOptionValue = new Map(fitnessBackgroundCategories.map((category) => [category.values[0], category.title]));
+const gymnasticsFollowUpQuestionIds = new Set([
+  "be17b43c-5265-488d-ae5b-73580a589b7c",
+  "3d10e2f2-d2e4-4b65-941b-f19bcda23cb4",
+  "d931a68f-fa69-4063-9d9c-244d6aa220e3",
+  "c7291f4d-fcd3-4f04-9f89-07c561a3110c"
+]);
+const questionGroupDefinitions = [
+  { key: "activity-total", step: 0, questionIds: [overallActivityQuestionId] },
+  { key: "activity-minutes", step: 0, questionIds: [...minuteIntensityQuestionIds] },
+  { key: "height", step: 1, questionIds: ["cb3f237d-53a1-4664-8c27-aa6567bc4300", "bd07595c-a567-4fab-a2f0-1ccb4eb28315", "b7628041-c31e-4cfa-bd2d-8036a896ae9f"] },
+  { key: "weight", step: 1, questionIds: ["fb588ef1-f6bb-4326-ae1d-28814d4d8d6b", "629ae559-1911-40bd-8c3d-a20899170ca7", "e2e36670-90a8-42cd-a4f9-f68bcb867e46", "de1f389b-103e-42b2-b861-83a14dcd629d"] },
+  { key: "fitness-background", step: 2, questionIds: [fitnessBackgroundQuestionId] },
+  { key: "gymnastics-status", step: 2, questionIds: ["be17b43c-5265-488d-ae5b-73580a589b7c"] },
+  { key: "gymnastics-details", step: 2, questionIds: [...gymnasticsFollowUpQuestionIds].filter((id) => id !== "be17b43c-5265-488d-ae5b-73580a589b7c") },
+  { key: "goals", step: 3, questionIds: [goalsQuestionId, goalsDetailsQuestionId] },
+  { key: "mindset", step: 3, questionIds: ["2f3cc5fa-0e36-4107-9cee-4eb76ac8c46e"] },
+  { key: "training-approach", step: 3, questionIds: ["9614b085-3eda-4807-b415-a9fe6c66ea38"] }
+];
+const questionGroupIndexByQuestionId = new Map(questionGroupDefinitions.flatMap((group, index) => group.questionIds.map((questionId) => [questionId, index + 1])));
+const renderQuestions = questions.flatMap((question) => {
+  if (question.id === goalsQuestionId) return [question, ...questions.filter((item) => item.id === goalsDetailsQuestionId)];
+  if (question.id === goalsDetailsQuestionId) return [];
+  return [question];
+});
+const shuffle = <T,>(items: T[]) => {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+};
+const getQuestionGroupIndex = (question: (typeof questions)[number]) => questionGroupIndexByQuestionId.get(question.id) ?? -1;
+const getQuestionGroupIndexByKey = (key: string) => {
+  const index = questionGroupDefinitions.findIndex((group) => group.key === key);
+  return index < 0 ? index : index + 1;
+};
+const getOptions = (question: (typeof questions)[number]) => {
+  if (question.id === "be17b43c-5265-488d-ae5b-73580a589b7c") return question.options.filter((option) => option.value !== removedGymnasticsMistakeOptionValue);
+  if (question.id === goalsQuestionId) {
+    const somethingElseOption = question.options.find((option) => option.value === somethingElseOptionValue);
+    return [...shuffle(question.options.filter((option) => option.value !== somethingElseOptionValue)), ...(somethingElseOption ? [somethingElseOption] : [])];
+  }
+  if (question.id !== fitnessBackgroundQuestionId) return question.options;
+  const optionsByValue = new Map(question.options.map((option) => [option.value, option]));
+  return fitnessBackgroundCategories.flatMap((category) => category.values.flatMap((value) => {
+    const option = optionsByValue.get(value) || additionalFitnessOptions.get(value);
+    return option ? [{ ...option, label: fitnessBackgroundDisplayLabels.get(value) || option.label }] : [];
+  }));
+};
 const clean = (value: unknown) => String(value || "").replace(/,tag,[^,]*/g, "").replace(/,tag/g, "").replace(/\s+/g, " ").trim();
+const heightSupportDescription = clean(questions.find((question) => heightInputQuestionIds.has(question.id))?.description);
+const weightSupportDescription = clean(questions.find((question) => weightInputQuestionIds.has(question.id))?.description);
+const fitnessBackgroundSubtitle = {
+  prefix: "There are no right or wrong answers here! Check ",
+  emphasis: "all",
+  middle: " the options below that fit your ",
+  secondEmphasis: "current or past",
+  suffix: " experience, or select 'Other' if you'd like to share more details."
+};
+const getQuestionLabel = (question: (typeof questions)[number]) => question.id === goalsDetailsQuestionId ? "We’d love to hear the specifics—what are you aiming for?" : gymnasticsFollowUpLabels.get(question.id) || (question.id === fitnessBackgroundQuestionId ? clean(fitnessBackgroundPrompt?.questionText) : question.id === overallActivityQuestionId ? "On average, how many physical activity sessions do you complete each week?" : heightInputQuestionIds.has(question.id) ? "Height" : weightInputQuestionIds.has(question.id) ? "Weight" : intensityLabels.get(question.id) || clean(question.questionText));
+const getQuestionLabelParts = (question: (typeof questions)[number]) => {
+  const label = getQuestionLabel(question);
+  const match = unitQuestionIds.has(question.id) ? label.match(/^(.*?)(\s*\([^)]*\))(.*)$/) : null;
+  return match ? { prefix: match[1], detail: match[2], suffix: match[3] } : { prefix: label, detail: "", suffix: "" };
+};
+const getQuestionHelp = (question: (typeof questions)[number]) => question.id === fitnessBackgroundQuestionId ? "" : question.id === overallActivityQuestionId ? "Think about a standard week over the last few months." : question.id === heightChoiceQuestionId ? heightSupportDescription : question.id === weightChoiceQuestionId ? weightSupportDescription : heightInputQuestionIds.has(question.id) || weightInputQuestionIds.has(question.id) ? "" : clean(question.description || question.subtext);
+const getQuestionHelpParts = (question: (typeof questions)[number]) => {
+  const help = getQuestionHelp(question);
+  if (!gymnasticsFollowUpQuestionIds.has(question.id)) return { intro: help, bullets: [] };
+  const parts = help.split("•").map((part) => part.trim()).filter(Boolean);
+  return { intro: parts[0] || "", bullets: parts.slice(1) };
+};
+const getQuestionPlaceholder = (question: (typeof questions)[number]) => question.id === overallActivityQuestionId || intensityQuestionIds.has(question.id) ? "0" : heightInputQuestionIds.has(question.id) ? question.placeholder.replace(/\s*cm\s*$/i, "") : weightInputQuestionIds.has(question.id) ? question.placeholder.replace(/\s*kg\s*$/i, "") : question.placeholder;
+const sessionDefinition = "A session is a dedicated period set aside for physical activity or exercise. Count a workout, class, sport, walk, run, or similar activity as one session, even if it includes different intensities.";
+const getOptionLabelParts = (label: string) => {
+  const parentheticalMatch = label.match(/^(.*?)(\s*\([^)]*\))(.*)$/);
+  if (parentheticalMatch) return { prefix: parentheticalMatch[1], detail: parentheticalMatch[2], suffix: parentheticalMatch[3] };
+  const andOrMatch = label.match(/^(.*?)(\s+and\/or\s+)(.*)$/);
+  if (andOrMatch) return { prefix: andOrMatch[1], detail: andOrMatch[2], suffix: andOrMatch[3] };
+  const dashMatch = label.match(/^(.*?)(\s[–—].*)$/);
+  return dashMatch ? { prefix: dashMatch[1], detail: dashMatch[2], suffix: "" } : { prefix: label, detail: "", suffix: "" };
+};
+const getOptionLabel = (option: (typeof questions)[number]["options"][number]) => goalsDisplayLabels.get(option.value) || fitnessBackgroundDisplayLabels.get(option.value) || option.label;
+const shouldStyleOptionParts = (question: (typeof questions)[number], option: (typeof questions)[number]["options"][number]) => question.id === fitnessBackgroundQuestionId || (question.id === goalsQuestionId && option.value === somethingElseOptionValue);
 ---
-{session.kind === "authenticated" ? <PortalLayout title="Fitness Profile" description="EOI Part 4"><PortalShell client:load active="eoi" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref="/api/auth/logout"><main class="eoi-part4" aria-labelledby="part4-title">
-  <p class="eyebrow">EOI Part 4 - Fitness Profile</p>
-  <h1 id="part4-title">{structure.form.publicTitle}</h1>
-  <form id="part4-form" novalidate>
-    {questions.map((question) => <div class="question" data-field-id={question.id} data-field-type={question.fieldType}>
-      <label for={`field-${question.id}`}>{clean(question.questionText)}{question.required ? " *" : ""}</label>
-      {question.fieldType === "checkbox" || question.fieldType === "multiselect" ? <div class="options">{question.options.map((option) => <label><input type="checkbox" name={question.id} value={option.value} /> {option.label}</label>)}</div> : question.fieldType === "radio" ? <div class="options">{question.options.map((option) => <label><input type="radio" name={question.id} value={option.value} required={question.required} /> {option.label}</label>)}</div> : question.fieldType === "textarea" ? <textarea id={`field-${question.id}`} name={question.id} required={question.required} placeholder={question.placeholder}></textarea> : <input id={`field-${question.id}`} name={question.id} type="number" required={question.required} min="0" />}
-    </div>)}
-    <p id="part4-error" class="error" role="alert" hidden></p><p id="part4-success" class="success" role="status" hidden>Part 4 has been submitted.</p><button type="submit">Submit Part 4</button>
-  </form>
-</main></PortalShell></PortalLayout> : <main>Members Portal is temporarily unavailable.</main>}
-<style>
-  .eoi-part4 { width: min(940px, 100%); margin: 0 auto; padding: 20px; background: #f5f5f5; color: #000; font-family: "Gamuth Sans", Arial, sans-serif; }.eoi-part4 form { display: grid; gap: 26px; margin: 0; padding: 34px 34px 44px; border: 1px solid rgba(0,0,0,.16); border-radius: 24px; background: #fff; box-shadow: 0 24px 70px rgba(0,0,0,.08); }.eoi-part4 h1 { font-size: clamp(32px, 5.5vw, 60px); line-height: .95; letter-spacing: -.04em; margin: 0 0 26px; }.eyebrow { color: #4b4b4b; font-size: 11.5px; letter-spacing: .085em; text-transform: uppercase; font-weight: 700; }.question { display: grid; gap: 12px; }.question > label { font-weight: 700; }.options { display: grid; gap: 12px; }.options label { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; font-weight: 400; }.question input[type=number], .question textarea { width: 100%; box-sizing: border-box; border: 1.25px solid rgba(0,0,0,.16); border-radius: 12px; padding: 12px; font: inherit; }.question textarea { min-height: 120px; resize: vertical; }.question input:focus-visible, .question textarea:focus-visible { outline: 3px solid rgba(0,0,0,.18); outline-offset: 2px; border-color: rgba(0,0,0,.86); }.eoi-part4 button { justify-self: start; min-height: 46px; padding: 10px 20px; border: 1px solid #000; border-radius: 999px; background: #000; color: #fff; font-weight: 700; cursor: pointer; }.error { color: #a00000; }.success { color: #176b36; } @media (max-width: 720px) { .eoi-part4 { padding: 10px; }.eoi-part4 form { padding: 18px 18px 28px; } }
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GYMFUSION Member Portal | Fitness Profile</title>
+</head>
+<body>
+<main class="eoi-part4" aria-labelledby="part4-title" data-success-preview={showSuccessPreview ? "true" : undefined}>
+  <div class="gf-wrap">
+    <div class="gf-shell">
+      <header class="gf-header">
+        <span class="gf-kicker">EOI PART 4</span>
+        <h1 id="part4-title">{structure.form.publicTitle}</h1>
+        <p class="gf-intro">Tell us a bit about your fitness journey—your goals, favorite workouts, and what you’re into! The more we know, the better GYMFUSION can tailor your coaching experience just for you. Take a sec to answer these questions as honestly as you can. It all helps us figure out where you're starting from and where you want to go!</p>
+      </header>
+      <div class="gf-progress" aria-live="polite">
+        <div class="gf-progress-track" aria-hidden="true"><span id="part4-progress-bar"></span></div>
+        <p id="part4-progress-label">Question 1 of 10: Weekly Activity</p>
+      </div>
+      <form id="part4-form" novalidate>
+        <section class="gf-page is-active">
+          <div id="part4-question-list" class="gf-question-list is-stepped">
+            <div class="gf-health-notice-step" data-step-heading data-step-index="-1" data-field-id="healthInformationNotice" data-field-type="notice" data-question-group="0" aria-labelledby="health-information-notice-heading">
+              <HealthInformationNotice />
+            </div>
+            {renderQuestions.map((question) => <Fragment>
+              {question.id === "2f50a6ce-91f0-4b27-9c62-d1f200c49450" ? <div class="gf-step-heading" data-step-heading data-step-index="0" aria-labelledby="step-activity-heading">
+                <span class="gf-step-kicker">SECTION 01 OF 04</span>
+                <h2 id="step-activity-heading" tabindex="-1">Weekly Activity</h2>
+                <p data-step-description="0">Let's begin with a typical week</p>
+                <p data-step-description="1" hidden>Now let's break that total down by intensity.</p>
+                <p data-step-description="2" hidden>Now, let's look at how much time you dedicate to your workouts.</p>
+              </div> : null}
+              {question.id === "cb3f237d-53a1-4664-8c27-aa6567bc4300" ? <div class="gf-step-heading" data-step-heading data-step-index="1" aria-labelledby="step-measurements-heading">
+                <span class="gf-step-kicker">SECTION 02 OF 04</span>
+                <h2 id="step-measurements-heading" tabindex="-1">Current Measurements</h2>
+                <p>Share your current height and weight, or provide an estimate if you are unsure.</p>
+              </div> : null}
+              {question.id === "95b1e51d-0ada-472c-8b52-a2eedb5d9d03" ? <div class="gf-step-heading" data-step-heading data-step-index="2" aria-labelledby="step-background-heading">
+                <span class="gf-step-kicker">SECTION 03 OF 04</span>
+                <h2 id="step-background-heading" tabindex="-1">Fitness Background</h2>
+                <p>Share a brief overview of your training history.</p>
+              </div> : null}
+              {question.id === goalsQuestionId ? <div class="gf-step-heading" data-step-heading data-step-index="3" aria-labelledby="step-goals-heading">
+                <span class="gf-step-kicker">SECTION 04 OF 04</span>
+                <h2 id="step-goals-heading" tabindex="-1">Goals and Preferences</h2>
+                <p>Share what you would like to achieve and how you prefer to train.</p>
+              </div> : null}
+              {question.id === "05a45715-434c-4851-a042-855c59e6a220" ? <div class="intensity-panel-heading" data-question-group={getQuestionGroupIndexByKey("activity-minutes")} role="group" aria-labelledby="minutes-per-week-heading">
+                <div class="intensity-heading-row">
+                  <h3 id="minutes-per-week-heading">Minutes Per Week</h3>
+                  <details class="gf-info">
+                    <summary aria-label="How to estimate your minutes">
+                      <svg class="gf-info-icon gf-info-icon--outline" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="none" stroke="currentColor" stroke-width="1.75" /><path d="M12 10.75v5.25" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.75" /><circle cx="12" cy="7.5" r=".9" fill="currentColor" /></svg>
+                      <svg class="gf-info-icon gf-info-icon--solid" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 1 0 0 19.5 9.75 9.75 0 0 0 0-19.5Zm0 5.1a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0 2.1Zm-1.05 4.2a1.05 1.05 0 0 1 2.1 0v5.1a1.05 1.05 0 0 1-2.1 0v-5.1Z" clip-rule="evenodd" /></svg>
+                    </summary>
+                    <div class="gf-info-popover"><strong>How to estimate your minutes</strong> Think about how long your typical sessions last. Only count actual active exercise time (e.g., exclude long rests between sets or downtime), and estimate the total minutes you spend at each intensity level across the week.</div>
+                  </details>
+                </div>
+                <p>Take a moment to think about how hard you&apos;re working during your physical activities each week. For each intensity level listed below, just give us a rough guess of how many minutes you spend in that zone.</p>
+              </div> : null}
+              {question.id === "05a45715-434c-4851-a042-855c59e6a220" ? <div class="intensity-help-box" data-question-group={getQuestionGroupIndexByKey("activity-minutes")}>
+                <svg class="intensity-helper-icon" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M3 15a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4-1.5c0 .827-.673 1.5-1.5 1.5S4 14.327 4 13.5S4.673 12 5.5 12s1.5.673 1.5 1.5m-1 0a.5.5 0 1 0-1 0a.5.5 0 0 0 1 0m10-7.25c0 1.792-1.57 3.25-3.5 3.25h-.095c-.368 1.437-1.771 2.501-3.405 2.501c-1.5 0-2.821-.903-3.304-2.18c-.382.118-.787.18-1.196.18c-1.93 0-3.5-1.346-3.5-3c0-1.538 1.357-2.81 3.1-2.98q-.099-.378-.1-.77C4 1.459 5.57.001 7.5.001c1.017 0 1.979.411 2.64 1.115q.418-.115.86-.115c1.487 0 2.723.984 2.959 2.295C15.192 3.821 16 4.972 16 6.25m-1 0c0-.946-.666-1.798-1.656-2.118a.5.5 0 0 1-.346-.453C12.955 2.738 12.077 2 11 2q-.436 0-.837.161a.5.5 0 0 1-.587-.164C9.109 1.373 8.333 1 7.5 1C6.121 1 5 2.01 5 3.25c0 .358.092.701.271 1.019a.5.5 0 0 1-.479.746a3 3 0 0 0-.293-.014c-1.379 0-2.5.897-2.5 2s1.121 2 2.5 2c.463 0 .916-.104 1.311-.299a.5.5 0 0 1 .451.004a.5.5 0 0 1 .265.366c.174 1.1 1.237 1.929 2.474 1.929c1.301 0 2.396-.914 2.492-2.081a.497.497 0 0 1 .573-.454q.212.033.435.034c1.379 0 2.5-1.01 2.5-2.25" /></svg>
+                <p class="intensity-helper-copy"><em>Not sure how to tell the different levels apart?</em><br />No worries—<strong>check out the RPE Intensity Guide<span class="mobile-guide-break"><br /></span> for a little help!</strong></p>
+                <details class="intensity-reference">
+                <summary aria-controls="rpe-guide-content"><span class="rpe-guide-open-label">Open the RPE Intensity Guide</span><span class="rpe-guide-close-label">Close the RPE Intensity Guide</span></summary>
+                </details>
+                <div id="rpe-guide-content" class="rpe-guide-content" aria-hidden="true">
+                <div class="rpe-guide-switcher" role="group" aria-label="RPE Intensity Guide version">
+                  <button type="button" data-rpe-guide-choice="image" aria-pressed="true">Image Version</button>
+                  <button type="button" data-rpe-guide-choice="text" aria-pressed="false">Plain Text Guide</button>
+                </div>
+                <figure class="gf-intensity-scale" data-rpe-guide-panel="image">
+                  <button type="button" class="rpe-image-trigger" data-rpe-image-open aria-label="Expand the RPE Intensity Guide image">
+                    <img src="/assets/images/Intensity-Scale-Guide-GYMFUSION.png" width="1672" height="941" alt="WAM Mapping Note: RPE 5–10 all enter as Vigorous Minutes. Max effort (9–10) has no separate bucket." decoding="async" />
+                    <span class="rpe-image-expand-hint" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M6 2H2v4M10 2h4v4M14 10v4h-4M6 14H2v-4" /></svg></span>
+                  </button>
+                </figure>
+                <div class="rpe-text-alternative" data-rpe-guide-panel="text" hidden>
+                  <div class="rpe-table-wrap">
+                    <table>
+                      <caption>RPE Training Zones<span class="rpe-table-intro">Rating of percieved exerction (RPE) uses a 1–10 scale to help guage your exercise effort based on breathing, rate rate and muscle fatigue.</span></caption>
+                      <thead><tr><th scope="col">Intensity</th><th scope="col">RPE (1–10)</th><th scope="col">% Max HR</th><th scope="col">Typical Duration</th><th scope="col">Description</th><th scope="col">WAM Bucket</th></tr></thead>
+                      <tbody>
+                        <tr><th scope="row">Light</th><td>1–2</td><td>40–55%</td><td>60+ minutes</td><td>Breathing is easy. Can sing. Recovery day activity.</td><td>Light</td></tr>
+                        <tr><th scope="row">Moderate</th><td>3–4</td><td>55–70%</td><td>30–60 minutes</td><td>Slight increase in breathing. Can hold a full conversation.</td><td>Moderate</td></tr>
+                        <tr><th scope="row">Vigorous</th><td>5–6</td><td>70–80%</td><td>20–40 minutes</td><td>Breathing is noticeable. Can speak only in short phrases.</td><td>Vigorous</td></tr>
+                        <tr><th scope="row">Hard</th><td>7–8</td><td>80–90%</td><td>10–20 minutes</td><td>Breathing is heavy. Can say only a few words. Muscle burn begins.</td><td>Vigorous</td></tr>
+                        <tr><th scope="row">Max / Near Max</th><td>9–10</td><td>&gt;90%</td><td>Not sustainable (bursts: 5s–2min)</td><td>Labored breathing. Cannot speak. All-out effort.</td><td>Vigorous <span role="img" aria-label="Warning">⚠️</span></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                </div>
+                <dialog class="rpe-image-dialog" data-rpe-image-dialog aria-labelledby="rpe-image-dialog-title">
+                  <div class="rpe-image-dialog-shell">
+                    <div class="rpe-image-dialog-header">
+                      <h2 id="rpe-image-dialog-title">RPE Intensity Guide</h2>
+                      <button type="button" class="rpe-image-dialog-close" data-rpe-image-close aria-label="Close expanded RPE Intensity Guide">Close</button>
+                      <div class="rpe-image-dialog-tools" aria-label="Image controls">
+                        <button type="button" data-rpe-image-zoom-out aria-label="Zoom out">−</button>
+                        <output data-rpe-image-zoom-value aria-live="polite">100%</output>
+                        <button type="button" data-rpe-image-zoom-in aria-label="Zoom in">+</button>
+                      </div>
+                    </div>
+                    <div class="rpe-image-dialog-viewport">
+                      <div class="rpe-image-pan-surface">
+                        <img src="/assets/images/Intensity-Scale-Guide-GYMFUSION.png" width="1672" height="941" alt="RPE Intensity Guide: RPE 5–10 all enter as Vigorous Minutes. Max effort (9–10) has no separate bucket." decoding="async" />
+                      </div>
+                    </div>
+                  </div>
+                </dialog>
+              </div> : null}
+              <div class={`gf-card question ${intensityQuestionIds.has(question.id) ? "intensity-row" : ""} ${question.id === goalsDetailsQuestionId ? "goals-details-question" : ""}`} data-field-id={question.id} data-field-type={question.fieldType} data-step-index={getStepIndex(question)} data-question-group={getQuestionGroupIndex(question)} data-required={question.required ? "true" : undefined} data-intensity-band={intensityLabels.get(question.id)?.split(" ")[0].toLowerCase()} data-intensity-unit={intensityInputUnits.get(question.id)} data-conditional-key={measurementConditionByQuestionId.get(question.id)} data-gymnastics-follow-up={gymnasticsFollowUpQuestionIds.has(question.id) ? "true" : undefined}>
+              {intensityQuestionIds.has(question.id) ? <span class="intensity-signal" aria-hidden="true">
+                {intensityLabels.get(question.id)?.startsWith("Light") ? <img src="/assets/images/Light-emoji.png" alt="" aria-hidden="true" /> : intensityLabels.get(question.id)?.startsWith("Moderate") ? <img src="/assets/images/Moderate-emoji.png" alt="" aria-hidden="true" /> : <img src="/assets/images/Vigorous-emoji.png" alt="" aria-hidden="true" />}
+              </span> : null}
+              <div class="gf-label-row">
+                {question.fieldType === "checkbox" || question.fieldType === "multiselect" || question.fieldType === "radio" ? <p class="gf-field-label" id={`label-${question.id}`}><span>{getQuestionLabelParts(question).prefix}</span><span class="question-detail">{getQuestionLabelParts(question).detail}</span><span>{getQuestionLabelParts(question).suffix}</span>{question.required ? <span class="gf-required-indicator" aria-hidden="true">*</span> : null}</p> : <label class="gf-field-label" for={`field-${question.id}`}><span>{getQuestionLabelParts(question).prefix}</span><span class="question-detail">{getQuestionLabelParts(question).detail}</span><span>{getQuestionLabelParts(question).suffix}</span>{question.required ? <span class="gf-required-indicator" aria-hidden="true">*</span> : null}</label>}
+                {question.id === overallActivityQuestionId ? <details class="gf-info">
+                  <summary aria-label="What counts as a session?">
+                    <svg class="gf-info-icon gf-info-icon--outline" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="none" stroke="currentColor" stroke-width="1.75" /><path d="M12 10.75v5.25" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.75" /><circle cx="12" cy="7.5" r=".9" fill="currentColor" /></svg>
+                    <svg class="gf-info-icon gf-info-icon--solid" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 1 0 0 19.5 9.75 9.75 0 0 0 0-19.5Zm0 5.1a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Zm-1.05 4.2a1.05 1.05 0 0 1 2.1 0v5.1a1.05 1.05 0 0 1-2.1 0v-5.1Z" clip-rule="evenodd" /></svg>
+                  </summary>
+                  <div class="gf-info-popover"><strong>What counts as a session?</strong> {sessionDefinition}</div>
+                </details> : null}
+              </div>
+              {question.id === fitnessBackgroundQuestionId ? <p class="gf-question-subtitle">{fitnessBackgroundSubtitle.prefix}<strong>{fitnessBackgroundSubtitle.emphasis}</strong>{fitnessBackgroundSubtitle.middle}<strong>{fitnessBackgroundSubtitle.secondEmphasis}</strong>{fitnessBackgroundSubtitle.suffix}</p> : null}
+              {getQuestionHelp(question) ? gymnasticsFollowUpQuestionIds.has(question.id) ? <div class="gf-question-help gf-question-help--list">{getQuestionHelpParts(question).intro ? <p>{getQuestionHelpParts(question).intro}</p> : null}{getQuestionHelpParts(question).bullets.length ? <ul>{getQuestionHelpParts(question).bullets.map((bullet) => <li>{bullet}</li>)}</ul> : null}</div> : <p class="gf-question-help">{getQuestionHelp(question)}</p> : null}
+              {question.id === goalsQuestionId ? <p class="gf-question-help">Select <strong>all</strong> that apply</p> : null}
+              {question.fieldType === "checkbox" || question.fieldType === "multiselect" ? <div class={question.id === fitnessBackgroundQuestionId ? "options fitness-options" : "options"} aria-labelledby={`label-${question.id}`}>{getOptions(question).map((option) => <Fragment>{question.id === fitnessBackgroundQuestionId && fitnessCategoryByFirstOptionValue.has(option.value) ? <h3 class="fitness-category-heading">{fitnessCategoryByFirstOptionValue.get(option.value)}</h3> : null}{question.id === fitnessBackgroundQuestionId && option.value === basicMovementsOptionValue ? <div class="fitness-option-with-info"><label><input type="checkbox" name={question.id} value={option.value} /> <span>{shouldStyleOptionParts(question, option) ? <><span class="option-primary">{getOptionLabelParts(getOptionLabel(option)).prefix}</span><span class="option-detail">{getOptionLabelParts(getOptionLabel(option)).detail}</span>{getOptionLabelParts(getOptionLabel(option)).suffix}</> : getOptionLabel(option)}</span></label><details class="gf-info fitness-option-info"><summary aria-label="What is structured training?"><svg class="gf-info-icon gf-info-icon--outline" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="none" stroke="currentColor" stroke-width="1.75" /><path d="M12 10.75v5.25" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.75" /><circle cx="12" cy="7.5" r=".9" fill="currentColor" /></svg><svg class="gf-info-icon gf-info-icon--solid" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 1 0 0 19.5 9.75 9.75 0 0 0 0-19.5Zm0 5.1a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Zm-1.05 4.2a1.05 1.05 0 0 1 2.1 0v5.1a1.05 1.05 0 0 1-2.1 0v-5.1Z" clip-rule="evenodd" /></svg></summary><div class="gf-info-popover"><strong>What is &quot;structured training&quot;?</strong> Following a planned, goal-focused routine (like a regular weight training program or fitness plan) rather than just moving through daily activities or casual workouts.</div></details></div> : <label><input type="checkbox" name={question.id} value={option.value} /> <span>{shouldStyleOptionParts(question, option) ? <><span class="option-primary">{getOptionLabelParts(getOptionLabel(option)).prefix}</span><span class={question.id === goalsQuestionId ? "option-detail option-detail--specify" : "option-detail"}>{getOptionLabelParts(getOptionLabel(option)).detail}</span>{getOptionLabelParts(getOptionLabel(option)).suffix}</> : getOptionLabel(option)}</span></label>}</Fragment>)}</div> : question.fieldType === "radio" ? <div class="options" aria-labelledby={`label-${question.id}`}>{getOptions(question).map((option) => <label><input type="radio" name={question.id} value={option.value} required={question.required} /> <span>{getOptionLabel(option)}</span></label>)}</div> : question.fieldType === "textarea" ? <textarea id={`field-${question.id}`} name={question.id} required={question.required} placeholder={getQuestionPlaceholder(question)}></textarea> : intensityQuestionIds.has(question.id) ? <div class="intensity-input"><input id={`field-${question.id}`} name={question.id} type="number" required={question.required} min="0" value="0" placeholder={getQuestionPlaceholder(question)} /><span>{intensityInputUnits.get(question.id)}</span></div> : question.id === overallActivityQuestionId ? <div class="intensity-input overall-activity-input"><input id={`field-${question.id}`} name={question.id} type="number" required={question.required} min="0" value="0" placeholder={getQuestionPlaceholder(question)} /><span>sessions</span></div> : heightInputQuestionIds.has(question.id) ? <div class="intensity-input measurement-input"><input id={`field-${question.id}`} name={question.id} type="number" required={question.required} min="0" placeholder={getQuestionPlaceholder(question)} /><span>cm</span></div> : weightInputQuestionIds.has(question.id) ? <div class="intensity-input measurement-input"><input id={`field-${question.id}`} name={question.id} type="number" required={question.required} min="0" placeholder={getQuestionPlaceholder(question)} /><span>kilograms</span></div> : <input id={`field-${question.id}`} name={question.id} type="number" required={question.required} min="0" placeholder={getQuestionPlaceholder(question)} />}
+              {question.id === fitnessBackgroundQuestionId ? <div class="gf-other-details" data-conditional-key="fitness-background-other" aria-hidden="true"><label for={`field-${fitnessBackgroundOtherFieldName}`}>Please tell us a little more</label><input id={`field-${fitnessBackgroundOtherFieldName}`} name={fitnessBackgroundOtherFieldName} type="text" maxlength="500" placeholder="Tell us about your other experience" disabled /></div> : null}
+              </div>
+            </Fragment>)}
+          </div>
+          <section id="part4-review" class="gf-review" aria-labelledby="part4-review-heading" hidden>
+            <div class="gf-step-heading gf-final-review-heading">
+              <span class="gf-step-kicker">FINAL REVIEW</span>
+              <h2 id="part4-review-heading" tabindex="-1">Check your answers</h2>
+              <p>Double-check your responses before submitting your Fitness Profile. If anything appears incorrect, click the 'back' button to make the necessary adjustments.</p>
+            </div>
+            <div id="part4-review-content" class="gf-review-content"></div>
+            <label class="gf-review-confirmation" for="part4-review-confirmation">
+              <input id="part4-review-confirmation" type="checkbox" required />
+              <span>I confirm that I have reviewed my answers and they are ready to submit.</span>
+            </label>
+          </section>
+          <p id="part4-warning" class="gf-warning" role="status" hidden></p>
+          <p id="part4-error" class="gf-error" role="alert" hidden></p>
+          <section id="part4-success" class="gf-success-panel" role="status" aria-labelledby="part4-success-title" hidden>
+            <div class="gf-success-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+            </div>
+            <span class="gf-success-kicker">SUBMISSION COMPLETE</span>
+            <h2 id="part4-success-title">Your Fitness Profile was submitted successfully.</h2>
+          </section>
+        </section>
+        <nav class="gf-nav" aria-label="Part 4 form actions">
+          <button type="button" id="part4-back" class="gf-nav-button gf-nav-button--back" hidden>Back</button>
+          <div class="gf-nav-actions">
+            <button type="button" id="part4-next" class="gf-nav-button gf-nav-button--next">Next</button>
+            <button type="submit" id="part4-submit" class="gf-nav-button gf-nav-button--continue" hidden disabled>Submit Part 4</button>
+            <a id="part4-return-portal" class="gf-nav-button gf-nav-button--dashboard" href="/eoi" hidden>Return to Portal</a>
+          </div>
+        </nav>
+      </form>
+    </div>
+  </div>
+</main>
+</body>
+</html>
+<style is:global>
+  @font-face { font-family: "Gamuth"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Gamuth"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: radial-gradient(circle at top, #fff 0%, #f7f7f7 44%, #eee 100%); color: #000; font-family: "Gamuth", Arial, Helvetica, sans-serif; line-height: 1.55; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  .eoi-part4 { color: #000; }
+  .gf-wrap { width: min(940px, 100%); margin: 0 auto; padding: 20px; }
+  .gf-shell { overflow: hidden; border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 34px; background: linear-gradient(180deg, #fff 0%, #fcfcfc 100%); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.08); }
+  .gf-header { display: flex; flex-direction: column; gap: 12px; padding: 34px 34px 30px; border-bottom: 1px solid rgba(0, 0, 0, 0.16); background: #fff; }
+  .gf-kicker { display: inline-flex; align-self: center; align-items: center; justify-content: center; width: fit-content; min-height: 34px; padding: 6px 16px 5px; border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 999px; font-size: 11.5px; letter-spacing: 0.085em; line-height: 1; font-weight: 700; text-align: center; text-transform: uppercase; white-space: nowrap; }
+  .gf-header .gf-kicker { margin-bottom: 6px; }
+  .gf-header h1 { margin: 0; font-size: clamp(32px, 5.5vw, 60px); line-height: 0.95; letter-spacing: -0.01em; }
+  .gf-intro { max-width: 800px; margin: 10px 0 0; color: #4b4b4b; font-size: 16px; line-height: 1.58; font-weight: 500; white-space: normal; overflow-wrap: normal; word-break: normal; text-wrap: pretty; }
+  .gf-progress { display: grid; gap: 8px; padding: 14px 34px 16px; border-bottom: 1px solid rgba(0, 0, 0, 0.16); background: #f0f0f0; }
+  .gf-progress-track { height: 6px; overflow: hidden; border-radius: 999px; background: #d6d6d6; }
+  .gf-progress-track span { display: block; width: 25%; height: 100%; border-radius: inherit; background: #000; transition: width 180ms ease; }
+  .gf-progress p { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  .gf-intensity-scale { margin: 0; padding: 8px 0 0; }
+  .gf-intensity-scale img { display: block; width: 100%; height: auto; border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 20px; }
+  .rpe-image-trigger { display: block; position: relative; width: 100%; padding: 0; border: 0; background: transparent; cursor: zoom-in; text-align: left; }
+  .rpe-image-trigger:focus-visible { outline: 3px solid rgba(0, 0, 0, 0.28); outline-offset: 4px; border-radius: 22px; }
+  .rpe-image-expand-hint { display: none; }
+  .rpe-image-dialog { width: min(96vw, 1100px); max-width: calc(100vw - 24px); height: min(92vh, 900px); max-height: calc(100vh - 24px); padding: 0; border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 18px; background: #fff; color: #111; overflow: hidden; }
+  .rpe-image-dialog::backdrop { background: rgba(0, 0, 0, 0.72); }
+  .rpe-image-dialog-shell { display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100%; }
+  .rpe-image-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border-bottom: 1px solid rgba(0, 0, 0, 0.12); }
+  .rpe-image-dialog-header h2 { margin: 0; font-size: 16px; line-height: 1.2; }
+  .rpe-image-dialog-close { padding: 7px 11px; border: 1px solid #000; border-radius: 999px; background: #000; color: #fff; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; }
+  .rpe-image-dialog-close:hover, .rpe-image-dialog-close:focus-visible { background: #fff; color: #000; }
+  .rpe-image-dialog-close:focus-visible { outline: 3px solid rgba(0, 0, 0, 0.24); outline-offset: 3px; }
+  .rpe-image-dialog-tools { display: none; }
+  .rpe-image-dialog-tools button, .rpe-image-dialog-tools output { display: inline-grid; min-width: 34px; min-height: 32px; place-items: center; padding: 5px 9px; border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 999px; background: #fff; color: #000; font: inherit; font-size: 12px; font-weight: 800; }
+  .rpe-image-dialog-tools button { cursor: pointer; }
+  .rpe-image-dialog-tools button:hover, .rpe-image-dialog-tools button:focus-visible { background: #000; color: #fff; }
+  .rpe-image-dialog-tools button:disabled { cursor: not-allowed; opacity: 0.4; }
+  .rpe-image-dialog-tools button:focus-visible { outline: 3px solid rgba(0, 0, 0, 0.24); outline-offset: 3px; }
+  .rpe-image-dialog-viewport { min-width: 0; min-height: 0; overflow: auto; padding: 12px; overscroll-behavior: contain; touch-action: pan-x pan-y pinch-zoom; -webkit-overflow-scrolling: touch; }
+  .rpe-image-pan-surface { width: 100%; min-width: 0; }
+  .rpe-image-pan-surface img { display: block; width: 100%; min-width: 0; max-width: none; height: auto; cursor: zoom-in; }
+  .rpe-image-dialog-viewport.is-dragging { cursor: grabbing; }
+  @media (max-width: 720px) { .rpe-image-expand-hint { display: grid; position: absolute; right: 10px; bottom: 10px; place-items: center; width: 34px; height: 34px; border: 1px solid rgba(0, 0, 0, 0.18); border-radius: 10px; background: rgba(255, 255, 255, 0.92); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16); color: #000; } .rpe-image-expand-hint svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; } .rpe-image-dialog { width: 100vw; max-width: none; height: 100vh; max-height: none; border: 0; border-radius: 0; } .rpe-image-dialog-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; } .rpe-image-dialog-tools { display: flex; grid-column: 1 / -1; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; } .rpe-image-dialog-viewport { display: grid; place-items: center; padding: 10px; } .rpe-image-dialog-viewport.is-zoomed { display: flex; align-items: center; justify-content: flex-start; overflow-x: scroll; overflow-y: auto; } .rpe-image-dialog-viewport.is-zoomed .rpe-image-pan-surface { flex: 0 0 auto; margin: 0; } .rpe-image-dialog-viewport img { min-width: 0; max-width: 100%; max-height: 100%; object-fit: contain; } }
+  .gf-page { display: flex; flex-direction: column; gap: 26px; padding: 34px 34px 44px; }
+  .gf-section-title { margin: 0; font-size: clamp(26px, 3vw, 38px); line-height: 1.08; letter-spacing: -0.03em; }
+  .gf-section-note, .gf-question-help { margin: 0; color: #4b4b4b; line-height: 1.62; }
+  .gf-section-note { max-width: 760px; font-size: 16px; }
+  .gf-question-list { display: flex; flex-direction: column; gap: 20px; }
+  .gf-question-list[hidden] { display: none; }
+  .gf-question-list.is-stepped [data-question-group]:not(.is-question-visible), .gf-question-list.is-stepped [data-step-heading]:not(.is-step-visible) { display: none; }
+  .gf-question-list.is-changing [data-question-group].is-question-visible { animation: gf-question-reveal 280ms ease both; }
+  @keyframes gf-question-reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .gf-step-heading { display: grid; gap: 5px; margin: 0 0 2px; padding: 4px 0 8px; }
+  .gf-step-kicker { color: #626262; font-size: 10px; font-weight: 800; letter-spacing: 0.12em; line-height: 1.2; }
+  .gf-step-heading[data-step-heading] > .gf-step-kicker { margin-bottom: 10px; }
+  .gf-step-heading[data-step-heading] > h2, .gf-final-review-heading > h2 { margin-bottom: 6px; }
+  .gf-final-review-heading > .gf-step-kicker { margin-bottom: 10px; }
+  .gf-step-heading h2 { margin: 0; font-size: clamp(26px, 3vw, 38px); line-height: 1.05; letter-spacing: -0.03em; }
+  .gf-step-heading p { max-width: 760px; margin: 0; color: #4b4b4b; font-size: 15px; line-height: 1.55; }
+  .gf-card { display: flex; flex-direction: column; gap: 24px; padding: 30px; border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 28px; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 24px rgba(0, 0, 0, 0.04); }
+  .question:not(.intensity-row) { gap: 0; }
+  .gf-label-row { display: flex; position: relative; align-items: flex-start; gap: 10px; }
+  .gf-label-row .gf-field-label { flex: 1; }
+  .gf-field-label { margin: 0; color: #000; font-size: 16px; line-height: 1.4; font-weight: 800; }
+  .question-detail { font-weight: 500 !important; }
+  .gf-required-indicator { margin-left: 2px; color: #b00020; }
+  .question:has(.gf-info[open]) { position: relative; z-index: 20; }
+  .gf-info { position: relative; z-index: 21; flex: 0 0 auto; }
+  .fitness-option-info { margin-left: auto; }
+  .gf-info summary { display: grid; position: relative; place-items: center; width: 28px; height: 28px; color: #000; cursor: pointer; line-height: 1; list-style: none; }
+  .gf-info summary::-webkit-details-marker { display: none; }
+  .gf-info summary::marker { display: none; }
+  .gf-info summary:focus-visible { outline: 3px solid rgba(0, 0, 0, 0.18); outline-offset: 3px; }
+  .gf-info-icon { width: 24px; height: 24px; }
+  .gf-info-icon--solid { display: none; }
+  .gf-info summary:hover .gf-info-icon--outline, .gf-info summary:focus-visible .gf-info-icon--outline, .gf-info[open] .gf-info-icon--outline { display: none; }
+  .gf-info summary:hover .gf-info-icon--solid, .gf-info summary:focus-visible .gf-info-icon--solid, .gf-info[open] .gf-info-icon--solid { display: block; }
+  .gf-info summary::after { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; color: #fff; content: "i"; font-family: Arial, sans-serif; font-size: 14px; font-weight: 800; line-height: 1; pointer-events: none; }
+  .gf-info summary:hover::after, .gf-info summary:focus-visible::after, .gf-info[open] summary::after { display: flex; }
+  .gf-info-popover { position: absolute; z-index: 22; top: calc(100% + 9px); right: 0; width: min(330px, calc(100vw - 56px)); padding: 14px 16px; border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 14px; background: #fff; color: #333; font-size: 13px; font-weight: 500; line-height: 1.5; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14); }
+  .gf-info-popover strong { display: block; margin-bottom: 4px; color: #000; font-weight: 800; }
+  @media (min-width: 721px) {
+    .gf-info:hover > .gf-info-popover { display: block; }
+    .gf-info[data-hover-closed="true"] > .gf-info-popover { display: none; }
+  }
+  .gf-question-help, .gf-question-subtitle { margin: 8px 0 0; color: #4b4b4b; font-size: 13px; line-height: 1.62; }
+  .gf-question-help--list { display: grid; gap: 6px; }
+  .gf-question-help--list p { margin: 0; }
+  .gf-question-help--list ul { display: grid; gap: 4px; margin: 0; padding-left: 22px; }
+  .question:not(.intensity-row) > .options, .question:not(.intensity-row) > .intensity-input, .question:not(.intensity-row) > input[type="number"], .question:not(.intensity-row) > textarea { margin-top: 20px; }
+  .question[data-gymnastics-follow-up="true"] { display: none; }
+  .question[data-gymnastics-follow-up="true"].is-visible { display: flex; }
+  .question[data-conditional-key] { display: none; }
+  .question[data-conditional-key].is-visible { display: flex; }
+  .gf-other-details { display: none; max-width: 720px; margin-top: 20px; padding: 18px; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 20px; background: linear-gradient(110deg, #f7f7f7 0%, #fff 72%); }
+  .gf-other-details.is-visible { display: grid; gap: 8px; }
+  .gf-other-details label { color: #111; font-size: 13px; font-weight: 800; line-height: 1.4; }
+  .gf-other-details input[type="text"] { width: 100%; min-height: 52px; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 17px; background: #fff; color: #000; padding: 15px 16px; font: inherit; font-size: 13px; line-height: 1.62; outline: none; transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+  .gf-other-details input[type="text"]::placeholder { color: #777; font-size: 13px; line-height: 1.62; }
+  .gf-other-details input[type="text"]:focus-visible { border-color: rgba(0, 0, 0, 0.86); box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08); outline: none; }
+  .question.goals-details-question[data-conditional-key] { display: none; width: 100%; max-width: none; margin-top: 0; padding: 18px; border-radius: 20px; background: linear-gradient(110deg, #f7f7f7 0%, #fff 72%); box-shadow: none; }
+  .question.goals-details-question[data-conditional-key].is-visible { display: grid; gap: 8px; }
+  .gf-question-list.is-stepped .question.goals-details-question:not(.is-question-visible) { display: none; }
+  .goals-details-question .gf-label-row { display: block; }
+  .goals-details-question .gf-field-label { font-size: 13px; line-height: 1.4; }
+  .goals-details-question textarea { min-height: 52px; margin-top: 0 !important; }
+  .intensity-overview { display: grid; gap: 5px; margin: 0 0 2px; padding: 2px; }
+  .intensity-overview .intensity-panel-kicker { margin-bottom: 10px; }
+  .intensity-overview h2 { margin: 0 0 6px; font-size: 26px; line-height: 1.08; letter-spacing: -0.02em; }
+  .intensity-overview p { max-width: 680px; margin: 0; color: #555; font-size: 13px; line-height: 1.45; }
+  .intensity-overview .intensity-total-reference { color: #000; font-weight: 700; }
+  .intensity-panel-heading { display: grid; position: relative; z-index: 1; gap: 4px; margin: 10px 0 -4px; padding: 18px 20px; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 22px; background: linear-gradient(110deg, #f7f7f7 0%, #fff 58%, #f1f1f1 100%); }
+  .intensity-panel-heading:has(.gf-info[open]) { z-index: 30; }
+  .intensity-heading-row { display: flex; align-items: center; gap: 10px; }
+  .intensity-heading-row h3 { flex: 1; }
+  .intensity-panel-kicker { color: #626262; font-size: 10px; font-weight: 800; letter-spacing: 0.12em; line-height: 1.2; }
+  .intensity-panel-heading h3 { margin: 0; font-size: 22px; line-height: 1.1; letter-spacing: -0.02em; }
+  .intensity-panel-heading p { margin: 0; color: #555; font-size: 13px; line-height: 1.45; }
+  .intensity-panel-heading .intensity-helper-copy { margin-top: 1px; color: #666; font-size: 12px; line-height: 1.4; }
+  .intensity-help-box { display: grid; position: relative; gap: 12px; overflow: hidden; margin-top: 10px; padding: 16px 18px 17px; border: 1px solid rgba(0, 0, 0, 0.16); border-left: 4px solid #000; border-radius: 18px; background: linear-gradient(112deg, #f1f1ef 0%, #fafaf9 58%, #fff 100%); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05); }
+  .intensity-helper-icon { position: absolute; z-index: 0; top: 50%; right: 22px; width: 72px; height: 72px; color: rgba(0, 0, 0, 0.1); transform: translateY(-50%); }
+  .intensity-help-box .intensity-helper-copy { position: relative; z-index: 1; max-width: 760px; margin: 0; padding-right: 76px; color: #555; font-size: 12px; line-height: 1.5; }
+  .intensity-help-box .intensity-helper-copy strong { color: #111; font-weight: 800; }
+  .intensity-help-box .intensity-reference summary { width: fit-content; margin-top: 0; padding: 8px 12px; border-color: #000; background: #000; color: #fff; font-size: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12); }
+  .intensity-help-box .intensity-reference summary::after { margin-left: 18px; }
+  .intensity-help-box .intensity-reference summary:hover, .intensity-help-box .intensity-reference summary:focus-visible { background: #fff; color: #000; }
+  .rpe-guide-content { display: none; grid-column: 1 / -1; min-width: 0; width: 100%; max-width: 100%; }
+  .intensity-help-box:has(.intensity-reference[open]) > .rpe-guide-content { display: grid; }
+  .intensity-row { display: grid; position: relative; isolation: isolate; grid-template-columns: 56px minmax(0, 1fr) minmax(150px, 230px); align-items: center; gap: 16px; overflow: hidden; padding: 18px 20px; border-color: color-mix(in srgb, var(--intensity-color, #888) 42%, #fff); border-left: 4px solid var(--intensity-color, #888); background: linear-gradient(112deg, var(--intensity-soft, #f2f2f2) 0%, #fff 72%); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 26px color-mix(in srgb, var(--intensity-color, #888) 10%, transparent); transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease; }
+  .intensity-row::after { position: absolute; z-index: -1; top: -74px; right: -40px; width: 190px; height: 190px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--intensity-color, #888) 18%, transparent) 0%, transparent 70%); content: ""; }
+  .intensity-row:hover { border-color: var(--intensity-color, #888); box-shadow: 0 8px 22px color-mix(in srgb, var(--intensity-color, #888) 18%, transparent); transform: translateY(-1px); }
+  .intensity-row[data-intensity-band="light"] { --intensity-color: #d2a600; --intensity-soft: #fff7cc; --intensity-ink: #604900; }
+  .intensity-row[data-intensity-band="moderate"] { --intensity-color: #db7418; --intensity-soft: #fff0dd; --intensity-ink: #713600; }
+  .intensity-row[data-intensity-band="vigorous"] { --intensity-color: #cf403a; --intensity-soft: #ffe7e5; --intensity-ink: #721a16; }
+  .intensity-signal { display: grid; position: relative; place-items: center; width: 56px; height: 56px; color: var(--intensity-color, #888); border: 1px solid color-mix(in srgb, var(--intensity-color, #888) 35%, #fff); border-radius: 17px; background: var(--intensity-soft, #f2f2f2); box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.54), 0 6px 14px color-mix(in srgb, var(--intensity-color, #888) 16%, transparent); }
+  .intensity-signal img { display: block; width: 34px; height: 34px; object-fit: contain; }
+  .intensity-row .gf-label-row { grid-column: 2; }
+  .intensity-row .gf-field-label { color: var(--intensity-ink, #000); }
+  .intensity-input { display: flex; grid-column: 3; align-items: center; gap: 10px; min-width: 0; }
+  .intensity-input input { flex: 1; min-width: 0; }
+  .intensity-row .intensity-input input { flex: 0 0 112px; width: 112px; }
+  .overall-activity-input input { flex: 0 1 220px; }
+  .measurement-input input { flex: 0 1 180px; max-width: 180px; }
+  .intensity-input span { padding: 6px 9px; border: 1px solid color-mix(in srgb, var(--intensity-color, #888) 25%, #fff); border-radius: 999px; background: var(--intensity-soft, #f2f2f2); color: var(--intensity-ink, #555); font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .intensity-row .intensity-input input { border-color: color-mix(in srgb, var(--intensity-color, #888) 34%, #fff); }
+  .intensity-row .intensity-input input:focus-visible { border-color: var(--intensity-color, #888); box-shadow: 0 0 0 4px color-mix(in srgb, var(--intensity-color, #888) 18%, transparent); }
+  .intensity-reference { position: relative; z-index: 1; margin: 0; }
+  .intensity-reference summary { display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 2px 0 0; padding: 12px 14px; border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 14px; background: #f5f5f5; color: #000; cursor: pointer; font-size: 13px; font-weight: 800; list-style: none; }
+  .intensity-reference summary::-webkit-details-marker { display: none; }
+  .intensity-reference summary::marker { display: none; }
+  .intensity-reference summary::after { content: "+"; font-size: 20px; font-weight: 500; line-height: 1; }
+  .intensity-reference summary:hover { border-color: #000; background: #000; color: #fff; }
+  .intensity-reference summary:focus-visible { outline: 3px solid rgba(0, 0, 0, 0.18); outline-offset: 3px; }
+  .intensity-reference[open] summary::after { content: "−"; }
+  .rpe-guide-close-label, .intensity-reference[open] .rpe-guide-open-label { display: none; }
+  .intensity-reference[open] .rpe-guide-close-label { display: inline; }
+  .intensity-reference[open] summary { margin-bottom: 14px; }
+  .rpe-guide-switcher { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+  .rpe-guide-switcher button { padding: 8px 12px; border: 1px solid rgba(0, 0, 0, 0.18); border-radius: 999px; background: #fff; color: #000; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; }
+  .rpe-guide-switcher button:hover, .rpe-guide-switcher button[aria-pressed="true"] { border-color: #000; background: #000; color: #fff; }
+  .rpe-guide-switcher button:focus-visible { outline: 3px solid rgba(0, 0, 0, 0.24); outline-offset: 3px; }
+  [data-rpe-guide-panel][hidden] { display: none; }
+  .rpe-text-alternative { min-width: 0; max-width: 100%; margin-top: 14px; padding: 14px; border: 1px solid rgba(0, 0, 0, 0.14); border-radius: 14px; background: #fff; }
+  .rpe-table-wrap { min-width: 0; max-width: 100%; overflow-x: auto; margin-top: 12px; }
+  .rpe-text-alternative table { width: 100%; min-width: 760px; border-collapse: collapse; color: #222; font-size: 12px; line-height: 1.45; }
+  .rpe-text-alternative caption { margin-bottom: 8px; text-align: left; font-weight: 800; }
+  .rpe-table-intro { display: block; margin-top: 6px; color: #4b4b4b; font-size: 12px; font-weight: 500; line-height: 1.5; }
+  .rpe-text-alternative th, .rpe-text-alternative td { padding: 8px; border: 1px solid rgba(0, 0, 0, 0.14); text-align: left; vertical-align: top; }
+  .rpe-text-alternative th { background: #f4f4f4; font-weight: 800; }
+  .rpe-text-alternative p { margin: 12px 0 0; font-size: 12px; line-height: 1.5; }
+  .gf-review[hidden] { display: none; }
+  .gf-review-content { display: grid; gap: 18px; }
+  .gf-review-group { display: grid; gap: 8px; padding: 20px; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 22px; background: #fff; }
+  .gf-review-group[data-review-step="3"] { display: none; }
+  .gf-review-group h3 { margin: 0; font-size: 19px; line-height: 1.15; }
+  .gf-review-list { display: grid; gap: 10px; margin: 0; }
+  .gf-review-question-group { display: grid; gap: 10px; }
+  .gf-review-question-group + .gf-review-question-group { padding-top: 10px; border-top: 1px solid rgba(0, 0, 0, 0.1); }
+  .gf-review-question-heading { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+  .gf-review-question-heading h4 { margin: 0; color: #222; font-size: 13px; line-height: 1.35; }
+  .gf-review-question-item { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 18px; }
+  .gf-review-question-item--full { display: block; }
+  .gf-review-bullets { margin: 0; padding-left: 18px; }
+  .gf-review-bullets li + li { margin-top: 4px; }
+  .gf-review-bullet-details { margin: 4px 0 0; padding-left: 18px; }
+  .gf-review-confirmation { display: flex; align-items: flex-start; gap: 10px; margin-top: 18px; padding: 14px 16px; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 16px; background: #fafafa; color: #222; font-size: 13px; line-height: 1.45; cursor: pointer; }
+  .gf-review-confirmation input { width: 18px; height: 18px; margin: 0; flex: 0 0 auto; accent-color: #000; }
+  .gf-review-list dt { color: #555; font-size: 13px; font-weight: 700; }
+  .gf-review-list dd { margin: 0; font-size: 13px; font-weight: 500; white-space: pre-wrap; }
+  .options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 20px; }
+  .fitness-options { row-gap: 14px; }
+  .fitness-options > label:has(input[value="821a5033-e2ea-44d0-a6b9-b68e66301387"]) { grid-column: 1 / -1; }
+  .fitness-options > label:has(input[value="f6e8c12e-44a7-4c0b-9f07-16d7ea8d7f8e"]),
+  .fitness-options > label:has(input[value="3e4810d8-3cb5-4d19-a698-a0f50cd409b4"]),
+  .fitness-options > label:has(input[value="3792d8b7-c2ca-470e-8a0f-c193e04c57a5"]),
+  .fitness-options > label:has(input[value="2f7b1085-3427-4e08-94bb-2e04b36d6e95"]) { grid-column: 1 / -1; }
+  .fitness-option-with-info { position: relative; grid-column: 1 / -1; }
+  .fitness-option-with-info > label { padding-right: 58px; }
+  .fitness-option-with-info > label > span { min-width: 0; }
+  .fitness-option-with-info > .fitness-option-info { position: absolute; top: 50%; right: 16px; margin: 0; transform: translateY(-50%); }
+  .fitness-option-info summary { width: 34px; height: 34px; }
+  .fitness-option-info .gf-info-icon { width: 30px; height: 30px; }
+  @media (max-width: 720px) { .fitness-option-with-info > label { padding-right: 116px; } .fitness-option-with-info > .fitness-option-info { top: 16px; right: 14px; transform: none; } }
+  @media (max-width: 720px) {
+    .fitness-option-with-info { display: grid; grid-template-columns: minmax(0, 1fr) 34px; align-items: start; gap: 10px; padding: 14px 16px; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 18px; background: #fff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02); }
+    .fitness-option-with-info > label, .fitness-option-with-info > label:hover, .fitness-option-with-info > label:has(input:checked) { min-width: 0; min-height: 0; padding: 0 !important; border: 0 !important; background: transparent !important; box-shadow: none !important; color: inherit !important; transform: none !important; }
+    .fitness-option-with-info > label > span { min-width: 0; }
+    .fitness-option-with-info > .fitness-option-info { position: static; align-self: center; grid-column: 2; grid-row: 1; margin: 0; transform: none; }
+    .fitness-option-with-info:has(input:checked) { border-color: #000; background: #000; color: #fff; box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16); }
+    .fitness-option-with-info:has(input:checked) .gf-info { color: #fff; }
+  }
+  .fitness-category-heading { grid-column: 1 / -1; margin: 12px 0 0; color: #777; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; line-height: 1.2; text-transform: uppercase; }
+  .fitness-category-heading:first-child { margin-top: 0; }
+  .options label { display: flex; position: relative; align-items: center; gap: 10px; min-height: 58px; margin: 0; padding: 14px 16px; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 18px; background: #fff; color: #111; cursor: pointer; font-size: 13px; font-weight: 700 !important; line-height: 1.4; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02); transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+  .options label span { font-size: 100%; }
+  .question[data-field-id="95b1e51d-0ada-472c-8b52-a2eedb5d9d03"] .option-detail { font-weight: 500 !important; }
+  .option-detail--specify { font-weight: 500 !important; font-style: normal; }
+  .options label:hover { border-color: rgba(0, 0, 0, 0.36); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05); transform: translateY(-1px); }
+  .options label:has(input:checked) { border-color: #000; background: #000; color: #fff; box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16); }
+  .question[data-field-id="2cdb337f-3283-49eb-adaa-40b36b370403"] .options label { font-weight: 600 !important; }
+  .options input { width: 18px; height: 18px; margin: 0; flex: 0 0 auto; accent-color: #000; }
+  .options label:has(input:checked) input { accent-color: #fff; }
+  .question input[type="number"], .question textarea { width: 100%; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 17px; background: #fff; color: #000; padding: 15px 16px; font: inherit; font-size: 13px; line-height: 1.62; outline: none; transition: border-color 160ms ease, box-shadow 160ms ease; }
+  .question input[type="number"]::placeholder, .question textarea::placeholder { font-size: 13px; line-height: 1.62; }
+  .question textarea { min-height: 120px; resize: vertical; }
+  .question input:focus-visible, .question textarea:focus-visible { border-color: rgba(0, 0, 0, 0.86); box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08); outline: none; }
+  .gf-nav { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 24px 30px 30px; border-top: 1px solid rgba(0, 0, 0, 0.16); }
+  .gf-nav-actions { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+  .gf-nav-button { min-width: 144px; min-height: 50px; padding: 14px 24px; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 999px; background: #fff; color: #000; font: inherit; font-weight: 800; cursor: pointer; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05); transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
+  .gf-nav-button--back { background: #fff; color: #000; }
+  .gf-nav-button--next { background: #000; color: #fff; }
+  .gf-nav-button--dashboard { display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #000; text-decoration: none; }
+  .gf-nav-button--dashboard[hidden] { display: none; }
+  .eoi-part4.is-submitted .gf-header, .eoi-part4.is-submitted .gf-progress { display: none; }
+  .eoi-part4.is-submitted .gf-shell { border: 0; background: transparent; box-shadow: none; }
+  .eoi-part4.is-submitted form { display: flex; flex-direction: column; justify-content: center; min-height: calc(100svh - 40px); }
+  .eoi-part4.is-submitted .gf-page { display: contents; }
+  .eoi-part4.is-submitted .gf-success-panel { margin: 0 auto 22px; }
+  .eoi-part4.is-submitted .gf-nav { width: 100%; border-top: 0; background: transparent; }
+  .eoi-part4.is-submitted .gf-nav { justify-content: center; }
+  .eoi-part4.is-submitted .gf-nav-actions { margin-left: 0; }
+  .eoi-part4.is-submitted .gf-nav-button--dashboard { border-color: #000; background: #000; color: #fff; }
+  .eoi-part4.is-submitted .gf-nav-button--dashboard:hover, .eoi-part4.is-submitted .gf-nav-button--dashboard:focus-visible { background: #fff; color: #000; }
+  .gf-nav-button:hover, .gf-nav-button:active { background: #000; color: #fff; box-shadow: 0 14px 26px rgba(0, 0, 0, 0.14); }
+  .gf-nav-button--next:hover, .gf-nav-button--next:active { background: #fff; color: #000; }
+  .gf-nav-button:active { transform: translateY(1px); }
+  .gf-error { margin: 0; color: #a00000; font-size: 13px; line-height: 1.62; }
+  .gf-warning { margin: 0; color: #7a5200; font-size: 13px; line-height: 1.62; }
+  .gf-success-panel { display: grid; justify-items: center; gap: 16px; width: min(100%, 620px); margin: auto; padding: clamp(34px, 7vw, 64px) clamp(24px, 6vw, 56px); border: 1px solid rgba(0, 0, 0, 0.14); border-radius: 30px; background: linear-gradient(145deg, #fafafa 0%, #fff 52%, #f1f1f1 100%); box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08); text-align: center; }
+  .gf-success-panel[hidden] { display: none; }
+  .gf-success-mark { display: grid; place-items: center; width: 68px; height: 68px; border: 2px solid #000; border-radius: 50%; background: #000; color: #fff; }
+  .gf-success-mark svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; }
+  .gf-success-kicker { color: #666; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; line-height: 1.2; }
+  .gf-success-panel h2 { max-width: 470px; margin: 0; font-size: clamp(26px, 4vw, 42px); line-height: 1.05; letter-spacing: -0.03em; }
+  @media (max-width: 720px) {
+    .eoi-part4.is-submitted .gf-shell { display: flex; flex-direction: column; justify-content: center; min-height: calc(100svh - 20px); }
+    .eoi-part4.is-submitted .gf-page { display: contents; }
+    .eoi-part4.is-submitted .gf-success-panel { margin: 0 auto 22px; }
+    .eoi-part4.is-submitted .gf-nav { width: 100%; }
+    .eoi-part4.is-submitted .gf-nav-actions { width: auto; }
+    .eoi-part4.is-submitted .gf-nav-button--dashboard { width: min(100%, 220px); min-width: 0; min-height: 44px; padding: 11px 24px; }
+    .intensity-row { grid-template-columns: 48px minmax(0, 1fr) auto; }
+    .intensity-row .gf-field-label { grid-column: 2; }
+    .intensity-row .intensity-input { grid-column: 3; align-self: center; }
+    .intensity-row .intensity-input input { flex-basis: 78px; width: 78px; }
+    .intensity-row .intensity-input span { padding-inline: 7px; font-size: 11px; }
+  }
+  @media (max-width: 720px) { .gf-wrap { padding: 10px; } .gf-header { padding: 18px; } .gf-progress { padding: 12px 18px 14px; } .gf-intensity-scale { padding-top: 8px; } .gf-intensity-scale img { border-radius: 16px; } .gf-page { gap: 22px; padding: 18px 18px 28px; } .gf-card { padding: 22px; border-radius: 24px; } .gf-step-heading h2 { font-size: 30px; } .intensity-panel-heading { padding: 16px 18px; } .intensity-overview h2 { font-size: 24px; } .intensity-row { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 16px; } .intensity-signal { width: 48px; height: 48px; } .intensity-row .gf-field-label, .intensity-input { grid-column: 2; } .intensity-row .intensity-input input { flex-basis: 100px; width: 100px; } .fitness-options { grid-template-columns: 1fr; } .gf-review-question-item { grid-template-columns: 1fr; gap: 4px; } .gf-review-list div { grid-template-columns: 1fr; gap: 4px; } .gf-nav { padding: 18px 18px 22px; } .gf-nav-actions { width: 100%; } .gf-nav-button { width: 100%; } }
+  .mobile-guide-break { display: none; }
+  @media (max-width: 720px) { .intensity-help-box { gap: 2px; padding: 14px 14px 19px; border-left-width: 3px; } .intensity-row { border-left-width: 3px; } .intensity-helper-icon { top: 18px; right: 20px; bottom: auto; width: 72px; height: 72px; transform: none; } .intensity-help-box .intensity-helper-copy { padding-right: 0; font-size: 12px; } .intensity-help-box .intensity-reference { justify-self: center; transform: translateX(6px); } .intensity-help-box .intensity-reference summary { font-size: 11px; } .intensity-help-box .rpe-guide-switcher { justify-content: center; } .mobile-guide-break { display: inline; } }
+  @media (max-width: 480px) { .intensity-helper-icon { width: 56px; height: 56px; } }
+  @media (min-width: 721px) {
+    .intensity-panel-heading .intensity-heading-row > .gf-info { transform: translateY(-3px); }
+    .intensity-help-box { grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; column-gap: 16px; row-gap: 14px; padding: 18px 20px; }
+    .intensity-help-box .intensity-helper-icon { position: static; grid-column: 1; grid-row: 1; align-self: center; justify-self: center; width: 48px; height: 48px; transform: none; }
+    .intensity-help-box .intensity-helper-copy { grid-column: 2; max-width: none; padding-right: 0; }
+    .intensity-help-box .intensity-reference { grid-column: 3; justify-self: end; }
+    .intensity-help-box .intensity-reference > summary { justify-self: end; }
+    .intensity-row { width: 100%; grid-template-columns: 56px minmax(220px, 1fr) auto; gap: 16px; padding: 14px 20px; }
+    .intensity-row .intensity-input { width: 200px; }
+  }
+  @media (min-width: 721px) and (max-width: 1024px) { .intensity-help-box { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 8px; padding: 28px 18px 36px; } .intensity-help-box .intensity-helper-icon { position: absolute; top: 30px; right: 14px; width: 112px; height: 112px; transform: none; } .intensity-help-box .intensity-helper-copy { grid-column: 1; max-width: calc(100% - 150px); padding-right: 0; } .intensity-help-box .intensity-reference { grid-column: 1; justify-self: center; transform: translateX(40px); } .intensity-help-box .intensity-reference summary { justify-self: center; } .mobile-guide-break { display: inline; } }
+  @media (max-width: 1024px) and (orientation: landscape) { .intensity-help-box .intensity-helper-icon { top: 0; right: 24px; width: 100px; height: 100px; } .intensity-help-box .intensity-helper-copy { max-width: calc(100% - 180px); font-size: 14px; } .intensity-help-box .intensity-helper-copy strong { white-space: nowrap; } .intensity-help-box .intensity-reference summary { font-size: 14px; } .mobile-guide-break { display: none; } }
+  @media (max-width: 1024px) and (orientation: landscape) { .intensity-help-box .intensity-reference { justify-self: center; margin-top: 14px; transform: none; } .intensity-help-box .intensity-reference > summary { justify-self: center; } .intensity-help-box .rpe-guide-switcher { justify-content: center; } .intensity-help-box .rpe-text-alternative table { min-width: 0; table-layout: fixed; font-size: 10px; } .intensity-help-box .rpe-text-alternative th, .intensity-help-box .rpe-text-alternative td { padding: 5px; overflow-wrap: anywhere; } .intensity-help-box .rpe-table-wrap { overflow-x: hidden; } }
+  @media (max-width: 1024px) and (orientation: landscape) { .eoi-part4.is-submitted .gf-nav-button--dashboard { position: relative; top: -24px; } }
+  @media (max-width: 720px) and (orientation: portrait) { .intensity-help-box .intensity-helper-icon { right: 14px; } .intensity-help-box .intensity-reference { justify-self: center; margin-top: 8px; transform: none; } .intensity-help-box .intensity-reference > summary { justify-self: center; } .intensity-help-box .rpe-guide-switcher { justify-content: center; } .intensity-row .intensity-input input { flex-basis: 82px; width: 82px; } .intensity-row .intensity-input span { padding-inline: 9px; font-size: 0; } .intensity-row .intensity-input span::after { content: "mins"; font-size: 11px; } }
+  @media (max-width: 720px) and (orientation: portrait) {
+    .question[data-field-id="cb3f237d-53a1-4664-8c27-aa6567bc4300"] .options,
+    .question[data-field-id="fb588ef1-f6bb-4326-ae1d-28814d4d8d6b"] .options,
+    .question[data-field-id="be17b43c-5265-488d-ae5b-73580a589b7c"] .options,
+    .question[data-field-id="2f3cc5fa-0e36-4107-9cee-4eb76ac8c46e"] .options { grid-template-columns: 1fr; }
+    .question[data-field-id="2cdb337f-3283-49eb-adaa-40b36b370403"] .options > label:has(input[value="72339ac7-1547-4566-bdaa-7cfc6e75e378"]) { grid-column: 1 / -1; }
+    .gf-review-list .gf-review-question-item { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 18px; }
+    .gf-review-group[data-review-step="0"] .gf-review-list .gf-review-question-item { grid-template-columns: minmax(0, 1fr) max-content; }
+    .gf-review-group[data-review-step="0"] .gf-review-list dt { white-space: nowrap; }
+  }
 </style>
 <script>
   const form = document.querySelector<HTMLFormElement>("#part4-form");
+  const overallActivityFieldId = "2f50a6ce-91f0-4b27-9c62-d1f200c49450";
+  const infoDisclosures = [...document.querySelectorAll<HTMLDetailsElement>("details.gf-info")];
+  if (window.innerWidth > 720) {
+    for (const disclosure of infoDisclosures) {
+      disclosure.addEventListener("mouseenter", () => {
+        disclosure.removeAttribute("data-hover-closed");
+        disclosure.open = true;
+      });
+      disclosure.addEventListener("mouseleave", () => {
+        if (!disclosure.matches(":focus-within")) disclosure.open = false;
+        disclosure.removeAttribute("data-hover-closed");
+      });
+      disclosure.querySelector("summary")?.addEventListener("click", (event) => {
+        event.preventDefault();
+        disclosure.open = !disclosure.open;
+        if (disclosure.open) disclosure.removeAttribute("data-hover-closed");
+        else disclosure.setAttribute("data-hover-closed", "true");
+      });
+    }
+  }
+  const rpeGuideDisclosure = document.querySelector<HTMLDetailsElement>(".intensity-reference");
+  const rpeGuideContent = document.querySelector<HTMLElement>("#rpe-guide-content");
+  const syncRpeGuideDisclosure = () => {
+    const expanded = Boolean(rpeGuideDisclosure?.open);
+    rpeGuideDisclosure?.querySelector("summary")?.setAttribute("aria-expanded", String(expanded));
+    rpeGuideContent?.setAttribute("aria-hidden", String(!expanded));
+  };
+  rpeGuideDisclosure?.addEventListener("toggle", syncRpeGuideDisclosure);
+  syncRpeGuideDisclosure();
+  const rpeGuideChoices = [...document.querySelectorAll<HTMLButtonElement>("[data-rpe-guide-choice]")];
+  const rpeGuidePanels = [...document.querySelectorAll<HTMLElement>("[data-rpe-guide-panel]")];
+  const setRpeGuideView = (view: string) => {
+    for (const button of rpeGuideChoices) {
+      const active = button.dataset.rpeGuideChoice === view;
+      button.setAttribute("aria-pressed", String(active));
+    }
+    for (const panel of rpeGuidePanels) panel.hidden = panel.dataset.rpeGuidePanel !== view;
+  };
+  for (const button of rpeGuideChoices) button.addEventListener("click", () => setRpeGuideView(button.dataset.rpeGuideChoice || "image"));
+  setRpeGuideView("image");
+  const rpeImageDialog = document.querySelector<HTMLDialogElement>("[data-rpe-image-dialog]");
+  const rpeImageTrigger = document.querySelector<HTMLButtonElement>("[data-rpe-image-open]");
+  const rpeImageClose = document.querySelector<HTMLButtonElement>("[data-rpe-image-close]");
+  const rpeImageViewport = rpeImageDialog?.querySelector<HTMLElement>(".rpe-image-dialog-viewport");
+  const rpeImagePanSurface = rpeImageDialog?.querySelector<HTMLElement>(".rpe-image-pan-surface");
+  const rpeImageDialogImage = rpeImageDialog?.querySelector<HTMLImageElement>(".rpe-image-dialog-viewport img");
+  const rpeImageZoomOut = rpeImageDialog?.querySelector<HTMLButtonElement>("[data-rpe-image-zoom-out]");
+  const rpeImageZoomIn = rpeImageDialog?.querySelector<HTMLButtonElement>("[data-rpe-image-zoom-in]");
+  const rpeImageZoomValue = rpeImageDialog?.querySelector<HTMLOutputElement>("[data-rpe-image-zoom-value]");
+  let rpeImageZoom = 1;
+  const setRpeImageZoom = (zoom: number) => {
+    rpeImageZoom = Math.min(3, Math.max(1, zoom));
+    if (rpeImagePanSurface) rpeImagePanSurface.style.width = `${rpeImageZoom * 100}%`;
+    if (rpeImageDialogImage) {
+      rpeImageDialogImage.style.width = "100%";
+      rpeImageDialogImage.style.maxWidth = "none";
+      rpeImageDialogImage.style.maxHeight = "none";
+    }
+    rpeImageViewport?.classList.toggle("is-zoomed", rpeImageZoom > 1);
+    if (rpeImageViewport) requestAnimationFrame(() => { rpeImageViewport.scrollLeft = rpeImageZoom > 1 ? Math.max(0, (rpeImageViewport.scrollWidth - rpeImageViewport.clientWidth) / 2) : 0; });
+    if (rpeImageZoomValue) rpeImageZoomValue.value = `${Math.round(rpeImageZoom * 100)}%`;
+    if (rpeImageZoomOut) rpeImageZoomOut.disabled = rpeImageZoom <= 1;
+    if (rpeImageZoomIn) rpeImageZoomIn.disabled = rpeImageZoom >= 3;
+  };
+  const closeRpeImageDialog = () => {
+    if (rpeImageDialog?.open) rpeImageDialog.close();
+  };
+  rpeImageTrigger?.addEventListener("click", () => {
+    setRpeImageZoom(1);
+    rpeImageDialog?.showModal();
+  });
+  rpeImageClose?.addEventListener("click", closeRpeImageDialog);
+  rpeImageZoomOut?.addEventListener("click", () => setRpeImageZoom(rpeImageZoom - 0.25));
+  rpeImageZoomIn?.addEventListener("click", () => setRpeImageZoom(rpeImageZoom + 0.25));
+  rpeImageDialog?.addEventListener("click", (event) => {
+    if (event.target === rpeImageDialog) closeRpeImageDialog();
+  });
+  rpeImageDialog?.addEventListener("close", () => {
+    setRpeImageZoom(1);
+    rpeImageTrigger?.focus();
+  });
+  setRpeImageZoom(1);
   const error = document.querySelector<HTMLElement>("#part4-error");
+  const warning = document.querySelector<HTMLElement>("#part4-warning");
   const success = document.querySelector<HTMLElement>("#part4-success");
+  const overallActivityInput = document.querySelector<HTMLInputElement>(`input[name='${overallActivityFieldId}']`);
+  for (const input of document.querySelectorAll<HTMLInputElement>("input[type='number']")) {
+    input.addEventListener("wheel", () => {
+      if (document.activeElement === input) input.blur();
+    }, { passive: true });
+  }
+  const zeroDefaultInputs = [...document.querySelectorAll<HTMLInputElement>(".intensity-input input[type='number']")];
+  for (const input of zeroDefaultInputs) {
+    input.addEventListener("focus", () => {
+      if (input.value === "0") input.value = "";
+    });
+    input.addEventListener("blur", () => {
+      if (!input.value.trim()) input.value = "0";
+    });
+  }
+  for (const input of document.querySelectorAll<HTMLInputElement>("input[type='number'][name='05a45715-434c-4851-a042-855c59e6a220'], input[type='number'][name='aaf40be5-18ef-416e-b9d6-6e5b0fb3405c'], input[type='number'][name='f9f0265d-17d9-402f-b13d-44dc92e11db0']")) {
+    input.max = "10080";
+    input.step = "0.1";
+  }
+  const fitnessBackgroundQuestionId = "95b1e51d-0ada-472c-8b52-a2eedb5d9d03";
+  const fitnessBackgroundOtherFieldName = "fitnessBackgroundOther";
+  const goalsQuestionId = "2cdb337f-3283-49eb-adaa-40b36b370403";
+  const goalsDetailsQuestionId = "98cba7c0-3215-4508-8d4f-eab41dbeef00";
+  const somethingElseOptionValue = "72339ac7-1547-4566-bdaa-7cfc6e75e378";
+  const gymnasticsOptionValue = "690c0946-7f24-44a0-8ae2-9dcf43555397";
+  const gymnasticsStatusQuestionId = "be17b43c-5265-488d-ae5b-73580a589b7c";
+  const pastGymnasticsDetailsQuestionId = "d931a68f-fa69-4063-9d9c-244d6aa220e3";
+  const gymnasticsFollowUpStatusByQuestionId = new Map([
+    ["3d10e2f2-d2e4-4b65-941b-f19bcda23cb4", "5ab94595-8673-40d7-8461-6448356de34f"],
+    ["d931a68f-fa69-4063-9d9c-244d6aa220e3", "d136cb70-7b04-4d0d-82fe-6d31b74555f2"],
+    ["c7291f4d-fcd3-4f04-9f89-07c561a3110c", "3f1dd336-f819-48c6-a110-43a4bd9eda7e"]
+  ]);
+  const otherOptionValue = "ac6154ae-d805-4160-a1e2-770117b6ef04";
+  const fitnessBackgroundReviewLabels = new Map([
+    ["2794ca4b-8e33-4a6e-b20e-f20a0098123d", "I can do basic everyday movements but haven't done structured training."],
+    ["821a5033-e2ea-44d0-a6b9-b68e66301387", "Bodyweight style workouts"],
+    ["42aa6969-04ee-4f7d-981c-d465daf39496", "Yoga"],
+    ["8895a33f-6cfe-44f4-afc0-1af67ea21c91", "Pilates"],
+    ["f6e8c12e-44a7-4c0b-9f07-16d7ea8d7f8e", "General gym strength training"],
+    ["4e767d6f-93ea-4492-8f36-8040cde37b39", "CrossFit"],
+    ["ff565015-cd40-4912-a97f-bf2de243ef21", "High-Intensity Interval Training (HIIT)"],
+    ["33929d14-b203-4a27-9e37-43355261a025", "Bootcamps / Circuit-style training"],
+    ["d42b1ba1-d22d-4648-b7f2-e6cf13c5c681", "Plyometrics"],
+    ["b3dd7d8f-bf00-4792-8789-18e4d00dd8d0", "Ninja Warrior Style / Obstacle-race Style Conditioning"],
+    ["eac26e31-3dfd-4de7-b893-5ff4f738b5cc", "Agility-based sports"],
+    ["72131517-7d61-4cfc-9601-25b40d9d672d", "Dance-style movement"],
+    ["b16a5123-6702-4c31-9585-7920dd4fb8c3", "Australian Calisthenics"],
+    ["690c0946-7f24-44a0-8ae2-9dcf43555397", "Gymnastics"],
+    ["41242412-5118-421a-9ad2-36ed6431d4fd", "Calisthenics"],
+    ["71a3b5f4-bdfd-41d9-ba66-14e6635e7c35", "Self-taught acrobatic, balance, and flexibility skills"],
+    ["325ed625-b32a-425b-8cde-442409d10e94", "Acrobatics"],
+    ["28a680da-0068-43be-8770-773d658b801c", "Aerial arts"],
+    ["ddb57723-0146-4ea1-9554-1a6755a6a3c9", "Pole dancing"],
+    ["cf54f0aa-06b2-46b0-ab70-ab61e5844168", "Parkour / tricking / free-running"],
+    ["4590c8f7-9d1a-4018-9fd4-ac20246faf64", "Boxing / Kickboxing"],
+    ["5864393c-e7d5-48f9-9382-bc6423e2ccae", "Karate / Jiu-Jitsu / Muay Thai / MMA"],
+    ["c6ca99e5-cc69-4daa-83bd-6b15bac765b9", "Self-defence and/or boxing-style fitness sessions."],
+    ["3e4810d8-3cb5-4d19-a698-a0f50cd409b4", "Police Operational Physical Training"],
+    ["3792d8b7-c2ca-470e-8a0f-c193e04c57a5", "Police-inspired bodyweight training"],
+    ["2f7b1085-3427-4e08-94bb-2e04b36d6e95", "Military-inspired tactical fitness"],
+    ["933db423-a03e-4a00-bad3-12be31e61de0", "ADF - Basic Training"],
+    ["e409a7aa-ebc9-4c03-8639-ad94fa782872", "ADF Field Training"]
+  ]);
+  const fitnessBackgroundReviewDetails = new Map([
+    ["71a3b5f4-bdfd-41d9-ba66-14e6635e7c35", "May include handstands, splits, flips"],
+    ["3792d8b7-c2ca-470e-8a0f-c193e04c57a5", "Emphasis on drills mimicking restraint and pursuit tasks."],
+    ["2f7b1085-3427-4e08-94bb-2e04b36d6e95", "Civilian training inspired by military methods"]
+  ]);
+  const heightChoiceQuestionId = "cb3f237d-53a1-4664-8c27-aa6567bc4300";
+  const weightChoiceQuestionId = "fb588ef1-f6bb-4326-ae1d-28814d4d8d6b";
+  const heightKnownOptionValue = "70b5d1e9-2abd-4723-a4e1-9f00baaafd75";
+  const heightEstimateOptionValue = "5774b095-4f9d-4cf9-a159-1a998041682c";
+  const weightKnownOptionValue = "731cf625-344f-4ec8-ad24-6da0fa62bcbd";
+  const weightEstimateInputQuestionId = "e2e36670-90a8-42cd-a4f9-f68bcb867e46";
+  const weightEstimateOptionValue = "d4c627dd-6060-4e88-b9da-f7da78bbd751";
+  const fitnessBackgroundInputs = [...document.querySelectorAll<HTMLInputElement>(`input[name='${fitnessBackgroundQuestionId}']`)];
+  const gymnasticsFollowUps = [...document.querySelectorAll<HTMLElement>("[data-gymnastics-follow-up='true']")];
+  const gymnasticsStatusCard = gymnasticsFollowUps.find((card) => card.dataset.fieldId === gymnasticsStatusQuestionId);
+  const gymnasticsDetailCards = gymnasticsFollowUps.filter((card) => card.dataset.fieldId !== gymnasticsStatusQuestionId);
+  const syncGymnasticsFollowUps = () => {
+    const gymnasticsSelected = fitnessBackgroundInputs.some((input) => input.checked && input.value === gymnasticsOptionValue);
+    const gymnasticsStatus = document.querySelector<HTMLInputElement>(`input[name='${gymnasticsStatusQuestionId}']:checked`)?.value;
+    if (gymnasticsStatusCard) {
+      gymnasticsStatusCard.classList.toggle("is-visible", gymnasticsSelected);
+      for (const input of gymnasticsStatusCard.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea")) {
+        input.disabled = !gymnasticsSelected;
+        if (!gymnasticsSelected && input instanceof HTMLInputElement) input.checked = false;
+      }
+    }
+    for (const card of gymnasticsDetailCards) {
+      const visible = gymnasticsSelected && gymnasticsFollowUpStatusByQuestionId.get(card.dataset.fieldId || "") === gymnasticsStatus;
+      card.classList.toggle("is-visible", visible);
+      for (const input of card.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea")) {
+        input.disabled = !visible;
+        if (!visible) input.value = "";
+      }
+    }
+  };
+  for (const input of document.querySelectorAll<HTMLInputElement>(`input[name='${gymnasticsStatusQuestionId}']`)) input.addEventListener("change", syncGymnasticsFollowUps);
+  for (const input of fitnessBackgroundInputs) input.addEventListener("change", syncGymnasticsFollowUps);
+  syncGymnasticsFollowUps();
+  const fitnessBackgroundOtherCard = document.querySelector<HTMLElement>("[data-conditional-key='fitness-background-other']");
+  const fitnessBackgroundOtherInput = document.querySelector<HTMLInputElement>(`input[name='${fitnessBackgroundOtherFieldName}']`);
+  const syncFitnessBackgroundOther = () => {
+    const otherSelected = fitnessBackgroundInputs.some((input) => input.checked && input.value === otherOptionValue);
+    fitnessBackgroundOtherCard?.classList.toggle("is-visible", otherSelected);
+    fitnessBackgroundOtherCard?.setAttribute("aria-hidden", String(!otherSelected));
+    if (fitnessBackgroundOtherInput) {
+      fitnessBackgroundOtherInput.disabled = !otherSelected;
+      fitnessBackgroundOtherInput.required = otherSelected;
+      if (!otherSelected) fitnessBackgroundOtherInput.value = "";
+    }
+  };
+  for (const input of fitnessBackgroundInputs) input.addEventListener("change", syncFitnessBackgroundOther);
+  syncFitnessBackgroundOther();
+  const goalsInputs = [...document.querySelectorAll<HTMLInputElement>(`input[name='${goalsQuestionId}']`)];
+  const goalsDetailsCard = document.querySelector<HTMLElement>(`[data-field-id='${goalsDetailsQuestionId}']`);
+  let goalsDetailsWasRequired = false;
+  const syncGoalsDetails = () => {
+    const detailsRequired = goalsInputs.some((input) => input.checked && input.value === somethingElseOptionValue);
+    goalsDetailsCard?.classList.toggle("is-visible", detailsRequired);
+    goalsDetailsCard?.setAttribute("aria-hidden", String(!detailsRequired));
+    for (const input of goalsDetailsCard?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea") ?? []) {
+      input.disabled = !detailsRequired;
+      input.required = detailsRequired;
+      if (!detailsRequired) input.value = "";
+    }
+    if (detailsRequired && !goalsDetailsWasRequired) requestAnimationFrame(() => goalsDetailsCard?.scrollIntoView({ behavior: "smooth", block: "center" }));
+    goalsDetailsWasRequired = detailsRequired;
+  };
+  for (const input of goalsInputs) input.addEventListener("change", syncGoalsDetails);
+  syncGoalsDetails();
+  const measurementCards = [...document.querySelectorAll<HTMLElement>("[data-conditional-key]")];
+  const getSelectedValue = (questionId: string) => document.querySelector<HTMLInputElement>(`input[name='${questionId}']:checked`)?.value;
+  const setMeasurementVisibility = (key: string, visible: boolean) => {
+    for (const card of measurementCards.filter((item) => item.dataset.conditionalKey === key)) {
+      card.classList.toggle("is-visible", visible);
+      card.setAttribute("aria-hidden", String(!visible));
+      for (const input of card.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea")) {
+        input.disabled = !visible;
+        if (!visible) {
+          if (input instanceof HTMLInputElement && (input.type === "checkbox" || input.type === "radio")) input.checked = false;
+          else input.value = "";
+        }
+      }
+    }
+  };
+  const syncMeasurementQuestions = () => {
+    const heightChoice = getSelectedValue(heightChoiceQuestionId);
+    const weightChoice = getSelectedValue(weightChoiceQuestionId);
+    const weightEstimateInput = document.querySelector<HTMLInputElement>(`input[name='${weightEstimateInputQuestionId}']`);
+    setMeasurementVisibility("height-known", heightChoice === heightKnownOptionValue);
+    setMeasurementVisibility("height-estimate", heightChoice === heightEstimateOptionValue);
+    setMeasurementVisibility("weight-known", weightChoice === weightKnownOptionValue);
+    setMeasurementVisibility("weight-estimate", weightChoice === weightEstimateOptionValue);
+    setMeasurementVisibility("weight-estimate-followup", weightChoice === weightEstimateOptionValue && Boolean(weightEstimateInput?.value.trim()));
+  };
+  for (const input of document.querySelectorAll<HTMLInputElement>(`input[name='${heightChoiceQuestionId}'], input[name='${weightChoiceQuestionId}']`)) input.addEventListener("change", syncMeasurementQuestions);
+  document.querySelector<HTMLInputElement>(`input[name='${weightEstimateInputQuestionId}']`)?.addEventListener("input", syncMeasurementQuestions);
+  document.querySelector<HTMLInputElement>(`input[name='${weightEstimateInputQuestionId}']`)?.addEventListener("change", syncMeasurementQuestions);
+  syncMeasurementQuestions();
+  const questionList = document.querySelector<HTMLElement>("#part4-question-list");
+  const stepHeadings = [...document.querySelectorAll<HTMLElement>("[data-step-heading]")];
+  const stepQuestions = [...document.querySelectorAll<HTMLElement>("[data-field-id][data-question-group]")];
+  const questionGroupElements = [...document.querySelectorAll<HTMLElement>("[data-question-group]")];
+  const activityTotalReference = document.querySelector<HTMLElement>("#activity-total-reference");
+  const activityMinutesGroupIndex = 2;
+  const highSessionWarningThreshold = 10;
+  const heightInputFieldIds = new Set(["bd07595c-a567-4fab-a2f0-1ccb4eb28315", "b7628041-c31e-4cfa-bd2d-8036a896ae9f"]);
+  const weightInputFieldIds = new Set(["629ae559-1911-40bd-8c3d-a20899170ca7", "e2e36670-90a8-42cd-a4f9-f68bcb867e46"]);
+  const getTotalActivitySessions = () => Math.max(0, Number(overallActivityInput?.value || 0) || 0);
+  const syncActivityWarning = () => {
+    const totalSessions = getTotalActivitySessions();
+    if (!warning) return;
+    warning.textContent = totalSessions > highSessionWarningThreshold
+      ? `You entered ${totalSessions} physical activity sessions per week. Please check that this total is correct.`
+      : "";
+    warning.hidden = totalSessions <= highSessionWarningThreshold;
+  };
+  const syncActivityBreakdown = () => {
+    const totalSessions = getTotalActivitySessions();
+    const isZeroActivity = totalSessions === 0;
+    for (const input of document.querySelectorAll<HTMLInputElement>("[data-intensity-unit='sessions'] input[type='number']")) {
+      input.max = String(totalSessions);
+    }
+    if (activityTotalReference) {
+      const unit = totalSessions === 1 ? "session" : "sessions";
+      activityTotalReference.textContent = `You said you complete ${totalSessions} ${unit} per week.`;
+    }
+    for (const card of stepQuestions.filter((item) => item.dataset.intensityUnit === "sessions" || item.dataset.intensityUnit === "minutes")) {
+      if (!isZeroActivity) continue;
+      const input = card.querySelector<HTMLInputElement>("input[type='number']");
+      if (input) input.value = "0";
+    }
+    return isZeroActivity;
+  };
+  const validateWamInputs = () => {
+    const inputs = [...document.querySelectorAll<HTMLInputElement>("input[type='number'][name='05a45715-434c-4851-a042-855c59e6a220'], input[type='number'][name='aaf40be5-18ef-416e-b9d6-6e5b0fb3405c'], input[type='number'][name='f9f0265d-17d9-402f-b13d-44dc92e11db0']")];
+    const values = inputs.map((input) => Number(input.value));
+    const invalid = values.some((value) => !Number.isFinite(value) || value < 0 || value > 10080 || Math.abs(value * 10 - Math.round(value * 10)) > 1e-9);
+    const total = values.reduce((sum, value) => sum + value, 0);
+    const reportedSessions = getTotalActivitySessions();
+    if (!invalid && total === 0 && reportedSessions > 0) {
+      if (error) {
+        error.textContent = "Enter minutes for at least one intensity because your weekly activity total is greater than zero.";
+        error.hidden = false;
+      }
+      return false;
+    }
+    if (invalid || total > 10080) {
+      if (error) {
+        error.textContent = invalid ? "Enter each weekly minute value as a non-negative number with no more than one decimal place." : "The combined weekly minutes cannot exceed 10,080.";
+        error.hidden = false;
+      }
+      return false;
+    }
+    return true;
+  };
+  const stepDescriptions = [...document.querySelectorAll<HTMLElement>("[data-step-description]")];
+  const reviewPanel = document.querySelector<HTMLElement>("#part4-review");
+  const reviewContent = document.querySelector<HTMLElement>("#part4-review-content");
+  const progressBar = document.querySelector<HTMLElement>("#part4-progress-bar");
+  const progressLabel = document.querySelector<HTMLElement>("#part4-progress-label");
+  const backButton = document.querySelector<HTMLButtonElement>("#part4-back");
+  const nextButton = document.querySelector<HTMLButtonElement>("#part4-next");
+  const submitButton = document.querySelector<HTMLButtonElement>("#part4-submit");
+  const returnPortalButton = document.querySelector<HTMLAnchorElement>("#part4-return-portal");
+  const reviewConfirmation = document.querySelector<HTMLInputElement>("#part4-review-confirmation");
+  const submittedState = document.querySelector<HTMLElement>(".eoi-part4");
+  const showSubmittedState = () => {
+    submittedState?.classList.add("is-submitted");
+    questionList?.setAttribute("hidden", "");
+    if (reviewPanel) reviewPanel.hidden = true;
+    if (warning) warning.hidden = true;
+    if (error) error.hidden = true;
+    if (success) success.hidden = false;
+    if (backButton) backButton.hidden = true;
+    if (nextButton) nextButton.hidden = true;
+    if (submitButton) submitButton.hidden = true;
+    if (returnPortalButton) returnPortalButton.hidden = false;
+  };
+  const wamFieldIds = new Set(["05a45715-434c-4851-a042-855c59e6a220", "aaf40be5-18ef-416e-b9d6-6e5b0fb3405c", "f9f0265d-17d9-402f-b13d-44dc92e11db0"]);
+  let currentGroup = 0;
+  let showingReview = false;
+  const isQuestionAvailable = (group: HTMLElement) => (!group.dataset.conditionalKey || group.classList.contains("is-visible")) && (!group.dataset.gymnasticsFollowUp || group.classList.contains("is-visible"));
+  const getGroupQuestions = (groupIndex: number) => stepQuestions.filter((group) => group.dataset.questionGroup === String(groupIndex) && isQuestionAvailable(group));
+  const getSectionQuestions = (stepIndex: number) => stepQuestions.filter((group) => group.dataset.stepIndex === String(stepIndex) && isQuestionAvailable(group));
+  const getAvailableGroupIndices = () => {
+    const skipActivityBreakdown = syncActivityBreakdown();
+    return [...new Set(stepQuestions.map((group) => Number(group.dataset.questionGroup)))].sort((a, b) => a - b).filter((groupIndex) => !(skipActivityBreakdown && groupIndex === activityMinutesGroupIndex) && getGroupQuestions(groupIndex).length > 0);
+  };
+  const validateGroup = (groupIndex: number) => {
+    if (groupIndex === activityMinutesGroupIndex && !validateWamInputs()) return false;
+    for (const group of getGroupQuestions(groupIndex)) {
+      const checkboxes = [...group.querySelectorAll<HTMLInputElement>("input[type='checkbox']")];
+      if (group.dataset.required === "true" && checkboxes.length) {
+        const valid = checkboxes.some((input) => input.checked);
+        checkboxes[0].setCustomValidity(valid ? "" : "Please select at least one option.");
+        if (!valid) { checkboxes[0].reportValidity(); return false; }
+      }
+      for (const control of [...group.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input:not(:disabled), textarea:not(:disabled)")].filter((control) => !control.closest("[hidden]"))) {
+        if (!control.checkValidity()) { control.reportValidity(); return false; }
+      }
+    }
+    if (error) error.hidden = true;
+    return true;
+  };
+  const showGroup = (groupIndex: number, shouldFocus = true, animate = shouldFocus, scrollToSection = false) => {
+    const availableGroupIndices = getAvailableGroupIndices();
+    const resolvedGroupIndex = availableGroupIndices.includes(groupIndex) ? groupIndex : availableGroupIndices[0];
+    if (resolvedGroupIndex === undefined) return;
+    if (error) {
+      error.hidden = true;
+      error.textContent = "";
+    }
+    const groupPosition = availableGroupIndices.indexOf(resolvedGroupIndex);
+    const sectionIndex = stepQuestions.find((group) => group.dataset.questionGroup === String(resolvedGroupIndex))?.dataset.stepIndex || "0";
+    showingReview = false;
+    currentGroup = resolvedGroupIndex;
+    questionList?.removeAttribute("hidden");
+    if (reviewPanel) reviewPanel.hidden = true;
+    for (const heading of stepHeadings) heading.classList.toggle("is-step-visible", heading.dataset.stepIndex === sectionIndex);
+    for (const group of questionGroupElements) group.classList.toggle("is-question-visible", group.dataset.questionGroup === String(resolvedGroupIndex));
+    if (animate && questionList) {
+      questionList.classList.remove("is-changing");
+      requestAnimationFrame(() => questionList.classList.add("is-changing"));
+    }
+    for (const description of stepDescriptions) description.hidden = description.dataset.stepDescription !== String(resolvedGroupIndex);
+    const sectionTitle = stepHeadings.find((heading) => heading.dataset.stepIndex === sectionIndex)?.querySelector("h2")?.textContent?.trim() || "Form";
+    const progressText = `Question ${groupPosition + 1} of ${availableGroupIndices.length}`;
+    if (progressBar) progressBar.style.width = `${((groupPosition + 1) / availableGroupIndices.length) * 100}%`;
+    if (progressLabel) {
+      progressLabel.textContent = progressText;
+      progressLabel.setAttribute("aria-label", `${progressText}, ${sectionTitle}`);
+    }
+    if (backButton) backButton.hidden = groupPosition === 0;
+    if (nextButton) nextButton.hidden = false;
+    if (submitButton) submitButton.hidden = true;
+    if (reviewConfirmation) reviewConfirmation.checked = false;
+    if (submitButton) submitButton.disabled = true;
+    if (returnPortalButton) returnPortalButton.hidden = true;
+    if (shouldFocus) requestAnimationFrame(() => {
+      const firstGroup = getGroupQuestions(resolvedGroupIndex)[0];
+      const firstControl = firstGroup?.querySelector<HTMLInputElement | HTMLTextAreaElement>("input:not(:disabled), textarea:not(:disabled)");
+      const sectionHeading = stepHeadings.find((heading) => heading.dataset.stepIndex === sectionIndex);
+      const sectionKicker = sectionHeading?.querySelector<HTMLElement>(".gf-step-kicker");
+      const focusTarget = firstControl || sectionHeading?.querySelector<HTMLElement>("h2");
+      focusTarget?.focus({ preventScroll: true });
+      (scrollToSection ? sectionKicker : firstGroup || focusTarget)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+  const buildReview = () => {
+    if (!reviewContent) return;
+    reviewContent.replaceChildren();
+    const availableGroupIndices = getAvailableGroupIndices();
+    const reviewGroupIndices = availableGroupIndices.filter((groupIndex) => groupIndex !== 0);
+    const questionNumberByGroup = new Map(reviewGroupIndices.map((groupIndex, index) => [groupIndex, index + 1]));
+    const getReviewQuestionGroup = (list: HTMLElement, questionNumber: number | undefined) => {
+      if (!questionNumber) return list;
+      return list.querySelector<HTMLElement>(`[data-review-question-number='${questionNumber}']`) || (() => {
+        const group = document.createElement("div");
+        group.className = "gf-review-question-group";
+        group.dataset.reviewQuestionNumber = String(questionNumber);
+        group.setAttribute("aria-label", `Question ${questionNumber}`);
+        list.append(group);
+        return group;
+      })();
+    };
+    const addReviewGroupHeading = (list: HTMLElement, questionNumber: number | undefined, label: string) => {
+      const questionGroup = getReviewQuestionGroup(list, questionNumber);
+      if (questionGroup.querySelector(".gf-review-question-heading")) return;
+      const heading = document.createElement("div");
+      heading.className = "gf-review-question-heading";
+      const headingLabel = document.createElement("h4");
+      headingLabel.textContent = label;
+      heading.append(headingLabel);
+      questionGroup.prepend(heading);
+    };
+    const addReviewItem = (list: HTMLElement, questionNumber: number | undefined, label: string, value: string | string[]) => {
+      const questionGroup = getReviewQuestionGroup(list, questionNumber);
+      const item = document.createElement("div");
+      item.className = "gf-review-question-item";
+      const term = document.createElement("dt");
+      term.textContent = label;
+      const description = document.createElement("dd");
+      if (Array.isArray(value)) {
+        const bullets = document.createElement("ul");
+        bullets.className = "gf-review-bullets";
+        for (const entry of value) {
+          const bullet = document.createElement("li");
+          bullet.textContent = entry;
+          bullets.append(bullet);
+        }
+        description.append(bullets);
+      } else {
+        description.textContent = value || "Not provided";
+      }
+      if (label) item.append(term);
+      else item.classList.add("gf-review-question-item--full");
+      item.append(description);
+      questionGroup.append(item);
+    };
+    const addFitnessReviewItem = (list: HTMLElement, questionNumber: number | undefined, entries: { label: string; detail?: string }[]) => {
+      const questionGroup = getReviewQuestionGroup(list, questionNumber);
+      const item = document.createElement("div");
+      item.className = "gf-review-question-item gf-review-question-item--full";
+      const description = document.createElement("dd");
+      const bullets = document.createElement("ul");
+      bullets.className = "gf-review-bullets";
+      for (const entry of entries) {
+        const bullet = document.createElement("li");
+        bullet.textContent = entry.label;
+        if (entry.detail) {
+          const details = document.createElement("ul");
+          details.className = "gf-review-bullet-details";
+          const detail = document.createElement("li");
+          detail.textContent = entry.detail;
+          details.append(detail);
+          bullet.append(details);
+        }
+        bullets.append(bullet);
+      }
+      description.append(bullets);
+      item.append(description);
+      questionGroup.append(item);
+    };
+    for (const heading of stepHeadings) {
+      const stepIndex = heading.dataset.stepIndex || "0";
+      if (stepIndex === "-1") continue;
+      const reviewGroup = document.createElement("section");
+      reviewGroup.className = "gf-review-group";
+      reviewGroup.dataset.reviewStep = stepIndex;
+      const title = document.createElement("h3");
+      title.textContent = heading.querySelector("h2")?.textContent?.trim() || "Section";
+      reviewGroup.append(title);
+      const list = document.createElement("dl");
+      list.className = "gf-review-list";
+      let sessionsHeadingAdded = false;
+      for (const group of getSectionQuestions(Number(stepIndex)).filter((item) => availableGroupIndices.includes(Number(item.dataset.questionGroup)))) {
+        const groupIndex = Number(group.dataset.questionGroup);
+        if (heightChoiceQuestionId === group.dataset.fieldId || weightChoiceQuestionId === group.dataset.fieldId || group.dataset.intensityUnit === "minutes") continue;
+        const label = group.dataset.fieldId === gymnasticsStatusQuestionId
+          ? "Gymnastics Experience"
+          : group.dataset.fieldId === "de1f389b-103e-42b2-b861-83a14dcd629d"
+            ? "Last weigh in"
+            : group.dataset.fieldId === overallActivityFieldId
+              ? "Sessions per week"
+            : group.dataset.fieldId === fitnessBackgroundQuestionId
+              ? ""
+              : group.querySelector<HTMLElement>(".gf-field-label")?.textContent?.replace(/\s*\*$/, "").trim();
+        if (!label && group.dataset.fieldId !== fitnessBackgroundQuestionId && group.dataset.fieldId !== pastGymnasticsDetailsQuestionId) continue;
+        const inputs = [...group.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input:not(:disabled), textarea:not(:disabled)")];
+        if (group.dataset.fieldId === fitnessBackgroundQuestionId) {
+          const entries = inputs
+            .filter((input) => input instanceof HTMLInputElement && input.type === "checkbox" && input.checked)
+            .map((input) => {
+              const optionValue = input.value;
+              if (optionValue === otherOptionValue) return { label: fitnessBackgroundOtherInput?.value.trim() || "Not provided" };
+              return {
+                label: fitnessBackgroundReviewLabels.get(optionValue) || input.closest("label")?.textContent?.replace(/\s+/g, " ").trim() || optionValue,
+                detail: fitnessBackgroundReviewDetails.get(optionValue)
+              };
+            });
+          if (entries.length) addFitnessReviewItem(list, questionNumberByGroup.get(groupIndex), entries);
+          continue;
+        }
+        let values = inputs[0]?.type === "checkbox" || inputs[0]?.type === "radio"
+          ? inputs.filter((input) => (input as HTMLInputElement).checked).map((input) => input.closest("label")?.textContent?.replace(/\s+/g, " ").trim() || input.value).map((value) => group.dataset.fieldId === fitnessBackgroundQuestionId && value === "Gymnastics (Any style)" ? "Gymnastics" : value)
+          : [inputs[0]?.value?.trim() || (group.dataset.fieldId === overallActivityFieldId ? "0" : "Not provided")];
+        if (group.dataset.fieldId === fitnessBackgroundQuestionId && fitnessBackgroundInputs.some((input) => input.checked && input.value === otherOptionValue) && fitnessBackgroundOtherInput?.value.trim()) {
+          values = values.filter((value) => value !== "Other (Please specify)");
+          values.push(fitnessBackgroundOtherInput.value.trim());
+        }
+        const rawValue = values.filter(Boolean).join(", ");
+        if (group.dataset.fieldId === pastGymnasticsDetailsQuestionId) {
+          const statusGroupIndex = Number(stepQuestions.find((item) => item.dataset.fieldId === gymnasticsStatusQuestionId)?.dataset.questionGroup ?? groupIndex);
+          if (rawValue && rawValue !== "Not provided") addReviewItem(list, questionNumberByGroup.get(statusGroupIndex), "", rawValue);
+          continue;
+        }
+        if (group.dataset.required !== "true" && (!rawValue || rawValue === "Not provided")) continue;
+        const unit = group.dataset.intensityUnit === "sessions" || group.dataset.fieldId === overallActivityFieldId
+          ? "sessions"
+          : heightInputFieldIds.has(group.dataset.fieldId || "")
+            ? "cm"
+            : weightInputFieldIds.has(group.dataset.fieldId || "")
+              ? "kg"
+              : "";
+        const displayValue = unit && rawValue !== "Not provided" ? `${rawValue} ${unit}` : rawValue;
+        if (group.dataset.intensityUnit === "sessions" && !sessionsHeadingAdded) {
+          addReviewGroupHeading(list, questionNumberByGroup.get(groupIndex), "Sessions by intensity");
+          sessionsHeadingAdded = true;
+        }
+        addReviewItem(list, questionNumberByGroup.get(groupIndex), label || "", group.dataset.fieldId === fitnessBackgroundQuestionId ? values : displayValue);
+      }
+      if (stepIndex === "0" && availableGroupIndices.includes(activityMinutesGroupIndex)) {
+        addReviewGroupHeading(list, questionNumberByGroup.get(activityMinutesGroupIndex), "Minutes by intensity");
+        for (const group of getSectionQuestions(0).filter((item) => item.dataset.intensityUnit === "minutes")) {
+          const label = group.querySelector<HTMLElement>(".gf-field-label")?.textContent?.replace(/\s*\*$/, "").trim() || "Intensity";
+          const value = group.querySelector<HTMLInputElement>("input[type='number']")?.value?.trim() || "0";
+          addReviewItem(list, questionNumberByGroup.get(activityMinutesGroupIndex), label, `${value} minutes`);
+        }
+      }
+      reviewGroup.append(list);
+      reviewContent.append(reviewGroup);
+    }
+  };
+  const showReview = () => {
+    if (!validateGroup(currentGroup)) return;
+    buildReview();
+    showingReview = true;
+    questionList?.setAttribute("hidden", "");
+    if (reviewPanel) reviewPanel.hidden = false;
+    if (progressBar) progressBar.style.width = "100%";
+    if (progressLabel) progressLabel.textContent = "Final Review: Check your answers!";
+    if (backButton) backButton.hidden = false;
+    if (nextButton) nextButton.hidden = true;
+    if (submitButton) submitButton.hidden = false;
+    if (reviewConfirmation) reviewConfirmation.checked = false;
+    if (submitButton) submitButton.disabled = true;
+    if (returnPortalButton) returnPortalButton.hidden = true;
+    requestAnimationFrame(() => document.querySelector<HTMLElement>("#part4-review-heading")?.focus());
+  };
+  backButton?.addEventListener("click", () => {
+    const availableGroupIndices = getAvailableGroupIndices();
+    if (showingReview) showGroup(availableGroupIndices[availableGroupIndices.length - 1] ?? 0);
+    else {
+      const groupPosition = availableGroupIndices.indexOf(currentGroup);
+      if (groupPosition > 0) showGroup(availableGroupIndices[groupPosition - 1]);
+    }
+  });
+  nextButton?.addEventListener("click", () => {
+    if (!validateGroup(currentGroup)) return;
+    const availableGroupIndices = getAvailableGroupIndices();
+    const groupPosition = availableGroupIndices.indexOf(currentGroup);
+    if (groupPosition === availableGroupIndices.length - 1) showReview();
+    else showGroup(availableGroupIndices[groupPosition + 1], true, true, true);
+  });
+  reviewConfirmation?.addEventListener("change", () => {
+    if (submitButton) submitButton.disabled = !reviewConfirmation.checked;
+  });
+  overallActivityInput?.addEventListener("input", () => {
+    syncActivityBreakdown();
+    syncActivityWarning();
+  });
+  overallActivityInput?.addEventListener("change", () => {
+    syncActivityBreakdown();
+    syncActivityWarning();
+  });
+  syncActivityBreakdown();
+  syncActivityWarning();
+  showGroup(getAvailableGroupIndices()[0] ?? 0, false, true);
+  if (document.querySelector<HTMLElement>("[data-success-preview='true']")) {
+    showSubmittedState();
+  }
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!form.checkValidity()) { form.reportValidity(); return; }
     const answers: Record<string, unknown> = {};
     const normalizedAnswers = [];
     for (const group of form.querySelectorAll<HTMLElement>("[data-field-id]")) {
+      if (group.dataset.conditionalKey && !group.classList.contains("is-visible")) continue;
       const fieldName = group.dataset.fieldId;
       if (!fieldName) continue;
+      if (fieldName === "healthInformationNotice") continue;
       const inputs = [...group.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(`[name='${fieldName}']`)];
-      const value = inputs[0]?.type === "checkbox" ? inputs.filter((input) => (input as HTMLInputElement).checked).map((input) => input.value) : inputs[0]?.value || "";
+      const rawValue = inputs[0]?.type === "checkbox" ? inputs.filter((input) => (input as HTMLInputElement).checked).map((input) => input.value) : inputs[0]?.value?.trim() || (fieldName === overallActivityFieldId ? "0" : "");
+      const value = wamFieldIds.has(fieldName) ? Number(rawValue) : rawValue;
       answers[fieldName] = value; normalizedAnswers.push({ fieldName, value });
     }
+    for (const fieldName of ["healthInformationFirstName", "healthInformationLastName", "healthInformationDate", "healthInformationConsent", "healthInformationSignature", "healthInformationSignatureSvg", "healthInformationSignatureFileName", "healthInformationSignatureSignedAt", "healthInformationSignatureDocumentID"]) {
+      const control = form.elements.namedItem(fieldName) as HTMLInputElement | null;
+      const value = control instanceof HTMLInputElement && control.type === "checkbox" ? (control.checked ? control.value : "") : (control?.value?.trim() || "");
+      answers[fieldName] = value;
+      normalizedAnswers.push({ fieldName, value });
+    }
+    if (fitnessBackgroundOtherInput && !fitnessBackgroundOtherInput.disabled) {
+      const value = fitnessBackgroundOtherInput.value.trim();
+      answers[fitnessBackgroundOtherFieldName] = value;
+      normalizedAnswers.push({ fieldName: fitnessBackgroundOtherFieldName, value });
+    }
     const payload = { formPart: "4", formVersion: "1", submissionID: `EOI-P4-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, submittedAt: new Date().toISOString(), answers, normalizedAnswers, calculatedFields: {}, conditionalFollowups: [] };
-    const response = await fetch("/api/rfm-part4", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
-    if (!response.ok) { if (error) { error.textContent = "We couldn’t submit Part 4. Please try again."; error.hidden = false; } return; }
-    if (success) success.hidden = false;
-    const button = form.querySelector<HTMLButtonElement>("button[type=submit]"); if (button) button.disabled = true;
+    if (submitButton) submitButton.disabled = true;
+    let response: Response | undefined;
+    let result: { ok?: boolean; submissionID?: unknown } = {};
+    try {
+      response = await fetch("/api/rfm-part4", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+      result = await response.json() as { ok?: boolean; submissionID?: unknown };
+    } catch {
+      response = undefined;
+    }
+    if (!response?.ok || result.ok !== true || typeof result.submissionID !== "string" || !result.submissionID.trim()) {
+      if (error) { error.textContent = "We couldn’t confirm submission of Part 4. Please try again. If this continues, please email support@gymfusion.com.au"; error.hidden = false; }
+      if (submitButton) submitButton.disabled = false;
+      return;
+    }
+    if (submitButton) submitButton.disabled = true;
+    showSubmittedState();
   });
 </script>

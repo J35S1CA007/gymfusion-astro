@@ -1,61 +1,391 @@
 ---
-import PortalLayout from "../../layouts/PortalLayout.astro";
-import PortalShell from "../../components/portal/PortalShell";
 import { loadPortalPage } from "../../lib/portal-page";
-import "../../styles/global.css";
-const session = await loadPortalPage(Astro.request, Astro.locals);
+import HealthInformationNotice from "../../components/HealthInformationNotice.astro";
+const isDevelopmentPreview = import.meta.env.DEV;
+const showSuccessPreview = isDevelopmentPreview && Astro.url.searchParams.get("preview") === "success";
+const session = isDevelopmentPreview
+  ? { kind: "authenticated" as const, displayName: "Preview Member" }
+  : await loadPortalPage(Astro.request, Astro.locals);
 if (session.kind === "redirect") return new Response(null, { status: 303, headers: { Location: "/login", "Cache-Control": "no-store" } });
-if (session.kind === "unavailable") Astro.response.status = 503;
+if (session.kind === "unavailable") return new Response("Members Portal is temporarily unavailable.", { status: 503, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
 ---
-{session.kind === "authenticated" ? <PortalLayout title="Accessibility & Support Needs" description="EOI Part 3"><PortalShell client:load active="eoi" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref="/api/auth/logout"><main class="eoi-part3" aria-labelledby="part3-title">
-  <p class="eyebrow">EOI Part 3 - Accessibility & Support Needs</p>
-  <h1 id="part3-title">Accessibility & Support Needs</h1>
-  <p>No diagnosis required. Let us know anything that may affect how you move or recover.</p>
-  <form id="part3-form" novalidate>
-    <fieldset><legend>Past injuries, current conditions and pain</legend><p>Select all that apply.</p><div class="options">
-      <label><input type="checkbox" name="injuries" value="previous_recovered" /> Previous injury (Fully recovered, but worth noting)</label>
-      <label><input type="checkbox" name="injuries" value="previous_limitation" /> Previous injury (may cause occasional discomfort or limitation)</label>
-      <label><input type="checkbox" name="injuries" value="current_injury" /> Current injury (e.g., sprain, strain, tear, fracture etc)</label>
-      <label><input type="checkbox" name="injuries" value="no_issues" /> No issues — I do not have any injuries, pain, or areas that aren’t 100%</label>
-      <label><input type="checkbox" name="injuries" value="chronic_condition" /> Chronic condition or pain</label>
-      <label><input type="checkbox" name="injuries" value="something_else" /> Something else? (Please specify)</label>
-    </div></fieldset>
-    <label for="injury-details">Please provide relevant details about the issue, including what it is, which movements aggravate it, anything that tends to trigger flare-ups, how you currently manage it, and whether you have previously done or are currently doing physiotherapy</label>
-    <textarea id="injury-details" name="injuryDetails" minlength="30" maxlength="350" required placeholder="e.g., My wrist doesn’t love weight-bearing or pushing movements, but it’s not injured."></textarea>
-    <fieldset><legend>Disability or Other Conditions/Factors Enquiry</legend><p>Select all that apply, or leave blank if none apply / you prefer not to say.</p><div class="options">
-      <label><input type="checkbox" name="needs" value="disability" /> Yes — I have a disability that may influence how I train or participate</label>
-      <label><input type="checkbox" name="needs" value="health_condition" /> Yes — I have a long-term or ongoing health condition that may affect how I train or participate (not already mentioned)</label>
-      <label><input type="checkbox" name="needs" value="neurodivergence" /> Yes — I am neurodivergent and may benefit from specific communication or environmental considerations</label>
-      <label><input type="checkbox" name="needs" value="other_factor" /> Yes — I have another condition or factor that may influence how I train or participate (not previously mentioned).</label>
-      <label><input type="checkbox" name="needs" value="none" /> No — I do not have any long-term or ongoing health conditions that affect how I train or participate.</label>
-    </div></fieldset>
-    <label for="needs-details">Please share any details you feel comfortable providing that may help us understand your needs or support your participation</label>
-    <textarea id="needs-details" name="needsDetails" required></textarea>
-    <p id="part3-error" class="error" role="alert" hidden></p><p id="part3-success" class="success" role="status" hidden>Part 3 has been submitted.</p><button type="submit">Submit Part 3</button>
-  </form>
-</main></PortalShell></PortalLayout> : <main>Members Portal is temporarily unavailable.</main>}
-<style>
-  .eoi-part3 { width: min(940px, 100%); margin: 0 auto; padding: 20px; background: #f5f5f5; color: #000; font-family: "Gamuth Sans", Arial, sans-serif; }
-  .eoi-part3 form { display: grid; gap: 26px; margin: 0; padding: 34px 34px 44px; border: 1px solid rgba(0,0,0,.16); border-radius: 24px; background: #fff; box-shadow: 0 24px 70px rgba(0,0,0,.08); }
-  .eoi-part3 h1 { font-size: clamp(32px, 5.5vw, 60px); line-height: .95; letter-spacing: -.04em; margin: 0; }.eyebrow { color: #4b4b4b; font-size: 11.5px; letter-spacing: .085em; text-transform: uppercase; font-weight: 700; }
-  .eoi-part3 fieldset { border: 1px solid rgba(0,0,0,.16); border-radius: 24px; padding: 22px; background: linear-gradient(180deg,#fff 0%,#fcfcfc 100%); box-shadow: 0 1px 2px rgba(0,0,0,.04),0 10px 24px rgba(0,0,0,.04); }.eoi-part3 legend, .eoi-part3 label { font-weight: 700; }.eoi-part3 .options { display: grid; gap: 12px; margin-top: 16px; }.eoi-part3 .options label { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; font-weight: 400; }
-  .eoi-part3 textarea { min-height: 120px; resize: vertical; border: 1.25px solid rgba(0,0,0,.16); border-radius: 12px; padding: 12px; font: inherit; }.eoi-part3 textarea:focus-visible, .eoi-part3 input:focus-visible { outline: 3px solid rgba(0,0,0,.18); outline-offset: 2px; border-color: rgba(0,0,0,.86); }.eoi-part3 button { justify-self: start; min-height: 46px; padding: 10px 20px; border: 1px solid #000; border-radius: 999px; background: #000; color: #fff; font-weight: 700; cursor: pointer; }.error { color: #a00000; }.success { color: #176b36; } @media (max-width: 720px) { .eoi-part3 { padding: 10px; }.eoi-part3 form { padding: 18px 18px 28px; } }
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GYMFUSION Member Portal | Accessibility &amp; Support Needs</title>
+</head>
+<body>
+<main class={showSuccessPreview ? "eoi-part3 is-submitted" : "eoi-part3"} aria-labelledby="part3-title">
+  <div class="gf-wrap">
+    <div class="gf-shell">
+      <header class="gf-header">
+        <span class="gf-kicker">EOI PART 3</span>
+        <h1 id="part3-title"><span>Accessibility</span><span>&amp; Support Needs</span></h1>
+        <p class="gf-intro">Tell us anything that may affect how you move, recover, communicate, or participate so GYMFUSION can provide safe and appropriate coaching.</p>
+      </header>
+      <div class="gf-progress" aria-live="polite">
+        <div class="gf-progress-track" aria-hidden="true"><span id="part3-progress-bar"></span></div>
+        <p id="part3-progress-label">Question 1 of 3</p>
+      </div>
+      {showSuccessPreview ? (
+        <>
+          <section class="gf-success-panel" role="status" aria-labelledby="part-3-success-title">
+            <div class="gf-success-mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg></div>
+            <span class="gf-success-kicker">SUBMISSION COMPLETE</span>
+            <h2 id="part-3-success-title">Your Accessibility and Support Needs have been submitted successfully.</h2>
+          </section>
+          <nav class="gf-nav" aria-label="Part 3 form actions">
+            <div class="gf-nav-actions"><a class="gf-nav-button gf-nav-button--dashboard" href="/eoi">Return to Portal</a></div>
+          </nav>
+        </>
+      ) : (
+      <form id="part3-form" novalidate>
+        <section class="gf-page is-active">
+          <div class="gf-stage is-stage-visible" data-part3-stage="0">
+            <HealthInformationNotice />
+          </div>
+
+          <div class="gf-stage" data-part3-stage="1" hidden>
+            <div class="gf-stage-heading">
+              <span class="gf-step-kicker">SECTION 01 OF 02</span>
+              <h2 tabindex="-1">Injuries and Conditions</h2>
+              <p>Tell us about any injuries, pain, or conditions that may affect your training.</p>
+            </div>
+            <div class="gf-card">
+              <fieldset>
+                <legend>Do you have any past injuries, current conditions or pain we should know about?</legend>
+                <p class="gf-help">Select <strong>all</strong> that apply.</p>
+                <div class="gf-choice-row gf-injury-choices">
+                  <label class="gf-choice"><input type="checkbox" name="injuries" value="current_injury" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">Current injury</span> <span class="gf-choice-detail">(for example, sprain, strain, tear, fracture)</span></span></label>
+                  <label class="gf-choice"><input type="checkbox" name="injuries" value="chronic_condition" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">Chronic condition or pain</span></span></label>
+                  <label class="gf-choice"><input type="checkbox" name="injuries" value="previous_recovered" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">Previous injury</span> <span class="gf-choice-detail">(fully recovered, but worth noting)</span></span></label>
+                  <label class="gf-choice"><input type="checkbox" name="injuries" value="previous_limitation" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">Previous injury</span> <span class="gf-choice-detail">(may cause occasional discomfort or limitation)</span></span></label>
+                  <label class="gf-choice"><input type="checkbox" name="injuries" value="no_issues" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">No issues</span> <span class="gf-choice-detail">— I do not have any injuries, pain, or areas that aren’t 100%</span></span></label>
+                  <label class="gf-choice"><input type="checkbox" name="injuries" value="something_else" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">Something else?</span> <span class="gf-choice-detail">(Please specify)</span></span></label>
+                </div>
+              </fieldset>
+            </div>
+            <div class="gf-card gf-details-card" data-details-panel="injury" hidden>
+              <div class="gf-field">
+                <label for="injury-details">Please provide some further information:</label>
+                <p class="gf-help">For example, describe the injury, condition, or issue, including which movements— if any—make it worse, what typically causes flare-ups, how you’re currently managing the symptoms, and whether you’ve had or are currently undergoing physiotherapy.</p>
+                <textarea id="injury-details" name="injuryDetails" minlength="30" maxlength="350" placeholder="e.g., My wrist doesn’t love weight-bearing or pushing movements, but it’s not injured."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="gf-stage" data-part3-stage="2" hidden>
+            <div class="gf-stage-heading">
+              <span class="gf-step-kicker">SECTION 02 OF 02</span>
+              <h2 tabindex="-1">Participation Support</h2>
+              <p>Share any factors that may influence how you train or participate.</p>
+            </div>
+            <div class="gf-card">
+              <fieldset>
+                <legend>Do you have any disabilities, health conditions, or other factors that may influence how you train or participate?</legend>
+                <p class="gf-help">Select <strong>all</strong> that apply, or leave blank if none apply or you prefer not to say.</p>
+                <div class="gf-choice-row">
+                  <label class="gf-choice"><input type="checkbox" name="needs" value="disability" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">Yes</span> <span class="gf-choice-detail">— I have a disability that may influence how I train or participate</span></span></label>
+                  <label class="gf-choice"><input type="checkbox" name="needs" value="health_condition" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">Yes</span> <span class="gf-choice-detail">— I have a long-term or ongoing health condition that may affect how I train or participate</span></span></label>
+                  <label class="gf-choice"><input type="checkbox" name="needs" value="neurodivergence" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">Yes</span> <span class="gf-choice-detail">— I am neurodivergent and may benefit from specific communication or environmental considerations</span></span></label>
+                  <label class="gf-choice"><input type="checkbox" name="needs" value="other_factor" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">Yes</span> <span class="gf-choice-detail">— I have another condition or factor that may influence how I train or participate</span></span></label>
+                  <label class="gf-choice"><input type="checkbox" name="needs" value="none" /> <span class="gf-choice-copy"><span class="gf-choice-emphasis">No</span> <span class="gf-choice-detail">— I do not have any long-term or ongoing health conditions that affect how I train or participate</span></span></label>
+                </div>
+              </fieldset>
+            </div>
+            <div class="gf-card gf-details-card" data-details-panel="needs" hidden>
+              <div class="gf-field">
+                <label for="needs-details">Please share any details you feel comfortable providing that may help us understand your needs or support your participation</label>
+                <textarea id="needs-details" name="needsDetails" minlength="30" maxlength="500" placeholder="Share anything that would help us support you during training."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <p id="part3-error" class="gf-error" role="alert" hidden></p>
+          <section id="part3-success" class="gf-success-panel" role="status" aria-labelledby="part-3-success-title" hidden>
+            <div class="gf-success-mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg></div>
+            <span class="gf-success-kicker">SUBMISSION COMPLETE</span>
+            <h2 id="part-3-success-title">Your Accessibility and Support Needs have been submitted successfully.</h2>
+          </section>
+        </section>
+        <nav class="gf-nav" aria-label="Part 3 form actions">
+          <button type="button" id="part3-back" class="gf-nav-button gf-nav-button--back" hidden>Back</button>
+          <div class="gf-nav-actions">
+            <button type="button" id="part3-next" class="gf-nav-button gf-nav-button--next">Next</button>
+            <button type="submit" id="part3-submit" class="gf-nav-button gf-nav-button--continue" hidden>Submit</button>
+            <a id="part3-return-portal" class="gf-nav-button gf-nav-button--dashboard" href="/eoi" hidden>Return to Portal</a>
+          </div>
+        </nav>
+      </form>
+      )}
+    </div>
+  </div>
+</main>
+</body>
+</html>
+<style is:global>
+  @import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Dancing+Script:wght@500&family=Great+Vibes&family=Pacifico&display=swap");
+  @font-face { font-family: "Gamuth"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Gamuth"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: radial-gradient(circle at top, #fff 0%, #f7f7f7 44%, #eee 100%); color: #000; font-family: "Gamuth", Arial, Helvetica, sans-serif; line-height: 1.55; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  .eoi-part3 { color: #000; }
+  .gf-wrap { width: min(940px, 100%); margin: 0 auto; padding: 20px; }
+  .gf-shell { overflow: hidden; border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 34px; background: linear-gradient(180deg, #fff 0%, #fcfcfc 100%); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.08); }
+  .gf-header { display: flex; flex-direction: column; gap: 12px; padding: 34px 34px 30px; border-bottom: 1px solid rgba(0, 0, 0, 0.16); background: #fff; }
+  .gf-kicker { display: inline-flex; align-self: center; align-items: center; justify-content: center; width: fit-content; min-height: 34px; padding: 6px 16px 5px; border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 999px; font-size: 11.5px; letter-spacing: 0.085em; line-height: 1; font-weight: 700; text-align: center; text-transform: uppercase; white-space: nowrap; }
+  .gf-header h1 { margin: 0; font-size: clamp(32px, 5.5vw, 60px); line-height: 0.95; letter-spacing: -0.04em; }
+  .gf-header h1 span { display: block; }
+  .gf-intro { max-width: 800px; margin: 10px 0 0; color: #4b4b4b; font-size: 16px; line-height: 1.58; font-weight: 500; white-space: normal; overflow-wrap: normal; word-break: normal; text-wrap: pretty; }
+  .gf-progress { display: grid; gap: 8px; padding: 14px 34px 16px; border-bottom: 1px solid rgba(0, 0, 0, 0.16); background: #f0f0f0; }
+  .gf-progress-track { height: 6px; overflow: hidden; border-radius: 999px; background: #d6d6d6; }
+  .gf-progress-track span { display: block; width: 50%; height: 100%; border-radius: inherit; background: #000; transition: width 180ms ease; }
+  .gf-progress p { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  .gf-page { display: flex; flex-direction: column; gap: 26px; padding: 34px 34px 44px; }
+  .gf-stage { display: flex; flex-direction: column; gap: 20px; }
+  .gf-stage[hidden] { display: none; }
+  .gf-stage-heading { display: grid; gap: 5px; margin: 0 0 2px; padding: 4px 0 8px; }
+  .gf-step-kicker { color: #626262; font-size: 10px; font-weight: 800; letter-spacing: 0.12em; line-height: 1.2; }
+  .gf-stage-heading .gf-step-kicker { margin-bottom: 10px; }
+  .gf-stage-heading h2 { margin: 0 0 6px; font-size: clamp(26px, 3vw, 38px); line-height: 1.05; letter-spacing: -0.03em; }
+  .gf-stage-heading p { max-width: 760px; margin: 0; color: #4b4b4b; font-size: 15px; line-height: 1.55; }
+  .gf-section-title { margin: 0; font-size: clamp(26px, 3vw, 38px); line-height: 1.08; letter-spacing: -0.03em; }
+  .gf-help { margin: 0; color: #4b4b4b; line-height: 1.62; }
+  .gf-help { font-size: 13px; }
+  .gf-card { display: flex; flex-direction: column; gap: 24px; padding: 30px; border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 28px; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 24px rgba(0, 0, 0, 0.04); }
+  .gf-details-card[hidden] { display: none !important; }
+  .gf-field { display: flex; flex-direction: column; gap: 8px; }
+  .gf-details-card .gf-field { gap: 0; }
+  .gf-details-card .gf-help { margin-top: 8px; }
+  .gf-details-card textarea { margin-top: 20px; }
+  .gf-card fieldset { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; border: 0; }
+  .gf-card legend, .gf-card label { display: block; color: #000; line-height: 1.4; font-weight: 800; }
+  .gf-card legend { font-size: 16px; }
+  .gf-card .gf-help { margin-top: 8px; font-size: 13px; }
+  .gf-choice-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 20px; }
+  .gf-choice-row label:has(input[value="none"]) { grid-column: 1 / -1; }
+  .gf-choice { display: flex !important; position: relative; align-items: center; gap: 10px; min-height: 58px; margin: 0; padding: 14px 16px; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 18px; background: #fff; color: #111; cursor: pointer; font-size: 13px; font-weight: 700 !important; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02); transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+  .gf-health-notice .gf-consent-choice > span { font-weight: 500; }
+  .gf-choice-copy { flex: 1; font-size: 13px; }
+  .gf-choice-emphasis { font-size: 100%; }
+  .gf-choice-detail { font-size: 100%; font-weight: 500 !important; }
+  .gf-choice:hover { border-color: rgba(0, 0, 0, 0.36); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05); transform: translateY(-1px); }
+  .gf-choice input { width: 18px; height: 18px; margin: 0; accent-color: #000; flex: 0 0 auto; }
+  .gf-choice:has(input:checked) { border-color: #000; background: #000; color: #fff; box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16); }
+  .gf-choice:has(input:checked) input { accent-color: #fff; }
+  .gf-card input:not([type="checkbox"]), .gf-card textarea { width: 100%; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 17px; background: #fff; color: #000; padding: 15px 16px; font: inherit; outline: none; transition: border-color 160ms ease, box-shadow 160ms ease; }
+  .gf-card textarea { min-height: 120px; resize: vertical; }
+  .gf-details-card textarea { font-size: 13px; line-height: 1.62; }
+  .gf-card textarea:focus { border-color: rgba(0, 0, 0, 0.86); box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08); }
+  .gf-nav { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 24px 30px 30px; border-top: 1px solid rgba(0, 0, 0, 0.16); }
+  .gf-nav-actions { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+  .gf-nav-button { min-width: 144px; min-height: 50px; padding: 14px 24px; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 999px; background: #fff; color: #000; font: inherit; font-weight: 800; cursor: pointer; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05); transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
+  .gf-nav-button--back { background: #fff; color: #000; }
+  .gf-nav-button--next { background: #000; color: #fff; }
+  .gf-nav-button--dashboard { display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #000; text-decoration: none; }
+  .gf-nav-button--dashboard[hidden] { display: none; }
+  .gf-nav-button:hover, .gf-nav-button:active { background: #000; color: #fff; box-shadow: 0 14px 26px rgba(0, 0, 0, 0.14); }
+  .gf-nav-button--next:hover, .gf-nav-button--next:active { background: #fff; color: #000; }
+  .gf-nav-button:active { transform: translateY(1px); }
+  .gf-error { margin: 0; color: #a00000; }
+  .gf-success-panel { display: grid; justify-items: center; gap: 16px; width: min(100%, 620px); margin: auto; padding: clamp(34px, 7vw, 64px) clamp(24px, 6vw, 56px); border: 1px solid rgba(0, 0, 0, 0.14); border-radius: 30px; background: linear-gradient(145deg, #fafafa 0%, #fff 52%, #f1f1f1 100%); box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08); text-align: center; }
+  .gf-success-panel[hidden] { display: none; }
+  .gf-success-mark { display: grid; place-items: center; width: 68px; height: 68px; border: 2px solid #000; border-radius: 50%; background: #000; color: #fff; }
+  .gf-success-mark svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; }
+  .gf-success-kicker { color: #666; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; line-height: 1.2; }
+  .gf-success-panel h2 { max-width: 470px; margin: 0; font-size: clamp(26px, 4vw, 42px); line-height: 1.05; letter-spacing: -0.03em; }
+  .gf-success-panel #part-3-success-title { font-size: clamp(22px, 3vw, 34px); }
+  .eoi-part3.is-submitted .gf-header, .eoi-part3.is-submitted .gf-progress { display: none; }
+  .eoi-part3.is-submitted .gf-shell { display: flex; flex-direction: column; justify-content: center; min-height: calc(100svh - 40px); border: 0; background: transparent; box-shadow: none; }
+  .eoi-part3.is-submitted form { display: flex; flex-direction: column; justify-content: center; min-height: calc(100svh - 40px); }
+  .eoi-part3.is-submitted form .gf-page { display: contents; }
+  .eoi-part3.is-submitted .gf-success-panel { margin: 0 auto 22px; }
+  .eoi-part3.is-submitted .gf-nav { width: 100%; border-top: 0; background: transparent; justify-content: center; }
+  .eoi-part3.is-submitted .gf-nav-actions { margin-left: 0; }
+  .eoi-part3.is-submitted .gf-nav-button--dashboard { border-color: #000; background: #000; color: #fff; }
+  .eoi-part3.is-submitted .gf-nav-button--dashboard:hover, .eoi-part3.is-submitted .gf-nav-button--dashboard:focus-visible { background: #fff; color: #000; }
+  @media (max-width: 720px) {
+    .gf-wrap { padding: 10px; }
+    .gf-header { padding: 18px; }
+    .gf-intro { white-space: normal; font-size: 16px; }
+    .gf-progress { padding: 12px 18px 14px; }
+    .gf-page { gap: 22px; padding: 18px 18px 28px; }
+    .gf-stage-heading { padding-top: 0; }
+    .gf-card { padding: 22px; border-radius: 24px; }
+    .gf-choice-row { grid-template-columns: 1fr; }
+    .gf-nav { padding: 18px 18px 22px; }
+    .gf-nav-actions { width: 100%; }
+    .gf-nav-button { width: 100%; }
+    .eoi-part3.is-submitted .gf-shell { display: flex; flex-direction: column; justify-content: center; min-height: calc(100svh - 20px); }
+    .eoi-part3.is-submitted .gf-page { display: contents; }
+    .eoi-part3.is-submitted .gf-nav { width: 100%; }
+    .eoi-part3.is-submitted .gf-nav-actions { width: auto; }
+    .eoi-part3.is-submitted .gf-nav-button--dashboard { width: min(100%, 220px); min-width: 0; min-height: 44px; padding: 11px 24px; }
+  }
 </style>
 <script>
   const form = document.querySelector<HTMLFormElement>("#part3-form");
   const error = document.querySelector<HTMLElement>("#part3-error");
   const success = document.querySelector<HTMLElement>("#part3-success");
+  const injuryInputs = [...(form?.querySelectorAll<HTMLInputElement>('input[name="injuries"]') || [])];
+  const needsInputs = [...(form?.querySelectorAll<HTMLInputElement>('input[name="needs"]') || [])];
+  const injuryDetails = form?.elements.namedItem("injuryDetails") as HTMLTextAreaElement | null;
+  const needsDetails = form?.elements.namedItem("needsDetails") as HTMLTextAreaElement | null;
+  const injuryDetailsPanel = form?.querySelector<HTMLElement>('[data-details-panel="injury"]') ?? null;
+  const needsDetailsPanel = form?.querySelector<HTMLElement>('[data-details-panel="needs"]') ?? null;
+  const healthNotice = form?.querySelector<HTMLElement>("[data-health-information-notice]") ?? null;
+
+  function syncConditionalSelection(inputs: HTMLInputElement[], exclusiveValue: string, panel: HTMLElement | null, details: HTMLTextAreaElement | null, changedInput?: HTMLInputElement) {
+    if (changedInput?.checked) {
+      if (changedInput.value === exclusiveValue) {
+        inputs.filter((input) => input !== changedInput).forEach((input) => { input.checked = false; });
+      } else {
+        const exclusiveInput = inputs.find((input) => input.value === exclusiveValue);
+        if (exclusiveInput) exclusiveInput.checked = false;
+      }
+    }
+
+    const shouldShow = inputs.some((input) => input.checked && input.value !== exclusiveValue);
+    if (panel) {
+      panel.hidden = !shouldShow;
+      panel.setAttribute("aria-hidden", String(!shouldShow));
+    }
+    if (details) {
+      details.required = shouldShow;
+      if (!shouldShow) details.value = "";
+    }
+  }
+
+  function syncConditionalFields(changedInput?: HTMLInputElement) {
+    syncConditionalSelection(injuryInputs, "no_issues", injuryDetailsPanel, injuryDetails, changedInput?.name === "injuries" ? changedInput : undefined);
+    syncConditionalSelection(needsInputs, "none", needsDetailsPanel, needsDetails, changedInput?.name === "needs" ? changedInput : undefined);
+  }
+
+  [...injuryInputs, ...needsInputs].forEach((input) => {
+    input.addEventListener("change", () => syncConditionalFields(input));
+  });
+  syncConditionalFields();
+
+  const stages = [...document.querySelectorAll<HTMLElement>("[data-part3-stage]")];
+  const progressBar = document.querySelector<HTMLElement>("#part3-progress-bar");
+  const progressLabel = document.querySelector<HTMLElement>("#part3-progress-label");
+  const backButton = document.querySelector<HTMLButtonElement>("#part3-back");
+  const nextButton = document.querySelector<HTMLButtonElement>("#part3-next");
+  const submitButton = document.querySelector<HTMLButtonElement>("#part3-submit");
+  const returnPortalButton = document.querySelector<HTMLAnchorElement>("#part3-return-portal");
+  let currentStage = 0;
+
+  function validateDetails(kind: "injury" | "needs") {
+    const inputs = kind === "injury" ? injuryInputs : needsInputs;
+    const details = kind === "injury" ? injuryDetails : needsDetails;
+    const exclusiveValue = kind === "injury" ? "no_issues" : "none";
+    const required = inputs.some((input) => input.checked && input.value !== exclusiveValue);
+    const value = details?.value.trim() || "";
+    const maximum = kind === "injury" ? 350 : 500;
+    if (required && (value.length < 30 || value.length > maximum)) {
+      if (error) {
+        error.textContent = "Please complete the required details fields.";
+        error.hidden = false;
+      }
+      details?.focus();
+      return false;
+    }
+    return true;
+  }
+
+  function validateHealthNotice() {
+    if (!healthNotice) return true;
+    const controls = [...healthNotice.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>("input, textarea, select")]
+      .filter((control) => !control.closest("[hidden]"));
+    const firstInvalid = controls.find((control) => !control.checkValidity());
+    if (firstInvalid) {
+      if (error) {
+        error.textContent = "Please complete the health information notice before continuing.";
+        error.hidden = false;
+      }
+      firstInvalid.reportValidity();
+      return false;
+    }
+    return true;
+  }
+
+  function validateStage(stageIndex: number) {
+    const valid = stageIndex === 0
+      ? validateHealthNotice()
+      : validateDetails(stageIndex === 1 ? "injury" : "needs");
+    if (valid && error) {
+      error.hidden = true;
+      error.textContent = "";
+    }
+    return valid;
+  }
+
+  function updateStage(stageIndex: number, shouldFocus = true) {
+    currentStage = Math.max(0, Math.min(stages.length - 1, stageIndex));
+    if (error) {
+      error.hidden = true;
+      error.textContent = "";
+    }
+    stages.forEach((stage, index) => {
+      stage.hidden = index !== currentStage;
+      stage.classList.toggle("is-stage-visible", index === currentStage);
+    });
+    const progress = ((currentStage + 1) / stages.length) * 100;
+    if (progressBar) progressBar.style.width = `${progress}%`;
+    const progressText = `Question ${currentStage + 1} of ${stages.length}`;
+    if (progressLabel) {
+      progressLabel.textContent = progressText;
+      progressLabel.setAttribute("aria-label", progressText);
+    }
+    if (backButton) backButton.hidden = currentStage === 0;
+    if (nextButton) nextButton.hidden = currentStage === stages.length - 1;
+    if (submitButton) submitButton.hidden = currentStage !== stages.length - 1;
+    if (shouldFocus) {
+      requestAnimationFrame(() => {
+        const heading = stages[currentStage]?.querySelector<HTMLElement>("h2");
+        heading?.focus({ preventScroll: true });
+        stages[currentStage]?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }
+
+  function showSubmittedState() {
+    document.querySelector<HTMLElement>(".eoi-part3")?.classList.add("is-submitted");
+    stages.forEach((stage) => stage.classList.remove("is-stage-visible"));
+    if (success) success.hidden = false;
+    if (backButton) backButton.hidden = true;
+    if (nextButton) nextButton.hidden = true;
+    if (submitButton) submitButton.hidden = true;
+    if (submitButton) submitButton.disabled = true;
+    if (returnPortalButton) returnPortalButton.hidden = false;
+  }
+
+  backButton?.addEventListener("click", () => {
+    if (currentStage > 0) updateStage(currentStage - 1);
+  });
+
+  nextButton?.addEventListener("click", () => {
+    if (validateStage(currentStage)) updateStage(currentStage + 1);
+  });
+
+  updateStage(0, false);
+
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const injuryDetails = (form.elements.namedItem("injuryDetails") as HTMLTextAreaElement).value.trim();
-    const needsDetails = (form.elements.namedItem("needsDetails") as HTMLTextAreaElement).value.trim();
-    if (injuryDetails.length < 30 || injuryDetails.length > 350 || !needsDetails) { if (error) { error.textContent = "Please complete the required details fields."; error.hidden = false; } return; }
+    if (!validateHealthNotice() || !validateDetails("injury") || !validateDetails("needs")) return;
+    const injuryDetailsValue = injuryDetails?.value.trim() || "";
+    const needsDetailsValue = needsDetails?.value.trim() || "";
+    const noticeValue = (name: string) => (form?.elements.namedItem(name) as HTMLInputElement | null)?.value.trim() || "";
+    const injuryDetailsRequired = injuryInputs.some((input) => input.checked && input.value !== "no_issues");
+    const needsDetailsRequired = needsInputs.some((input) => input.checked && input.value !== "none");
+    if ((injuryDetailsRequired && (injuryDetailsValue.length < 30 || injuryDetailsValue.length > 350)) || (needsDetailsRequired && (needsDetailsValue.length < 30 || needsDetailsValue.length > 500))) { if (error) { error.textContent = "Please complete the required details fields."; error.hidden = false; } return; }
     if (error) error.hidden = true;
     const values = (name: string) => [...form.querySelectorAll<HTMLInputElement>(`[name=${name}]:checked`)].map((input) => input.value);
-    const payload = { formPart: "3", formVersion: "1", submissionID: `EOI-P3-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, submittedAt: new Date().toISOString(), answers: { injuries: values("injuries"), injuryDetails, needs: values("needs"), needsDetails }, normalizedAnswers: [{ fieldName: "injuries", value: values("injuries") }, { fieldName: "injuryDetails", value: injuryDetails }, { fieldName: "needs", value: values("needs") }, { fieldName: "needsDetails", value: needsDetails }], calculatedFields: {}, conditionalFollowups: [] };
+    const payload = { formPart: "3", formVersion: "1", submissionID: `EOI-P3-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, submittedAt: new Date().toISOString(), answers: { healthInformationFirstName: noticeValue("healthInformationFirstName"), healthInformationLastName: noticeValue("healthInformationLastName"), healthInformationDate: noticeValue("healthInformationDate"), healthInformationConsent: noticeValue("healthInformationConsent"), healthInformationSignature: noticeValue("healthInformationSignature"), healthInformationSignatureSvg: noticeValue("healthInformationSignatureSvg"), healthInformationSignatureFileName: noticeValue("healthInformationSignatureFileName"), healthInformationSignatureSignedAt: noticeValue("healthInformationSignatureSignedAt"), healthInformationSignatureDocumentID: noticeValue("healthInformationSignatureDocumentID"), injuries: values("injuries"), injuryDetails: injuryDetailsValue, needs: values("needs"), needsDetails: needsDetailsValue }, normalizedAnswers: [{ fieldName: "healthInformationFirstName", value: noticeValue("healthInformationFirstName") }, { fieldName: "healthInformationLastName", value: noticeValue("healthInformationLastName") }, { fieldName: "healthInformationDate", value: noticeValue("healthInformationDate") }, { fieldName: "healthInformationConsent", value: noticeValue("healthInformationConsent") }, { fieldName: "healthInformationSignature", value: noticeValue("healthInformationSignature") }, { fieldName: "healthInformationSignatureSvg", value: noticeValue("healthInformationSignatureSvg") }, { fieldName: "healthInformationSignatureFileName", value: noticeValue("healthInformationSignatureFileName") }, { fieldName: "healthInformationSignatureSignedAt", value: noticeValue("healthInformationSignatureSignedAt") }, { fieldName: "healthInformationSignatureDocumentID", value: noticeValue("healthInformationSignatureDocumentID") }, { fieldName: "injuries", value: values("injuries") }, { fieldName: "injuryDetails", value: injuryDetailsValue }, { fieldName: "needs", value: values("needs") }, { fieldName: "needsDetails", value: needsDetailsValue }], calculatedFields: {}, conditionalFollowups: [] };
     const response = await fetch("/api/rfm-part3", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
     if (!response.ok) { if (error) { error.textContent = "We couldn’t submit Part 3. Please try again."; error.hidden = false; } return; }
-    if (success) success.hidden = false;
-    const button = form.querySelector<HTMLButtonElement>("button[type=submit]"); if (button) button.disabled = true;
+    showSubmittedState();
   });
 </script>
