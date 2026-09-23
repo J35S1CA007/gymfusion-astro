@@ -1,0 +1,380 @@
+---
+import HealthDateTimePicker from "./HealthDateTimePicker";
+import HealthSignaturePad from "./HealthSignaturePad";
+
+interface Props {
+  controller?: boolean;
+}
+
+const { controller = true } = Astro.props;
+---
+<div class="gf-health-notice" data-health-information-notice data-health-information-controller={controller ? "true" : "false"}>
+  <h2 id="health-information-notice-heading" class="gf-section-title" tabindex="-1">Collection of Health Information Notice</h2>
+  <p class="gf-section-note">Please review and sign to confirm your acknowledgment and agreement to this Health Information Collection Notice prior to proceeding.</p>
+
+  <div class="gf-card soft gf-health-notice-card">
+    <h3>Purpose of Collection</h3>
+    <p>GYMFUSION collects personal and health information, including medical history, disability, and fitness-related information, for the purpose of assessing health-related risks, determining safe participation in training, and identifying any supports or reasonable adjustments that may be required.</p>
+    <p>This information enables GYMFUSION to uphold participant safety, meet its duty of care, and make informed decisions regarding program suitability.</p>
+
+    <h3>Basis of Screening</h3>
+    <p>GYMFUSION’s screening process is informed by Australia’s national pre-exercise screening framework; however, it is not a direct reproduction of the Australian Pre-Exercise Screening System (APSS).</p>
+    <p>The process incorporates gymnastics-specific, movement-based, and follow-up questions to obtain a comprehensive understanding of an individual’s background and training needs. Where responses indicate that additional support or consideration may be beneficial, GYMFUSION staff will discuss appropriate options with the participant.</p>
+
+    <h3>Participant Responsibilities and Disclosures</h3>
+    <p>Participants are required to provide accurate and complete information to the best of their knowledge, based on their current and, where relevant, past health status.</p>
+    <p>Disclosure of a health condition, injury, or relevant aspect of disability does not automatically preclude participation in GYMFUSION services. This information is used solely to determine appropriate supports or reasonable adjustments, whether a condition is stable for participation, the level of supervision or session format that may be suitable, and whether medical clearance or referral to a qualified health professional is advisable.</p>
+    <p>Where clinical guidance is recommended, participants may re-engage once appropriate advice has been obtained regarding safe participation, including any required supports or modifications. GYMFUSION adopts a person-centred approach, with a focus on supporting individuals to participate safely and effectively.</p>
+
+    <h3>Legal Authority and Privacy Compliance</h3>
+    <p>Personal and health information is collected and managed in accordance with applicable privacy laws, including the Privacy Act 1988 (Cth), including the Australian Privacy Principles (APPs), and the Health Records Act 2001 (Vic), including the Health Privacy Principles (HPPs), where applicable.</p>
+    <p>Because GYMFUSION collects and handles health information in Victoria, that information is handled in accordance with the Health Records Act 2001 (Vic) and the Health Privacy Principles (HPPs), where applicable.</p>
+    <p>Health information is collected and used solely for the purpose of assessing risk and supporting safe participation in GYMFUSION programs, unless otherwise required or authorised by law.</p>
+
+    <h3>Storage, Retention, and Disposal</h3>
+    <p>Health information collected as part of the assessment process will be retained as part of the participant’s Expression of Interest record.</p>
+    <p>Where an individual becomes a member, relevant information will form part of their ongoing member record and be retained in accordance with operational and legal requirements.</p>
+    <p>Where an individual does not proceed, their information will be securely destroyed or de-identified in accordance with GYMFUSION’s Privacy Policy and applicable Commonwealth and State privacy legislation.</p>
+
+    <h3>Use and Disclosure</h3>
+    <p>Health information is used by authorised GYMFUSION staff for health screening, safety, coaching suitability, reasonable adjustments and related service administration. It may also be processed through GYMFUSION’s approved technology providers as described in our Privacy Policy. We do not disclose health information to external health professionals or other third parties unless you consent, the disclosure is reasonably necessary for the relevant purpose and permitted by law, or disclosure is otherwise required or authorised by law.</p>
+
+    <h3>Access and Correction</h3>
+    <p>You may request access to, or correction of, health information we hold about you. Details about how to make a request are available in our Privacy Policy or via privacy@gymfusion.com.au.</p>
+
+    <h3>Acknowledgement and Consent</h3>
+    <div class="gf-grid gf-signature-meta">
+      <div class="gf-field">
+        <label for="healthInformationFirstName">First Name<span class="gf-required-indicator" aria-hidden="true">*</span></label>
+        <input id="healthInformationFirstName" name="healthInformationFirstName" type="text" autocomplete="given-name" placeholder="Enter first name" required />
+      </div>
+      <div class="gf-field">
+        <label for="healthInformationLastName">Last Name<span class="gf-required-indicator" aria-hidden="true">*</span></label>
+        <input id="healthInformationLastName" name="healthInformationLastName" type="text" autocomplete="family-name" placeholder="Enter last name" required />
+      </div>
+      <div class="gf-field" data-date-field>
+        <label for="healthInformationDateTrigger">Date</label>
+        <input id="healthInformationDate" name="healthInformationDate" type="hidden" required />
+        <HealthDateTimePicker client:load />
+      </div>
+    </div>
+    <div class="gf-field gf-acknowledgement-field">
+      <label class="gf-choice gf-consent-choice">
+        <input type="checkbox" name="healthInformationConsent" value="yes" required />
+        <span>I acknowledge that I have read and understood this Health Information Collection Notice and consent to GYMFUSION collecting, using, storing and disclosing the health information I provide for the purposes described in this Notice and the GYMFUSION Privacy Policy.</span>
+      </label>
+    </div>
+    <div class="gf-field gf-signature-field" data-signature-field hidden>
+      <p class="gf-question">Signature</p>
+      <fieldset class="gf-signature-method">
+        <legend>Choose signature method</legend>
+        <div class="gf-signature-method-options" role="group" aria-label="Signature method">
+          <button type="button" class="gf-signature-mode" data-signature-mode="draw" aria-pressed="true">Draw signature</button>
+          <button type="button" class="gf-signature-mode" data-signature-mode="typed" aria-pressed="false">Choose a font</button>
+        </div>
+        <div class="gf-signature-font-picker" data-signature-font-options hidden>
+          <p class="gf-signature-font-label">Choose font style</p>
+          <div class="gf-signature-font-options" role="group" aria-label="Signature font style">
+            <button type="button" class="gf-signature-font" data-signature-font="Dancing Script" aria-pressed="true">Dancing Script</button>
+            <button type="button" class="gf-signature-font" data-signature-font="Great Vibes" aria-pressed="false">Great Vibes</button>
+            <button type="button" class="gf-signature-font" data-signature-font="Caveat" aria-pressed="false">Caveat</button>
+            <button type="button" class="gf-signature-font" data-signature-font="Pacifico" aria-pressed="false">Pacifico</button>
+          </div>
+        </div>
+      </fieldset>
+      <div class="gf-signature-pad">
+        <HealthSignaturePad client:load />
+        <div class="gf-typed-signature-preview" data-signature-typed-preview hidden aria-live="polite"></div>
+      </div>
+      <input id="healthInformationSignature" name="healthInformationSignature" type="hidden" required />
+      <input id="healthInformationSignatureSvg" name="healthInformationSignatureSvg" type="hidden" />
+      <input id="healthInformationSignatureFileName" name="healthInformationSignatureFileName" type="hidden" />
+      <input id="healthInformationSignatureSignedAt" name="healthInformationSignatureSignedAt" type="hidden" />
+      <input id="healthInformationSignatureDocumentID" name="healthInformationSignatureDocumentID" type="hidden" />
+      <div class="gf-signature-actions">
+        <button type="button" class="gf-signature-clear" data-clear-signature>Clear Signature</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector("[data-health-information-notice]");
+    if (!root || root.getAttribute("data-health-information-controller") !== "true") return;
+    const get = (selector) => root.querySelector(selector);
+    const consent = get('input[name="healthInformationConsent"]');
+    const signatureField = get("[data-signature-field]");
+    const signatureCanvas = get("[data-signature-pad]");
+    const signatureInput = get("#healthInformationSignature");
+    const signatureSvgInput = get("#healthInformationSignatureSvg");
+    const signatureFileNameInput = get("#healthInformationSignatureFileName");
+    const signatureSignedAtInput = get("#healthInformationSignatureSignedAt");
+    const signatureDocumentIDInput = get("#healthInformationSignatureDocumentID");
+    const firstNameInput = get("#healthInformationFirstName");
+    const lastNameInput = get("#healthInformationLastName");
+    const typedPreview = get("[data-signature-typed-preview]");
+    const fontOptions = get("[data-signature-font-options]");
+    const modeButtons = [...root.querySelectorAll("[data-signature-mode]")];
+    const fontButtons = [...root.querySelectorAll("[data-signature-font]")];
+    let signatureMode = "draw";
+    let selectedSignatureFont = "Dancing Script";
+    let renderVersion = 0;
+
+    const localISODate = () => {
+      const now = new Date();
+      return new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 10);
+    };
+    const escapeXml = (value) => value.replace(/[<>&"']/g, (character) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "\"": "&quot;", "'": "&apos;" })[character]);
+    const createDocumentID = () => `EOI-HEALTH-NOTICE-${Date.now()}-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
+    const signatureName = () => [firstNameInput?.value, lastNameInput?.value].map((value) => value?.trim()).filter(Boolean).join(" ");
+
+    function updateSignatureInputs(signature) {
+      const hasSignature = typeof signature === "string" && signature.startsWith("data:image/png;base64,");
+      const signedAt = hasSignature ? (signatureSignedAtInput.value || new Date().toISOString()) : "";
+      const documentID = hasSignature ? (signatureDocumentIDInput.value || createDocumentID()) : "";
+      const fileName = hasSignature ? `eoi-health-notice-signature_${documentID}_${signedAt.replace(/[:.]/g, "-")}.png` : "";
+      const width = signatureCanvas?.clientWidth || 800;
+      const height = signatureCanvas?.clientHeight || 198;
+      signatureInput.value = hasSignature ? signature : "";
+      signatureSignedAtInput.value = signedAt;
+      signatureDocumentIDInput.value = documentID;
+      signatureFileNameInput.value = fileName;
+      signatureSvgInput.value = hasSignature
+        ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height + 34}"><rect width="100%" height="100%" fill="white"/><image href="${signature}" width="${width}" height="${height}"/><text x="12" y="${height + 22}" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000">${escapeXml(`Document ID: ${documentID} | Signed: ${signedAt}`)}</text></svg>`
+        : "";
+    }
+
+    function setSignatureVisibility() {
+      const visible = consent.checked && Boolean(firstNameInput.value.trim() && lastNameInput.value.trim());
+      signatureField.hidden = !visible;
+      signatureField.setAttribute("aria-hidden", String(!visible));
+      if (!visible && signatureInput.value) {
+        window.dispatchEvent(new CustomEvent("gymfusion:signature-clear"));
+        updateSignatureInputs(null);
+      }
+    }
+
+    async function renderTypedSignature() {
+      const version = ++renderVersion;
+      const name = signatureName();
+      if (!name || !typedPreview || signatureMode !== "typed") {
+        updateSignatureInputs(null);
+        if (typedPreview) { typedPreview.hidden = false; typedPreview.textContent = ""; }
+        return;
+      }
+      typedPreview.hidden = false;
+      typedPreview.textContent = name;
+      typedPreview.style.fontFamily = `"${selectedSignatureFont}", cursive`;
+      try { await document.fonts?.load(`58px "${selectedSignatureFont}"`); } catch {}
+      if (version !== renderVersion || signatureMode !== "typed") return;
+      const width = Math.max(signatureCanvas?.parentElement?.clientWidth || signatureCanvas?.clientWidth || 800, 320);
+      const height = signatureCanvas?.clientHeight || 198;
+      const ratio = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.scale(ratio, ratio);
+      context.font = `500 ${Math.min(64, Math.max(38, width / (Math.max(name.length, 8) * 0.55)))}px "${selectedSignatureFont}", cursive`;
+      context.fillStyle = "#111";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(name, width / 2, height / 2);
+      updateSignatureInputs(canvas.toDataURL("image/png"));
+    }
+
+    function setSignatureMode(mode) {
+      signatureMode = mode;
+      const typed = mode === "typed";
+      modeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.signatureMode === mode)));
+      fontOptions.hidden = !typed;
+      signatureCanvas.hidden = typed;
+      signatureCanvas.tabIndex = typed ? -1 : 0;
+      signatureCanvas.setAttribute("aria-hidden", String(typed));
+      if (typed) void renderTypedSignature();
+      else { renderVersion += 1; typedPreview.hidden = true; typedPreview.textContent = ""; window.dispatchEvent(new CustomEvent("gymfusion:signature-clear")); }
+    }
+
+    const dateInput = get("#healthInformationDate");
+    if (dateInput && !dateInput.value) dateInput.value = localISODate();
+    setSignatureVisibility();
+    window.addEventListener("gymfusion:signature-change", (event) => updateSignatureInputs(event.detail?.signature || null));
+    modeButtons.forEach((button) => button.addEventListener("click", () => setSignatureMode(button.dataset.signatureMode)));
+    fontButtons.forEach((button) => button.addEventListener("click", () => {
+      selectedSignatureFont = button.dataset.signatureFont || "Dancing Script";
+      fontButtons.forEach((fontButton) => fontButton.setAttribute("aria-pressed", String(fontButton === button)));
+      if (signatureMode !== "typed") setSignatureMode("typed"); else void renderTypedSignature();
+    }));
+    [firstNameInput, lastNameInput].forEach((input) => input?.addEventListener("input", () => {
+      setSignatureVisibility();
+      if (signatureMode === "typed") void renderTypedSignature();
+    }));
+    consent.addEventListener("change", setSignatureVisibility);
+    get("[data-clear-signature]")?.addEventListener("click", () => {
+      window.dispatchEvent(new CustomEvent("gymfusion:signature-clear"));
+      if (signatureMode === "typed") { renderVersion += 1; typedPreview.textContent = ""; }
+      updateSignatureInputs(null);
+    });
+  })();
+</script>
+
+<style is:global>
+  .gf-health-notice { display: flex; flex-direction: column; gap: 0; }
+  .gf-health-notice .gf-section-title { margin: 0; }
+  .gf-health-notice .gf-section-note { margin: 16px 0 26px; color: #4b4b4b; max-width: 760px; line-height: 1.62; font-size: 16px; }
+  .gf-health-notice-card { gap: 16px; background: linear-gradient(180deg, #fcfcfc 0%, #f7f7f7 100%); }
+  .gf-health-notice-card h3 { margin: 8px 0 0; font-size: 18px; line-height: 1.25; }
+  .gf-health-notice-card > h3:last-of-type + .gf-signature-meta { margin-top: 8px; }
+  .gf-health-notice-card p { margin: 0; color: #333; line-height: 1.6; }
+  .gf-health-notice .gf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .gf-health-notice .gf-signature-meta { position: relative; margin-bottom: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .gf-health-notice-card > .gf-acknowledgement-field { position: relative; top: -6px; margin-top: 0; }
+  .gf-health-notice-card > .gf-signature-field { margin-top: 0; }
+  .gf-health-notice .gf-field { display: flex; flex-direction: column; gap: 8px; }
+  .gf-health-notice label, .gf-health-notice legend, .gf-health-notice .gf-question { display: block; color: #000; line-height: 1.4; font-weight: 800; }
+  .gf-health-notice input:not([type="checkbox"]), .gf-health-notice textarea { width: 100%; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 14px; padding: 13px 14px; background: #fff; color: #000; font: inherit; }
+  .gf-health-notice .gf-choice { display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 14px 16px; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 18px; background: #fff; color: #111; cursor: pointer; font-size: 14px; font-weight: 500; }
+  .gf-health-notice .gf-choice input { width: 18px; height: 18px; flex: 0 0 auto; accent-color: #000; }
+  .gf-health-notice .gf-signature-method { display: flex; flex-direction: column; gap: 12px; margin: 0 0 16px; border: 0; padding: 0; }
+  .gf-health-notice .gf-signature-method legend, .gf-health-notice .gf-signature-font-label { color: #4b4b4b; font-size: 14px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+  .gf-health-notice .gf-signature-method-options, .gf-health-notice .gf-signature-font-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .gf-health-notice .gf-signature-mode, .gf-health-notice .gf-signature-font { min-height: 52px; padding: 10px 16px; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 17px; background: #fff; color: #000; font: inherit; cursor: pointer; }
+  .gf-health-notice .gf-signature-mode[aria-pressed="true"], .gf-health-notice .gf-signature-font[aria-pressed="true"] { background: #000; color: #fff; }
+  .gf-health-notice .gf-signature-font-picker { display: flex; flex-direction: column; gap: 12px; margin-top: 2px; }
+  .gf-health-notice .gf-signature-font { min-height: 58px; font-size: 25px; line-height: 1; }
+  .gf-health-notice .gf-signature-font-picker[hidden], .gf-health-notice [data-signature-field][hidden] { display: none; }
+  .gf-health-notice .gf-signature-font[data-signature-font="Dancing Script"] { font-family: "Dancing Script", cursive; }
+  .gf-health-notice .gf-signature-font[data-signature-font="Great Vibes"] { font-family: "Great Vibes", cursive; }
+  .gf-health-notice .gf-signature-font[data-signature-font="Caveat"] { font-family: "Caveat", cursive; }
+  .gf-health-notice .gf-signature-font[data-signature-font="Pacifico"] { font-family: "Pacifico", cursive; }
+  .gf-health-notice .gf-signature-pad { min-height: 198px; overflow: hidden; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 20px; background: #fff; touch-action: none; }
+  .gf-health-notice .gf-signature-pad canvas { display: block; width: 100%; height: 198px; touch-action: none; user-select: none; }
+  .gf-health-notice .gf-signature-pad canvas[hidden], .gf-health-notice .gf-typed-signature-preview[hidden] { display: none; }
+  .gf-health-notice .gf-typed-signature-preview { display: grid; min-height: 198px; place-items: center; padding: 24px; color: #111; font-size: clamp(38px, 6vw, 64px); line-height: 1.1; text-align: center; overflow-wrap: anywhere; }
+  .gf-health-notice .gf-signature-actions { display: flex; justify-content: flex-start; margin-top: 8px; }
+  .gf-health-notice .gf-signature-clear { border: 0; padding: 0; background: transparent; color: #4b4b4b; font: inherit; cursor: pointer; text-decoration: underline; }
+  [data-date-field] { position: relative; }
+  .gf-datetimepicker { position: relative; width: 100%; }
+  .gf-datetimepicker-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 16px;
+    border: 1.25px solid rgba(0, 0, 0, 0.16);
+    border-radius: 17px;
+    background: #fff;
+    color: #000;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .gf-datetimepicker-trigger svg {
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .gf-datetimepicker-trigger:hover,
+  .gf-datetimepicker-trigger:focus-visible,
+  .gf-datetimepicker-trigger[aria-expanded="true"] {
+    border-color: #000;
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+    outline: none;
+  }
+  .gf-datetimepicker-popover {
+    position: absolute;
+    z-index: 80;
+    top: calc(100% + 10px);
+    left: 0;
+    width: min(354px, 100%);
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(14px);
+    animation: gf-picker-in 160ms ease-out both;
+  }
+  @keyframes gf-picker-in {
+    from { opacity: 0; transform: translateY(-6px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .gf-datetimepicker-header {
+    display: grid;
+    grid-template-columns: 38px 1fr 38px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .gf-datetimepicker-header strong { text-align: center; font-size: 15px; }
+  .gf-datetimepicker-header button,
+  .gf-datetimepicker-day {
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    color: #000;
+    font: inherit;
+    cursor: pointer;
+  }
+  .gf-datetimepicker-header button {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    font-size: 27px;
+    line-height: 1;
+  }
+  .gf-datetimepicker-header button:hover,
+  .gf-datetimepicker-header button:focus-visible,
+  .gf-datetimepicker-day:hover,
+  .gf-datetimepicker-day:focus-visible {
+    background: #ededed;
+    outline: 2px solid #000;
+    outline-offset: 1px;
+  }
+  .gf-datetimepicker-weekdays,
+  .gf-datetimepicker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .gf-datetimepicker-weekdays {
+    margin-bottom: 4px;
+    color: #4b4b4b;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .gf-datetimepicker-weekdays span { padding: 6px 0; }
+  .gf-datetimepicker-day {
+    aspect-ratio: 1;
+    min-width: 0;
+    border-radius: 11px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .gf-datetimepicker-day[data-outside-month="true"] { color: #9a9a9a; }
+  .gf-datetimepicker-day[aria-current="date"] { box-shadow: inset 0 0 0 1.5px #000; }
+  .gf-datetimepicker-day[aria-pressed="true"] {
+    background: #000;
+    color: #fff;
+    box-shadow: none;
+  }
+  .gf-datetimepicker-day[aria-pressed="true"]:hover,
+  .gf-datetimepicker-day[aria-pressed="true"]:focus-visible {
+    background: #000;
+    color: #fff;
+  }
+  @media (max-width: 720px) {
+    .gf-health-notice .gf-grid, .gf-health-notice .gf-signature-meta { grid-template-columns: 1fr; }
+  }
+</style>
