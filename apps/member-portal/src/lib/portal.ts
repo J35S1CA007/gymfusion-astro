@@ -22,7 +22,7 @@ export const navItems: NavItem[] = [
   { href: "/profile", icon: "user-round", label: "My Profile", section: "profile" },
   { href: "/profile/change-requests", icon: "file-text", label: "Profile Change Requests", section: "profile-change-requests" },
   { href: "/account", icon: "settings-2", label: "Account", section: "account" },
-  { href: "/eoi", icon: "file-text", label: "EOI Parts 2-4", section: "eoi" },
+  { href: "/eoi", icon: "file-text", label: "Expression of Interest", section: "eoi" },
   { href: "/help", icon: "circle-help", label: "Help & Support", section: "help" },
 ];
 
