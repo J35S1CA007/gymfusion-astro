@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Avatar, AvatarFallback, AvatarImage, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Separator, Sheet, SheetContent, SheetTrigger } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { MEMBERS_PORTAL_LOGO_ASSET, resolvePortalAssetUrl } from "@/lib/portal-asset";
 import { ChevronDown, CircleHelp, FileText, HelpCircle, LayoutDashboard, LogOut, Menu, Paperclip, Settings2, UserRound } from "lucide-react";
 import { navItems, type PortalSection, sectionCopy } from "@/lib/portal";
 
@@ -27,11 +28,12 @@ export default function PortalShell({ active, children, member, onLogout, logout
   const copy = sectionCopy[active];
   const pageTitle = title ?? copy.title;
   const pageDescription = description ?? copy.description;
+  const membersPortalLogo = resolvePortalAssetUrl(MEMBERS_PORTAL_LOGO_ASSET, typeof window === "undefined" ? undefined : window.location.hostname);
 
   return <div className="min-h-screen bg-[#f5f5f3] text-black">
     <div className="mx-auto flex min-h-screen w-full max-w-[1600px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)]">
       <aside className="hidden w-[280px] shrink-0 flex-col bg-black px-6 py-7 text-white xl:flex">
-        <a href="/dashboard" className="mb-8 block"><img src="/assets/branding/gf-members-portal-transparent%20logo.png" alt="GYMFUSION Members Portal" className="h-auto w-[220px] max-w-full" /></a>
+        <a href="/dashboard" className="mb-8 block"><img src={membersPortalLogo} alt="GYMFUSION Members Portal" className="h-auto w-[220px] max-w-full" /></a>
         <ShellNav active={active} />
         <div className="mt-auto pt-8 text-xs tracking-[0.24em] text-white/55">© 2026 GYMFUSION</div>
       </aside>
@@ -39,7 +41,7 @@ export default function PortalShell({ active, children, member, onLogout, logout
         <header className="sticky top-0 z-20 border-b border-black/10 bg-white/95 backdrop-blur">
           <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3 xl:hidden">
-              <Sheet><SheetTrigger asChild><Button variant="ghost" size="icon-sm" className="rounded-md border border-black/15" aria-label="Open navigation"><Menu className="size-5" aria-hidden="true" /></Button></SheetTrigger><SheetContent side="left" className="w-[86vw] max-w-[340px] border-white/10 bg-black p-0 text-white"><div className="flex h-full flex-col px-5 py-6"><a href="/dashboard" className="mb-8 block"><img src="/assets/branding/gf-members-portal-transparent%20logo.png" alt="GYMFUSION Members Portal" className="h-auto w-[200px] max-w-full" /></a><ShellNav active={active} /></div></SheetContent></Sheet>
+              <Sheet><SheetTrigger asChild><Button variant="ghost" size="icon-sm" className="rounded-md border border-black/15" aria-label="Open navigation"><Menu className="size-5" aria-hidden="true" /></Button></SheetTrigger><SheetContent side="left" className="w-[86vw] max-w-[340px] border-white/10 bg-black p-0 text-white"><div className="flex h-full flex-col px-5 py-6"><a href="/dashboard" className="mb-8 block"><img src={membersPortalLogo} alt="GYMFUSION Members Portal" className="h-auto w-[200px] max-w-full" /></a><ShellNav active={active} /></div></SheetContent></Sheet>
               <a href="/dashboard" className="block" aria-label="Dashboard"><img src="/assets/branding/vibrant_gf_spiral_transparent.png" alt="GYMFUSION" className="size-10" /></a>
             </div>
             <div className="hidden min-w-0 flex-1 xl:block">
