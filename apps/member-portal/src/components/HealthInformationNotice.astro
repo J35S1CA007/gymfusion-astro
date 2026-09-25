@@ -221,6 +221,17 @@ const { controller = true } = Astro.props;
 </script>
 
 <style is:global>
+  .gf-visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
   .gf-health-notice { display: flex; flex-direction: column; gap: 0; }
   .gf-health-notice .gf-section-title { margin: 0; }
   .gf-health-notice .gf-section-note { margin: 16px 0 26px; color: #4b4b4b; max-width: 760px; line-height: 1.62; font-size: 16px; }
@@ -250,7 +261,19 @@ const { controller = true } = Astro.props;
   .gf-health-notice .gf-signature-font[data-signature-font="Caveat"] { font-family: "Caveat", cursive; }
   .gf-health-notice .gf-signature-font[data-signature-font="Pacifico"] { font-family: "Pacifico", cursive; }
   .gf-health-notice .gf-signature-pad { min-height: 198px; overflow: hidden; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 20px; background: #fff; touch-action: none; }
-  .gf-health-notice .gf-signature-pad canvas { display: block; width: 100%; height: 198px; touch-action: none; user-select: none; }
+  .gf-health-notice .gf-signature-pad canvas {
+    display: block;
+    width: 100%;
+    height: 198px;
+    cursor: -webkit-image-set(
+      url("https://cdn.sweezy-cursors.com/cursor_packs/2b1d5bd8-9c8c-4b51-90fb-bb428b14f0f3/fountain-pen-pen-nib-3d--cursor-image.png") 4x
+    ) 1 1, crosshair;
+    cursor: image-set(
+      url("https://cdn.sweezy-cursors.com/cursor_packs/2b1d5bd8-9c8c-4b51-90fb-bb428b14f0f3/fountain-pen-pen-nib-3d--cursor-image.png") 4x
+    ) 1 1, crosshair;
+    touch-action: none;
+    user-select: none;
+  }
   .gf-health-notice .gf-signature-pad canvas[hidden], .gf-health-notice .gf-typed-signature-preview[hidden] { display: none; }
   .gf-health-notice .gf-typed-signature-preview { display: grid; min-height: 198px; place-items: center; padding: 24px; color: #111; font-size: clamp(38px, 6vw, 64px); line-height: 1.1; text-align: center; overflow-wrap: anywhere; }
   .gf-health-notice .gf-signature-actions { display: flex; justify-content: flex-start; margin-top: 8px; }

@@ -97,12 +97,20 @@ const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
       if (!canvas) return;
 
       const resizeCanvas = () => {
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width <= 1 || rect.height <= 1) return;
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        const width = Math.max(1, Math.round(rect.width * ratio));
+        const height = Math.max(1, Math.round(rect.height * ratio));
+        if (canvas.width === width && canvas.height === height) {
+          configureContext(canvas.getContext("2d")!, ratio);
+          return;
+        }
+
         const restoreVersion = ++restoreVersionRef.current;
         const previousImage = toDataURL();
-        const rect = canvas.getBoundingClientRect();
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = Math.max(1, Math.round(rect.width * ratio));
-        canvas.height = Math.max(1, Math.round(rect.height * ratio));
+        canvas.width = width;
+        canvas.height = height;
         configureContext(canvas.getContext("2d")!, ratio);
 
         if (previousImage) {
@@ -117,7 +125,12 @@ const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
 
       resizeCanvas();
       window.addEventListener("resize", resizeCanvas);
-      return () => window.removeEventListener("resize", resizeCanvas);
+      const resizeObserver = new ResizeObserver(resizeCanvas);
+      resizeObserver.observe(canvas);
+      return () => {
+        resizeObserver.disconnect();
+        window.removeEventListener("resize", resizeCanvas);
+      };
     }, [lineWidth, penColor]);
 
     function pointerPosition(event: ReactPointerEvent<HTMLCanvasElement>): Point {
