@@ -3,7 +3,8 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
-const baseURL = "http://127.0.0.1:4327";
+const baseURL = process.env.BASE_URL ?? "http://127.0.0.1:4327";
+const port = new URL(baseURL).port || "4327";
 const appRoot = fileURLToPath(new URL("..", import.meta.url));
 let preview;
 
@@ -13,7 +14,7 @@ try {
     const existing = await fetch(`${baseURL}/dev-preview/frame`);
     if (!existing.ok) throw new Error(`existing dev server returned ${existing.status}`);
   } catch {
-    preview = spawn("npm", ["run", "dev", "--", "--host", "127.0.0.1", "--port", "4327"], {
+    preview = spawn("npm", ["run", "dev", "--", "--host", "127.0.0.1", "--port", port], {
       cwd: appRoot,
       stdio: "ignore",
       env: { ...process.env },
@@ -31,41 +32,77 @@ try {
   await page.goto(`${baseURL}/dev-preview/frame`, { waitUntil: "networkidle" });
 
   await page.waitForFunction(() => !document.querySelector("astro-island")?.hasAttribute("ssr"));
-  const status = page.locator("#dashboard-status-heading");
   const taskHeading = page.locator("#dashboard-tasks-heading");
-  assert.equal(await status.textContent(), "Your EOI is in progress.");
-  assert.equal(await page.locator("[aria-label='EOI - Part 1, COMPLETE']").count(), 1);
-  assert.equal(await page.locator("[aria-label='EOI - Part 3, INCOMPLETE, locked']").count(), 1);
+  assert.equal(await page.locator("#eoi-overview-heading").textContent(), "Where you are now");
+  assert.equal(await page.locator("#dashboard-eoi-heading").count(), 0);
+  assert.equal(await page.locator("[aria-label^='EOI - Part']").count(), 0);
 
   await page.getByRole("button", { name: "Open preview controls" }).click();
   const state = page.locator("#dashboard-preview-state");
   await state.selectOption("active-incomplete");
   await page.getByRole("button", { name: "Close" }).click();
-  assert.equal(await page.locator("[aria-label='EOI - Part 1, INCOMPLETE']").count(), 1);
+  assert.equal(await page.locator("[aria-label^='EOI - Part']").count(), 0);
+  await page.getByRole("heading", { name: "Complete your Expression of Interest", exact: true }).waitFor();
+  assert.equal(await page.getByRole("heading", { name: "Complete your Expression of Interest" }).count(), 1);
   assert.equal(await page.locator("#dashboard-tasks-heading").textContent(), "Action required");
+
+  await page.getByRole("button", { name: "Open preview controls" }).click();
+  await state.selectOption("part2-complete");
+  await page.getByRole("button", { name: "Close" }).click();
+  await page.getByRole("heading", { name: "Complete your Accessibility & Support Needs", exact: true }).waitFor();
+  assert.equal(await page.getByRole("heading", { name: "Complete your Accessibility & Support Needs" }).count(), 1);
+  assert.equal(await page.locator("[aria-label='EOI - Part 3, INCOMPLETE, locked']").count(), 0);
+
+  await page.getByRole("button", { name: "Open preview controls" }).click();
+  await state.selectOption("part3-complete");
+  await page.getByRole("button", { name: "Close" }).click();
+  await page.getByRole("heading", { name: "Complete your Fitness Profile", exact: true }).waitFor();
+  assert.equal(await page.getByRole("heading", { name: "Complete your Fitness Profile" }).count(), 1);
+  assert.equal(await page.locator("[aria-label='EOI - Part 4, INCOMPLETE, locked']").count(), 0);
+
+  await page.getByRole("button", { name: "Open preview controls" }).click();
+  await state.selectOption("complete-eoi-phase");
+  await page.getByRole("button", { name: "Close" }).click();
+  assert.equal(await page.locator("h3").filter({ hasText: "Your EOI is in the Review Phase" }).count(), 0);
+  assert.equal(await page.locator("h3").filter({ hasText: "Parts 2-4 complete" }).count(), 2);
+
+  await page.getByRole("button", { name: "Open preview controls" }).click();
+  await state.selectOption("complete-no-phase");
+  await page.getByRole("button", { name: "Close" }).click();
+  assert.equal(await page.locator("h3").filter({ hasText: "Your EOI is in the Review Phase" }).count(), 0);
+
+  await page.getByRole("button", { name: "Open preview controls" }).click();
+  await state.selectOption("incomplete-review");
+  await page.getByRole("button", { name: "Close" }).click();
+  assert.equal(await page.locator("h3").filter({ hasText: "Your EOI is in the Review Phase" }).count(), 0);
+  assert.equal(await taskHeading.textContent(), "Action required");
 
   await page.getByRole("button", { name: "Open preview controls" }).click();
   await state.selectOption("no-active");
   await page.getByRole("button", { name: "Close" }).click();
-  assert.equal(await status.textContent(), "No active enrolment or EOI in progress.");
-  assert.equal(await page.getByText("If you would like to re-enrol, please submit a new").count(), 1);
-  assert.equal(await page.getByRole("link", { name: "EOI" }).getAttribute("href"), "https://eoi.gymfusion.com.au");
   assert.equal(await taskHeading.textContent(), "No outstanding tasks.");
-  assert.equal(await page.locator("#dashboard-eoi-heading").count(), 0);
+  const noActiveText = await page.locator("body").innerText();
+  assert.equal(noActiveText.includes("Complete Part 1"), false);
+  assert.equal(noActiveText.includes("Your next steps"), false);
+  assert.equal(noActiveText.includes("Your EOI is in the Review Phase"), false);
 
   await page.getByRole("button", { name: "Open preview controls" }).click();
   await state.selectOption("eoi-review");
   await page.getByRole("button", { name: "Close" }).click();
-  assert.equal(await status.textContent(), "Your EOI is under review.");
-  assert.equal(await page.locator("[aria-label='EOI - Part 4, COMPLETE']").count(), 1);
-  await page.getByRole("link", { name: "Review" }).first().waitFor();
-  assert.equal(await page.getByRole("link", { name: "Review" }).count(), 3);
+  assert.equal(await page.locator("h3").filter({ hasText: "Your EOI is in the Review Phase" }).count(), 2);
+  assert.equal(await page.locator("[aria-label^='EOI - Part']").count(), 0);
+  assert.equal(await page.locator("#dashboard-tasks-heading").textContent(), "No outstanding tasks.");
 
-  for (const width of [320, 390, 414]) {
+  for (const width of [320, 390, 414, 1280]) {
     await page.setViewportSize({ width, height: 844 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, `no horizontal overflow at ${width}px`);
   }
-  console.log("dashboard preview tests passed: 4 states, 3 mobile widths");
+  await page.goto(`${baseURL}/dev-preview/eoi`, { waitUntil: "networkidle" });
+  assert.equal(await page.locator("#eoi-overview-heading").textContent(), "Where you are now");
+  assert.equal(await page.locator("#dashboard-eoi-heading").count(), 1);
+  assert.equal(await page.locator("[aria-label^='EOI - Part']").count(), 4);
+  assert.equal(await page.locator("[aria-label='EOI - Part 4, COMPLETE']").count(), 1);
+  console.log("dashboard preview tests passed: 9 states, dashboard tracker, detailed EOI grid, 4 widths");
 } finally {
   await browser?.close();
   preview?.kill();

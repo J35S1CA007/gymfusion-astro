@@ -1,30 +1,13 @@
 import { ArrowRight, Check, LockKeyhole } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import type { EoiProgression } from "../../lib/eoi-progression";
+import EoiOverviewCards from "./EoiOverviewCards";
 
 export type DashboardStatus = "COMPLETE" | "INCOMPLETE";
-export type DashboardAvailability = "AVAILABLE" | "LOCKED" | "SUBMITTED";
 
-export type DashboardPart = {
-  status: DashboardStatus;
-  availability: DashboardAvailability;
-  href?: string;
-  actionLabel?: string;
-};
-
-export type DashboardProjection = {
-  hasActiveEpisode: boolean;
-  part1: DashboardStatus | null;
-  nextAction: string | null;
-  currentStatus: string;
-  parts?: Partial<Record<"part2" | "part3" | "part4", DashboardPart>>;
-  task?: {
-    title: string;
-    description: string;
-    href: string;
-    actionLabel: string;
-  };
-};
+export type DashboardPart = EoiProgression["parts"][keyof EoiProgression["parts"]];
+export type DashboardProjection = EoiProgression;
 
 const partDetails = {
   part1: { label: "EOI - Part 1", title: "Expression of Interest" },
@@ -87,7 +70,7 @@ export function EoiProgress({ projection }: { projection: DashboardProjection })
     href: projection.part1 === "COMPLETE" ? "/submissions" : "https://eoi.gymfusion.com.au",
     actionLabel: projection.part1 === "COMPLETE" ? "View submission" : "Continue EOI",
   };
-  const parts = { part1, part2: projection.parts?.part2, part3: projection.parts?.part3, part4: projection.parts?.part4 };
+  const parts = { part1, part2: projection.parts.part2, part3: projection.parts.part3, part4: projection.parts.part4 };
 
   return <section className="rounded-2xl border border-black/12 bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:p-7" aria-labelledby="dashboard-eoi-heading">
     <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-bold uppercase tracking-[0.14em] text-black/50">EOI progress</p><h2 id="dashboard-eoi-heading" className="mt-2 font-heading text-2xl font-bold tracking-tight">Your Expression of Interest</h2></div></div>
@@ -96,46 +79,8 @@ export function EoiProgress({ projection }: { projection: DashboardProjection })
 }
 
 export default function DashboardView({ projection }: { projection: DashboardProjection }) {
-  if (!projection.hasActiveEpisode) {
-    return <div className="grid gap-5">
-      <section className="rounded-2xl border border-black/12 bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:p-8" aria-labelledby="dashboard-status-heading">
-        <p className="text-sm font-bold uppercase tracking-[0.14em] text-black/50">Current status</p>
-        <h2 id="dashboard-status-heading" className="mt-3 max-w-3xl font-heading text-[clamp(1.7rem,4vw,2.8rem)] font-black leading-tight">No active enrolment or EOI in progress.</h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-black/65">If you would like to re-enrol, please submit a new <a href="https://eoi.gymfusion.com.au" className="font-bold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black">EOI</a>.</p>
-      </section>
-      <TasksCard projection={projection} />
-    </div>;
-  }
-
-  if (!projection.part1) {
-    return <div className="grid gap-5">
-      <section className="rounded-2xl border border-black/12 bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:p-8" aria-labelledby="dashboard-status-heading">
-        <p className="text-sm font-bold uppercase tracking-[0.14em] text-black/50">Current status</p>
-        <h2 id="dashboard-status-heading" className="mt-3 max-w-3xl font-heading text-[clamp(1.7rem,4vw,2.8rem)] font-black leading-tight">{projection.currentStatus}</h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-black/65">We could not load your EOI progress right now. Please try again shortly.</p>
-      </section>
-      <TasksCard projection={{ ...projection, task: undefined }} />
-    </div>;
-  }
-
-  const part1: DashboardPart = {
-    status: projection.part1,
-    availability: "AVAILABLE",
-    href: projection.part1 === "COMPLETE" ? "/submissions" : "https://eoi.gymfusion.com.au",
-    actionLabel: projection.part1 === "COMPLETE" ? "View submission" : "Continue EOI",
-  };
-  const parts = { part1, part2: projection.parts?.part2, part3: projection.parts?.part3, part4: projection.parts?.part4 };
-
-  return <div className="grid gap-5">
-    <section className="rounded-2xl border border-black/12 bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:p-8" aria-labelledby="dashboard-status-heading">
-      <p className="text-sm font-bold uppercase tracking-[0.14em] text-black/50">Current status</p>
-      <h2 id="dashboard-status-heading" className="mt-3 font-heading text-[clamp(1.7rem,4vw,2.8rem)] font-black leading-tight">{projection.currentStatus}</h2>
-      {projection.nextAction ? <p className="mt-4 max-w-2xl text-base leading-7 text-black/65">Next: {projection.nextAction}</p> : null}
-    </section>
-    <section className="rounded-2xl border border-black/12 bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:p-7" aria-labelledby="dashboard-eoi-heading">
-      <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-bold uppercase tracking-[0.14em] text-black/50">EOI progress</p><h2 id="dashboard-eoi-heading" className="mt-2 font-heading text-2xl font-bold tracking-tight">Your Expression of Interest</h2></div><p className="text-sm text-black/55">Status and availability</p></div>
-      <div className="mt-6 grid gap-4 md:grid-cols-2">{(<><PartCard part={parts.part1} definition={partDetails.part1} />{parts.part2 ? <PartCard part={parts.part2} definition={partDetails.part2} /> : null}{parts.part3 ? <PartCard part={parts.part3} definition={partDetails.part3} /> : null}{parts.part4 ? <PartCard part={parts.part4} definition={partDetails.part4} /> : null}</>)}</div>
-    </section>
+  return <div className="grid min-w-0 gap-8">
+    <EoiOverviewCards progression={projection} />
     <TasksCard projection={projection} />
   </div>;
 }

@@ -2,9 +2,10 @@
 import { env } from "cloudflare:workers";
 import PortalLayout from "../layouts/PortalLayout.astro";
 import PortalShell from "../components/portal/PortalShell";
-import DashboardView, { type DashboardProjection } from "../components/portal/DashboardView";
+import DashboardView from "../components/portal/DashboardView";
 import { readMemberPortalView } from "../lib/member-portal-read";
 import { checkMemberLoginSession } from "../lib/member-login-session";
+import { deriveEoiProgression, type EoiOnboardingRead } from "../lib/eoi-progression";
 import "../styles/global.css";
 
 const session = await checkMemberLoginSession(Astro.request, env.MEMBER_LOGIN_SERVICE_URL);
@@ -23,21 +24,9 @@ const read = session.kind === "authenticated"
   ? await readMemberPortalView(Astro.request, env.MEMBER_LOGIN_SERVICE_URL, "dashboard")
   : { kind: "unavailable" as const };
 const onboarding = read.kind === "authenticated"
-  ? read.data.onboarding as { hasActiveEpisode?: boolean; part1?: string | null; part2?: string; part3?: string; part4?: string; part2Availability?: string; part3Availability?: string; part4Availability?: string; nextAction?: string | null }
+  ? read.data.onboarding as EoiOnboardingRead
   : undefined;
-const status = (value: unknown): "COMPLETE" | "INCOMPLETE" => value === "COMPLETE" ? "COMPLETE" : "INCOMPLETE";
-const availability = (value: unknown): "AVAILABLE" | "LOCKED" => value === "AVAILABLE" ? "AVAILABLE" : "LOCKED";
-const projection: DashboardProjection | null = onboarding ? {
-  hasActiveEpisode: onboarding.hasActiveEpisode === true,
-  part1: onboarding.part1 === "COMPLETE" ? "COMPLETE" : onboarding.part1 === "INCOMPLETE" ? "INCOMPLETE" : null,
-  nextAction: typeof onboarding.nextAction === "string" ? onboarding.nextAction : null,
-  currentStatus: onboarding.hasActiveEpisode === true ? "Your EOI is in progress." : "No active enrolment or EOI in progress.",
-  parts: {
-    part2: { status: status(onboarding.part2), availability: availability(onboarding.part2Availability), href: "/eoi/part-2", actionLabel: onboarding.part2 === "COMPLETE" ? "Review" : "Continue" },
-    part3: { status: status(onboarding.part3), availability: availability(onboarding.part3Availability), href: "/eoi/part-3", actionLabel: onboarding.part3 === "COMPLETE" ? "Review" : "Continue" },
-    part4: { status: status(onboarding.part4), availability: availability(onboarding.part4Availability), href: "/eoi/part-4", actionLabel: onboarding.part4 === "COMPLETE" ? "Review" : "Continue" },
-  },
-} : null;
+const projection = deriveEoiProgression(onboarding);
 ---
 
 {session.kind === "authenticated" ? (

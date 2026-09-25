@@ -10,6 +10,7 @@ if (!isDevelopmentPreview) Astro.response.status = 404;
 
 const projection = {
   hasActiveEpisode: true,
+  journeyPhase: "REVIEW_PHASE",
   part1: "COMPLETE",
   nextAction: null,
   currentStatus: "Your EOI is in the Review Phase",
@@ -18,12 +19,14 @@ const projection = {
     part3: { status: "COMPLETE", availability: "SUBMITTED", href: "/eoi/part-3", actionLabel: "View submission" },
     part4: { status: "COMPLETE", availability: "SUBMITTED", href: "/eoi/part-4", actionLabel: "View submission" },
   },
+  allPartsComplete: true,
+  stageTwoProgress: 3,
 } satisfies DashboardProjection;
 ---
 {isDevelopmentPreview ? (
   <PortalLayout title="Expression of Interest Preview" description="Development-only EOI preview">
     <PortalShell client:load active="eoi" member={{ displayName: "Preview Member", initials: "PM" }} title="Expression of Interest" description="">
-      <EoiOverviewCards allPartsComplete={true} stageTwoProgress={3} />
+      <EoiOverviewCards progression={projection} />
       <EoiProgress projection={projection} />
     </PortalShell>
   </PortalLayout>

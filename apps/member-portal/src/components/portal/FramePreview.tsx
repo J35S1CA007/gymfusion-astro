@@ -4,12 +4,17 @@ import { Button, Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 import PortalShell, { type PortalMember } from "./PortalShell";
 import DashboardView, { type DashboardProjection } from "./DashboardView";
 
-export type PreviewState = "active-complete" | "active-incomplete" | "no-active" | "eoi-review";
+export type PreviewState = "active-complete" | "part2-complete" | "part3-complete" | "active-incomplete" | "no-active" | "complete-eoi-phase" | "complete-no-phase" | "incomplete-review" | "eoi-review";
 
 const previewOptions: Array<{ value: PreviewState; label: string }> = [
   { value: "active-complete", label: "Active episode - Part 1 complete" },
+  { value: "part2-complete", label: "Active episode - Part 2 complete" },
+  { value: "part3-complete", label: "Active episode - Part 3 complete" },
   { value: "active-incomplete", label: "Active episode - Part 1 incomplete" },
   { value: "no-active", label: "No active episode" },
+  { value: "complete-eoi-phase", label: "All parts complete - EOI phase" },
+  { value: "complete-no-phase", label: "All parts complete - no phase" },
+  { value: "incomplete-review", label: "Incomplete EOI - review phase" },
   { value: "eoi-review", label: "EOI complete - under review" },
 ];
 

@@ -2,10 +2,11 @@
 import PortalLayout from "../layouts/PortalLayout.astro";
 import PortalShell from "../components/portal/PortalShell";
 import PortalState from "../components/portal/PortalState.astro";
-import { EoiProgress, type DashboardProjection } from "../components/portal/DashboardView";
+import { EoiProgress } from "../components/portal/DashboardView";
 import EoiOverviewCards from "../components/portal/EoiOverviewCards";
 import { loadPortalPage } from "../lib/portal-page";
 import { readMemberPortalView } from "../lib/member-portal-read";
+import { deriveEoiProgression, type EoiOnboardingRead } from "../lib/eoi-progression";
 import { env } from "cloudflare:workers";
 import { sectionCopy } from "../lib/portal";
 import "../styles/global.css";
@@ -13,36 +14,10 @@ const session = await loadPortalPage(Astro.request);
 if (session.kind === "redirect") return new Response(null, { status: 303, headers: { Location: "/login", "Cache-Control": "no-store" } });
 if (session.kind === "unavailable") Astro.response.status = 503;
 const copy = sectionCopy.eoi;
-const [dashboardRead, eoiRead] = session.kind === "authenticated"
-  ? await Promise.all([
-      readMemberPortalView(Astro.request, env.MEMBER_LOGIN_SERVICE_URL, "dashboard"),
-      readMemberPortalView(Astro.request, env.MEMBER_LOGIN_SERVICE_URL, "eoi"),
-    ])
-  : [null, null];
-const onboarding = dashboardRead?.kind === "authenticated" ? dashboardRead.data.onboarding as { hasActiveEpisode?: boolean; journeyPhase?: "EOI_PHASE" | "REVIEW_PHASE" | null; part1?: string | null; part2?: string; part3?: string; part4?: string; part2Availability?: string; part3Availability?: string; part4Availability?: string } : undefined;
-const submittedParts = eoiRead?.kind === "authenticated" && Array.isArray(eoiRead.data.parts)
-  ? eoiRead.data.parts as Array<{ part?: string; completed?: boolean }>
-  : undefined;
-const partFromEoiRead = (part: string, fallback: unknown) => {
-  const record = submittedParts?.find((item) => item.part === part);
-  return record ? record.completed === true ? "COMPLETE" : "INCOMPLETE" : fallback;
-};
-const normalized = (value: unknown) => typeof value === "string" ? value.trim().toUpperCase() : "";
-const status = (value: unknown, declaredAvailability?: unknown): "COMPLETE" | "INCOMPLETE" => ["COMPLETE", "SUBMITTED"].includes(normalized(value)) || normalized(declaredAvailability) === "SUBMITTED" ? "COMPLETE" : "INCOMPLETE";
-const availability = (value: unknown, declaredAvailability: unknown, prerequisiteComplete = true): "AVAILABLE" | "LOCKED" | "SUBMITTED" => status(value, declaredAvailability) === "COMPLETE" ? "SUBMITTED" : normalized(declaredAvailability) === "AVAILABLE" || prerequisiteComplete ? "AVAILABLE" : "LOCKED";
-const part2Status = status(partFromEoiRead("2", onboarding?.part2), onboarding?.part2Availability);
-const part3Status = status(partFromEoiRead("3", onboarding?.part3), onboarding?.part3Availability);
-const part4Status = status(partFromEoiRead("4", onboarding?.part4), onboarding?.part4Availability);
-const projection: DashboardProjection | null = onboarding ? {
-  hasActiveEpisode: onboarding.hasActiveEpisode === true,
-  part1: onboarding.part1 === "COMPLETE" ? "COMPLETE" : onboarding.part1 === "INCOMPLETE" ? "INCOMPLETE" : null,
-  nextAction: null,
-  currentStatus: onboarding?.journeyPhase === "REVIEW_PHASE" ? "Your EOI is in the Review Phase" : "Your EOI is in progress.",
-  parts: {
-    part2: { status: part2Status, availability: availability(part2Status, onboarding.part2Availability), href: "/eoi/part-2", actionLabel: part2Status === "COMPLETE" ? "View submission" : "Continue" },
-    part3: { status: part3Status, availability: availability(part3Status, onboarding.part3Availability, part2Status === "COMPLETE"), href: "/eoi/part-3", actionLabel: part3Status === "COMPLETE" ? "View submission" : "Continue" },
-    part4: { status: part4Status, availability: availability(part4Status, onboarding.part4Availability, part3Status === "COMPLETE"), href: "/eoi/part-4", actionLabel: part4Status === "COMPLETE" ? "View submission" : "Continue" },
-  },
-} : null;
+const read = session.kind === "authenticated"
+  ? await readMemberPortalView(Astro.request, env.MEMBER_LOGIN_SERVICE_URL, "dashboard")
+  : { kind: "unavailable" as const };
+const onboarding = read.kind === "authenticated" ? read.data.onboarding as EoiOnboardingRead : undefined;
+const projection = deriveEoiProgression(onboarding);
 ---
-{session.kind === "authenticated" ? <PortalLayout title={copy.title} description={copy.description}><PortalShell client:load active="eoi" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref="/api/auth/logout">{projection ? <><EoiOverviewCards allPartsComplete={projection.part1 === "COMPLETE" && part2Status === "COMPLETE" && part3Status === "COMPLETE" && part4Status === "COMPLETE"} stageTwoProgress={[part2Status, part3Status, part4Status].filter((partStatus) => partStatus === "COMPLETE").length} /><EoiProgress projection={projection} /></> : <PortalState heading="Expression of Interest" body="Your EOI progress is temporarily unavailable. Please try again shortly." links={[]} />}</PortalShell></PortalLayout> : <main>Members Portal is temporarily unavailable.</main>}
+{session.kind === "authenticated" ? <PortalLayout title={copy.title} description={copy.description}><PortalShell client:load active="eoi" member={{ displayName: session.displayName, initials: session.displayName.slice(0, 1).toUpperCase() }} logoutHref="/api/auth/logout">{projection ? <><EoiOverviewCards progression={projection} /><EoiProgress projection={projection} /></> : <PortalState heading="Expression of Interest" body="Your EOI progress is temporarily unavailable. Please try again shortly." links={[]} />}</PortalShell></PortalLayout> : <main>Members Portal is temporarily unavailable.</main>}
