@@ -206,7 +206,7 @@ const shouldStyleOptionParts = (question: (typeof questions)[number], option: (t
         <section class="gf-page is-active">
           <div id="part4-question-list" class="gf-question-list is-stepped">
             <div class="gf-health-notice-step" data-step-heading data-step-index="-1" data-field-id="healthInformationNotice" data-field-type="notice" data-question-group="0" aria-labelledby="health-information-notice-heading">
-              <HealthInformationNotice />
+              <HealthInformationNotice documentId="EOI-P4-HEALTH-PROFILE" fileNamePrefix="EOI-P4-HEALTH-NOTICE-SIGNATURE" />
             </div>
             {renderQuestions.map((question) => <Fragment>
               {question.id === "2f50a6ce-91f0-4b27-9c62-d1f200c49450" ? <div class="gf-step-heading" data-step-heading data-step-index="0" aria-labelledby="step-activity-heading">
@@ -734,6 +734,20 @@ const shouldStyleOptionParts = (question: (typeof questions)[number], option: (t
   });
   setRpeImageZoom(1);
   const error = document.querySelector<HTMLElement>("#part4-error");
+  const healthNotice = form?.querySelector<HTMLElement>("[data-health-information-notice]") ?? null;
+  const clearSignatureValidationState = () => {
+    healthNotice?.querySelectorAll<HTMLElement>("[data-signature-mode], [data-signature-font], [data-signature-pad]").forEach((control) => {
+      control.removeAttribute("aria-invalid");
+      control.removeAttribute("aria-describedby");
+    });
+  };
+  window.addEventListener("gymfusion:signature-mode-change", () => {
+    clearSignatureValidationState();
+    if (error) {
+      error.hidden = true;
+      error.textContent = "";
+    }
+  });
   const warning = document.querySelector<HTMLElement>("#part4-warning");
   const success = document.querySelector<HTMLElement>("#part4-success");
   const overallActivityInput = document.querySelector<HTMLInputElement>(`input[name='${overallActivityFieldId}']`);
@@ -989,6 +1003,32 @@ const shouldStyleOptionParts = (question: (typeof questions)[number], option: (t
   };
   const validateGroup = (groupIndex: number) => {
     if (groupIndex === activityMinutesGroupIndex && !validateWamInputs()) return false;
+    if (groupIndex === 0 && healthNotice) {
+      const signature = healthNotice.querySelector<HTMLInputElement>("#healthInformationSignature")?.value || "";
+      const mode = healthNotice.dataset.signatureCurrentMode || "";
+      const signatureValid = healthNotice.dataset.signatureValid === "true"
+        && (mode === "draw" || mode === "typed")
+        && signature.startsWith("data:image/png;base64,");
+      if (!signatureValid) {
+        const target = mode === "draw"
+          ? healthNotice.querySelector<HTMLElement>("[data-signature-pad]")
+          : mode === "typed"
+            ? healthNotice.querySelector<HTMLElement>("[data-signature-font][aria-pressed='true']")
+            : healthNotice.querySelector<HTMLElement>("[data-signature-mode]");
+        if (target && error) {
+          target.setAttribute("aria-invalid", "true");
+          target.setAttribute("aria-describedby", error.id);
+          target.focus({ preventScroll: true });
+          target.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        if (error) {
+          error.textContent = "Please complete the health information notice before continuing.";
+          error.hidden = false;
+        }
+        return false;
+      }
+      clearSignatureValidationState();
+    }
     for (const group of getGroupQuestions(groupIndex)) {
       const checkboxes = [...group.querySelectorAll<HTMLInputElement>("input[type='checkbox']")];
       if (group.dataset.required === "true" && checkboxes.length) {

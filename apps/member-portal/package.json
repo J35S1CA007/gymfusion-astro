@@ -10,7 +10,7 @@
     "dev": "astro dev",
     "check": "astro check",
     "build": "astro check && astro build",
-    "test": "npm run build && node scripts/health-profile-browser-tests.mjs",
+    "test": "npm run build && node scripts/health-profile-browser-tests.mjs && node scripts/signature-browser-tests.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -23,6 +23,7 @@
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.5",
     "lucide-react": "^1.41.0",
+    "perfect-freehand": "1.2.3",
     "radix-ui": "^1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",

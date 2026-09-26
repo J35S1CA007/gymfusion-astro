@@ -35,8 +35,6 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
       2. Keep health data out of Member profile fields; send to the approved EOI Parts 2-4 collections only.
     */
 
-    @import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Dancing+Script:wght@500&family=Great+Vibes&family=Pacifico&display=swap");
-
     @font-face {
       font-family: "Gamuth";
       src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Regular.ttf") format("truetype");
@@ -151,7 +149,7 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
       color: var(--gf-muted);
       max-width: 800px;
       margin: 10px 0 0;
-      font-size: 18px;
+      font-size: 16px;
       line-height: 1.62;
       font-weight: 500;
     }
@@ -611,6 +609,12 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
     }
 
+    .gf-signature-field > .gf-question {
+      margin: 12px 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
     .gf-signature-method {
       display: flex;
       flex-direction: column;
@@ -628,7 +632,7 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
     }
 
     .gf-signature-method legend {
-      margin-bottom: 16px;
+      margin: 0 0 4px;
     }
 
     .gf-signature-method-options,
@@ -650,6 +654,8 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
       cursor: pointer;
       transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
     }
+
+    .gf-signature-mode { font-size: 15px; }
 
     .gf-signature-mode:hover,
     .gf-signature-mode:focus-visible,
@@ -687,14 +693,14 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
 
     .gf-signature-font {
       min-height: 58px;
-      font-size: 25px;
+      font-size: 22px;
       line-height: 1;
     }
 
-    .gf-signature-font[data-signature-font="Dancing Script"] { font-family: "Dancing Script", cursive; }
-    .gf-signature-font[data-signature-font="Caveat"] { font-family: "Caveat", cursive; }
-    .gf-signature-font[data-signature-font="Pacifico"] { font-family: "Pacifico", cursive; }
-    .gf-signature-font[data-signature-font="Great Vibes"] { font-family: "Great Vibes", cursive; }
+    .gf-signature-font[data-signature-font="GF Byron"] { font-size: 28px; }
+    .gf-signature-font[data-signature-font="GF Indian Dunes"] { font-size: 28px; }
+    .gf-signature-font[data-signature-font="GF Black William"] { font-size: 28px; }
+    .gf-signature-font[data-signature-font="GF Black William"] { font-family: "GF Black William", "Pacifico", "Segoe Script", "Bradley Hand", "URW Chancery L", cursive; font-weight: 400; }
 
     .gf-typed-signature-preview {
       display: grid;
@@ -978,7 +984,7 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
       ) : (
       <form id="gfHealthProfileForm" novalidate>
         <section class="gf-page is-active" data-page="0">
-          <HealthInformationNotice controller={false} />
+          <HealthInformationNotice controller={false} documentId="EOI-P2-HEALTH-PROFILE" fileNamePrefix="EOI-P2-HEALTH-NOTICE-SIGNATURE" />
         </section>
 
         <section class="gf-page" data-page="1">
@@ -1395,6 +1401,7 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
       const statusEl = document.querySelector("[data-status]");
       const successPanel = document.querySelector("#part2-success");
       const signatureCanvas = document.querySelector("[data-signature-pad]");
+      const signatureWorkspace = document.querySelector("[data-signature-workspace]");
       const clearSignatureBtn = document.querySelector("[data-clear-signature]");
       const healthInformationConsentInput = document.querySelector('input[name="healthInformationConsent"]');
       const signatureField = document.querySelector("[data-signature-field]");
@@ -1410,8 +1417,14 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
       const signatureSignedAtInput = document.getElementById("healthInformationSignatureSignedAt");
       const signatureDocumentIDInput = document.getElementById("healthInformationSignatureDocumentID");
       const healthInformationDateInput = document.getElementById("healthInformationDate");
-      let signatureMode = "draw";
-      let selectedSignatureFont = "Dancing Script";
+      const signatureNotice = document.querySelector("[data-health-information-notice]");
+      const signatureDocumentID = signatureNotice?.dataset.signatureDocumentId || "EOI-P2-HEALTH-PROFILE";
+      const signatureFileNamePrefix = signatureNotice?.dataset.signatureFileNamePrefix || "EOI-P2-HEALTH-NOTICE-SIGNATURE";
+      let signatureMode = "";
+      let selectedSignatureFont = "GF Black William";
+      const signatureFontFallback = '"Segoe Script", "Bradley Hand", "URW Chancery L", cursive';
+      const signatureFallbackForFont = (font) => font === "GF Black William" ? `"Pacifico", ${signatureFontFallback}` : signatureFontFallback;
+      let signatureStampID = "";
       let typedSignatureRenderVersion = 0;
       let pageIndex = 0;
 
@@ -1424,41 +1437,69 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
       function escapeXml(value) {
         return value.replace(/[<>&"']/g, (character) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "\"": "&quot;", "'": "&apos;" })[character]);
       }
-      function createDocumentID() {
-        const suffix = globalThis.crypto?.randomUUID?.().slice(0, 8).toUpperCase() || Math.random().toString(36).slice(2, 10).toUpperCase();
-        return `EOI-P2-SIGN-${Date.now()}-${suffix}`;
+      function createSignatureStampID() {
+        const suffix = globalThis.crypto?.randomUUID?.().replaceAll("-", "").slice(0, 8).toUpperCase()
+          || Math.random().toString(36).slice(2, 10).toUpperCase();
+        return `HEALTH-COLLECTION-NOTICE-SIGNATURE-${Date.now()}-${suffix}`;
       }
       function updateSignatureInputs(signature) {
-        const hasSignature = typeof signature === "string" && signature.startsWith("data:image/png;base64,");
+        const hasSignature = typeof signature === "string"
+          && signature.startsWith("data:image/png;base64,")
+          && (signatureMode === "draw" || signatureMode === "typed");
+        if (signatureNotice) {
+          signatureNotice.dataset.signatureCurrentMode = signatureMode;
+          signatureNotice.dataset.signatureValid = String(hasSignature);
+        }
         const signedAt = hasSignature ? (signatureSignedAtInput.value || new Date().toISOString()) : "";
-        const documentID = hasSignature ? (signatureDocumentIDInput.value || createDocumentID()) : "";
-        const fileName = hasSignature ? `eoi-part2-health-notice-signature_${documentID}_${signedAt.replace(/[:.]/g, "-")}.png` : "";
+        if (!hasSignature) signatureStampID = "";
+        if (hasSignature && !signatureStampID) signatureStampID = createSignatureStampID();
+        const documentID = hasSignature ? signatureDocumentID : "";
+        const fileName = hasSignature ? `${signatureFileNamePrefix}_${documentID}_${signedAt.replace(/[:.]/g, "-")}.png` : "";
         const canvasWidth = signatureCanvas?.clientWidth || 800;
         const canvasHeight = signatureCanvas?.clientHeight || 198;
-        const stampText = hasSignature ? `Document ID: ${documentID} | Signed: ${signedAt}` : "";
+        const auditHeight = 88;
+        const auditWidth = Math.max(canvasWidth - 24, 1);
+        const printedName = `Printed Name: ${firstNameInput?.value || ""} | ${lastNameInput?.value || ""}`;
+        const signatureStamp = `${signatureStampID} | Signed: ${signedAt}`;
 
         signatureInput.value = hasSignature ? signature : "";
         signatureSignedAtInput.value = signedAt;
         signatureDocumentIDInput.value = documentID;
         signatureFileNameInput.value = fileName;
         signatureSvgInput.value = hasSignature
-          ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvasWidth} ${canvasHeight + 34}"><rect width="100%" height="100%" fill="white"/><image href="${signature}" width="${canvasWidth}" height="${canvasHeight}"/><text x="12" y="${canvasHeight + 22}" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000">${escapeXml(stampText)}</text></svg>`
+          ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvasWidth} ${canvasHeight + auditHeight}"><rect width="100%" height="100%" fill="white"/><image href="${signature}" width="${canvasWidth}" height="${canvasHeight}"/><g font-family="Arial, Helvetica, sans-serif" fill="#000"><text x="12" y="${canvasHeight + 18}" font-size="11">${escapeXml(printedName)}</text><text x="12" y="${canvasHeight + 36}" font-size="11">MODE: DIGITAL SIGNATURE</text><text x="12" y="${canvasHeight + 54}" font-size="11">${escapeXml(`Document ID: ${documentID}`)}</text><text x="12" y="${canvasHeight + 72}" font-size="9" textLength="${auditWidth}" lengthAdjust="spacingAndGlyphs">${escapeXml(signatureStamp)}</text></g></svg>`
           : "";
         if (hasSignature) clearValidationWarnings(document.querySelector("[data-signature-field]") || form);
       }
       function typedSignatureName() {
         return [firstNameInput?.value, lastNameInput?.value].map((value) => value?.trim()).filter(Boolean).join(" ");
       }
+      function sanitizeNameInput(input) {
+        if (!input) return;
+        input.value = input.value.replace(/[^\p{L} ]/gu, "");
+        input.setCustomValidity("");
+      }
       function setSignatureMode(mode) {
-        signatureMode = mode;
-        const typed = mode === "typed";
-        signatureModeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.signatureMode === mode)));
+        const nextMode = mode === "draw" || mode === "typed" ? mode : "";
+        signatureMode = nextMode;
+        if (signatureNotice) {
+          signatureNotice.dataset.signatureCurrentMode = signatureMode;
+          signatureNotice.dataset.signatureValid = "false";
+        }
+        const typed = nextMode === "typed";
+        signatureModeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.signatureMode === nextMode)));
+        if (signatureWorkspace) signatureWorkspace.hidden = !nextMode;
         if (signatureFontOptions) signatureFontOptions.hidden = !typed;
         if (signatureCanvas) {
-          signatureCanvas.hidden = typed;
-          signatureCanvas.tabIndex = typed ? -1 : 0;
-          signatureCanvas.setAttribute("aria-hidden", String(typed));
+          signatureCanvas.hidden = !nextMode || typed;
+          signatureCanvas.tabIndex = typed || !nextMode ? -1 : 0;
+          signatureCanvas.setAttribute("aria-hidden", String(!nextMode || typed));
         }
+        if (clearSignatureBtn) clearSignatureBtn.hidden = !nextMode;
+        clearValidationWarnings(document.querySelector("[data-signature-field]") || form);
+        typedSignatureRenderVersion += 1;
+        window.dispatchEvent(new CustomEvent("gymfusion:signature-clear"));
+        updateSignatureInputs(null);
         if (typed) {
           void renderTypedSignature();
         } else {
@@ -1467,7 +1508,6 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
             typedSignaturePreview.hidden = true;
             typedSignaturePreview.textContent = "";
           }
-          window.dispatchEvent(new CustomEvent("gymfusion:signature-clear"));
         }
       }
       function setSignatureVisibility() {
@@ -1479,7 +1519,7 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
           signatureField.setAttribute("aria-hidden", String(!visible));
         }
         if (!visible && (wasVisible || signatureInput?.value)) {
-          setSignatureMode("draw");
+          setSignatureMode("");
           updateSignatureInputs(null);
         }
       }
@@ -1494,15 +1534,14 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
           }
           return;
         }
+        updateSignatureInputs(null);
         typedSignaturePreview.hidden = false;
         typedSignaturePreview.textContent = name;
-        typedSignaturePreview.style.fontFamily = `"${selectedSignatureFont}", cursive`;
+        typedSignaturePreview.style.fontFamily = `"${selectedSignatureFont}", ${signatureFallbackForFont(selectedSignatureFont)}`;
         typedSignaturePreview.setAttribute("aria-label", `Typed signature preview: ${name}`);
         try {
           await document.fonts?.load(`58px "${selectedSignatureFont}"`);
-        } catch {
-          // The cursive fallback remains usable if the optional web font is unavailable.
-        }
+        } catch { return; }
         if (renderVersion !== typedSignatureRenderVersion || signatureMode !== "typed") return;
         const width = Math.max(signatureCanvas?.parentElement?.clientWidth || signatureCanvas?.clientWidth || 800, 320);
         const height = signatureCanvas?.clientHeight || 198;
@@ -1514,7 +1553,7 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
         if (!context) return;
         context.scale(ratio, ratio);
         const fontSize = Math.min(64, Math.max(38, width / (Math.max(name.length, 8) * 0.55)));
-        context.font = `500 ${fontSize}px "${selectedSignatureFont}", cursive`;
+        context.font = `500 ${fontSize}px "${selectedSignatureFont}", ${signatureFallbackForFont(selectedSignatureFont)}`;
         context.fillStyle = "#111";
         context.textAlign = "center";
         context.textBaseline = "middle";
@@ -1634,6 +1673,11 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
         const field = control.closest(".gf-field, fieldset");
         return field?.querySelector("label, legend")?.textContent?.trim() || "This question";
       }
+      function signatureValidationTarget() {
+        const mode = signatureNotice?.dataset.signatureCurrentMode || "";
+        if (mode === "typed") return signatureFontButtons.find((button) => button.getAttribute("aria-pressed") === "true") || null;
+        return signatureCanvas;
+      }
       function showValidationWarning(control) {
         const field = control.closest(".gf-field, fieldset") || control.parentElement;
         if (!field) return;
@@ -1658,13 +1702,14 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
           el.dataset.validationErrorId = error.id;
         });
         if (control === signatureInput) {
-          signatureCanvas?.closest(".gf-signature-pad")?.classList.add("gf-invalid");
-          signatureCanvas?.setAttribute("aria-invalid", "true");
-          if (signatureCanvas) {
-            const describedBy = new Set((signatureCanvas.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
+          const signatureTarget = signatureValidationTarget();
+          signatureTarget?.closest(".gf-signature-pad")?.classList.add("gf-invalid");
+          signatureTarget?.setAttribute("aria-invalid", "true");
+          if (signatureTarget) {
+            const describedBy = new Set((signatureTarget.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
             describedBy.add(error.id);
-            signatureCanvas.setAttribute("aria-describedby", Array.from(describedBy).join(" "));
-            signatureCanvas.dataset.validationErrorId = error.id;
+            signatureTarget.setAttribute("aria-describedby", Array.from(describedBy).join(" "));
+            signatureTarget.dataset.validationErrorId = error.id;
           }
         }
       }
@@ -1700,12 +1745,16 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
             if (!firstInvalidControl) firstInvalidControl = control;
           }
         }
-        if (pageIndex === 0 && healthInformationConsentInput?.checked && !signatureInput.value) {
+        const currentSignatureMode = signatureNotice?.dataset.signatureCurrentMode || "";
+        const hasCurrentSignature = signatureNotice?.dataset.signatureValid === "true"
+          && (currentSignatureMode === "draw" || currentSignatureMode === "typed")
+          && signatureInput.value.startsWith("data:image/png;base64,");
+        if (pageIndex === 0 && healthInformationConsentInput?.checked && !hasCurrentSignature) {
           showValidationWarning(signatureInput);
           if (!firstInvalidControl) firstInvalidControl = signatureInput;
         }
         if (firstInvalidControl) {
-          const target = firstInvalidControl === signatureInput ? signatureCanvas : firstInvalidControl;
+          const target = firstInvalidControl === signatureInput ? signatureValidationTarget() : firstInvalidControl;
           target?.focus({ preventScroll: true });
           target?.scrollIntoView({ block: "center", behavior: "smooth" });
           return false;
@@ -1878,14 +1927,17 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
       });
       signatureModeButtons.forEach((button) => button.addEventListener("click", () => setSignatureMode(button.dataset.signatureMode)));
       signatureFontButtons.forEach((button) => button.addEventListener("click", () => {
-        selectedSignatureFont = button.dataset.signatureFont || "Dancing Script";
+        selectedSignatureFont = button.dataset.signatureFont || "Pacifico";
         signatureFontButtons.forEach((fontButton) => fontButton.setAttribute("aria-pressed", String(fontButton === button)));
         if (signatureMode !== "typed") setSignatureMode("typed");
         else void renderTypedSignature();
       }));
-      [firstNameInput, lastNameInput].forEach((input) => input?.addEventListener("input", () => {
+      const nameInputs = [firstNameInput, lastNameInput].filter(Boolean);
+      nameInputs.forEach((input) => ["input", "change", "blur"].forEach((eventName) => input.addEventListener(eventName, () => {
+        sanitizeNameInput(input);
         if (signatureMode === "typed") void renderTypedSignature();
-      }));
+      })));
+      nameInputs.forEach(sanitizeNameInput);
       clearSignatureBtn?.addEventListener("click", () => {
         window.dispatchEvent(new CustomEvent("gymfusion:signature-clear"));
         if (signatureMode === "typed") {
@@ -1914,6 +1966,7 @@ const part2AlreadyFinal = showSuccessPreview || (eoiRead?.kind === "authenticate
       nextBtn.addEventListener("click", () => { setConditionalVisibility(); if (validateCurrentPage()) showPage(pageIndex + 1); });
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
+        nameInputs.forEach(sanitizeNameInput);
         setConditionalVisibility();
         if (!validateCurrentPage()) return;
         let payload;

@@ -4,11 +4,13 @@ import HealthSignaturePad from "./HealthSignaturePad";
 
 interface Props {
   controller?: boolean;
+  documentId: string;
+  fileNamePrefix: string;
 }
 
-const { controller = true } = Astro.props;
+const { controller = true, documentId, fileNamePrefix } = Astro.props;
 ---
-<div class="gf-health-notice" data-health-information-notice data-health-information-controller={controller ? "true" : "false"}>
+<div class="gf-health-notice" data-health-information-notice data-health-information-controller={controller ? "true" : "false"} data-signature-document-id={documentId} data-signature-file-name-prefix={fileNamePrefix} data-signature-current-mode="" data-signature-valid="false">
   <h2 id="health-information-notice-heading" class="gf-section-title" tabindex="-1">Collection of Health Information Notice</h2>
   <p class="gf-section-note">Please review and sign to confirm your acknowledgment and agreement to this Health Information Collection Notice prior to proceeding.</p>
 
@@ -53,7 +55,7 @@ const { controller = true } = Astro.props;
         <input id="healthInformationLastName" name="healthInformationLastName" type="text" autocomplete="family-name" placeholder="Enter last name" required />
       </div>
       <div class="gf-field" data-date-field>
-        <label for="healthInformationDateTrigger">Date</label>
+        <label for="healthInformationDateTrigger">Date<span class="gf-required-indicator" aria-hidden="true">*</span></label>
         <input id="healthInformationDate" name="healthInformationDate" type="hidden" required />
         <HealthDateTimePicker client:load />
       </div>
@@ -69,31 +71,35 @@ const { controller = true } = Astro.props;
       <fieldset class="gf-signature-method">
         <legend>Choose signature method</legend>
         <div class="gf-signature-method-options" role="group" aria-label="Signature method">
-          <button type="button" class="gf-signature-mode" data-signature-mode="draw" aria-pressed="true">Draw signature</button>
+          <button type="button" class="gf-signature-mode" data-signature-mode="draw" aria-pressed="false">Draw signature</button>
           <button type="button" class="gf-signature-mode" data-signature-mode="typed" aria-pressed="false">Choose a font</button>
         </div>
         <div class="gf-signature-font-picker" data-signature-font-options hidden>
           <p class="gf-signature-font-label">Choose font style</p>
           <div class="gf-signature-font-options" role="group" aria-label="Signature font style">
-            <button type="button" class="gf-signature-font" data-signature-font="Dancing Script" aria-pressed="true">Dancing Script</button>
-            <button type="button" class="gf-signature-font" data-signature-font="Great Vibes" aria-pressed="false">Great Vibes</button>
-            <button type="button" class="gf-signature-font" data-signature-font="Caveat" aria-pressed="false">Caveat</button>
-            <button type="button" class="gf-signature-font" data-signature-font="Pacifico" aria-pressed="false">Pacifico</button>
+            <button type="button" class="gf-signature-font" data-signature-font="GF Black William" aria-pressed="true">Black William</button>
+            <button type="button" class="gf-signature-font" data-signature-font="GF Byron" aria-pressed="false">Byron</button>
+            <button type="button" class="gf-signature-font" data-signature-font="GF Indian Dunes" aria-pressed="false">Indian Dunes</button>
+            <button type="button" class="gf-signature-font" data-signature-font="GF Roustel" aria-pressed="false">Roustel</button>
+            <button type="button" class="gf-signature-font" data-signature-font="GF Signature" aria-pressed="false">Signature</button>
+            <button type="button" class="gf-signature-font" data-signature-font="GF Thornton" aria-pressed="false">Thornton</button>
           </div>
         </div>
       </fieldset>
-      <div class="gf-signature-pad">
-        <HealthSignaturePad client:load />
-        <div class="gf-typed-signature-preview" data-signature-typed-preview hidden aria-live="polite"></div>
+      <div class="gf-signature-workspace" data-signature-workspace hidden>
+        <div class="gf-signature-pad">
+          <HealthSignaturePad client:load />
+          <div class="gf-typed-signature-preview" data-signature-typed-preview hidden aria-live="polite"></div>
+        </div>
+        <div class="gf-signature-actions">
+          <button type="button" class="gf-signature-clear" data-clear-signature>Clear Signature</button>
+        </div>
       </div>
       <input id="healthInformationSignature" name="healthInformationSignature" type="hidden" required />
       <input id="healthInformationSignatureSvg" name="healthInformationSignatureSvg" type="hidden" />
       <input id="healthInformationSignatureFileName" name="healthInformationSignatureFileName" type="hidden" />
       <input id="healthInformationSignatureSignedAt" name="healthInformationSignatureSignedAt" type="hidden" />
       <input id="healthInformationSignatureDocumentID" name="healthInformationSignatureDocumentID" type="hidden" />
-      <div class="gf-signature-actions">
-        <button type="button" class="gf-signature-clear" data-clear-signature>Clear Signature</button>
-      </div>
     </div>
   </div>
 </div>
@@ -105,7 +111,9 @@ const { controller = true } = Astro.props;
     const get = (selector) => root.querySelector(selector);
     const consent = get('input[name="healthInformationConsent"]');
     const signatureField = get("[data-signature-field]");
+    const signatureWorkspace = get("[data-signature-workspace]");
     const signatureCanvas = get("[data-signature-pad]");
+    const clearSignatureButton = get("[data-clear-signature]");
     const signatureInput = get("#healthInformationSignature");
     const signatureSvgInput = get("#healthInformationSignatureSvg");
     const signatureFileNameInput = get("#healthInformationSignatureFileName");
@@ -113,12 +121,17 @@ const { controller = true } = Astro.props;
     const signatureDocumentIDInput = get("#healthInformationSignatureDocumentID");
     const firstNameInput = get("#healthInformationFirstName");
     const lastNameInput = get("#healthInformationLastName");
+    const signatureDocumentID = root.dataset.signatureDocumentId || "";
+    const signatureFileNamePrefix = root.dataset.signatureFileNamePrefix || "";
     const typedPreview = get("[data-signature-typed-preview]");
     const fontOptions = get("[data-signature-font-options]");
     const modeButtons = [...root.querySelectorAll("[data-signature-mode]")];
     const fontButtons = [...root.querySelectorAll("[data-signature-font]")];
-    let signatureMode = "draw";
-    let selectedSignatureFont = "Dancing Script";
+    let signatureMode = "";
+    let selectedSignatureFont = "GF Black William";
+    const signatureFontFallback = '"Segoe Script", "Bradley Hand", "URW Chancery L", cursive';
+    const signatureFallbackForFont = (font) => font === "GF Black William" ? `"Pacifico", ${signatureFontFallback}` : signatureFontFallback;
+    let signatureStampID = "";
     let renderVersion = 0;
 
     const localISODate = () => {
@@ -126,22 +139,41 @@ const { controller = true } = Astro.props;
       return new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 10);
     };
     const escapeXml = (value) => value.replace(/[<>&"']/g, (character) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "\"": "&quot;", "'": "&apos;" })[character]);
-    const createDocumentID = () => `EOI-HEALTH-NOTICE-${Date.now()}-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
+    const createSignatureStampID = () => {
+      const suffix = globalThis.crypto?.randomUUID?.().replaceAll("-", "").slice(0, 8).toUpperCase()
+        || Math.random().toString(36).slice(2, 10).toUpperCase();
+      return `HEALTH-COLLECTION-NOTICE-SIGNATURE-${Date.now()}-${suffix}`;
+    };
     const signatureName = () => [firstNameInput?.value, lastNameInput?.value].map((value) => value?.trim()).filter(Boolean).join(" ");
+    const sanitizeNameInput = (input) => {
+      if (!input) return;
+      input.value = input.value.replace(/[^\p{L} ]/gu, "");
+      input.setCustomValidity("");
+    };
 
     function updateSignatureInputs(signature) {
-      const hasSignature = typeof signature === "string" && signature.startsWith("data:image/png;base64,");
+      const hasSignature = typeof signature === "string"
+        && signature.startsWith("data:image/png;base64,")
+        && (signatureMode === "draw" || signatureMode === "typed");
+      root.dataset.signatureCurrentMode = signatureMode;
+      root.dataset.signatureValid = String(hasSignature);
       const signedAt = hasSignature ? (signatureSignedAtInput.value || new Date().toISOString()) : "";
-      const documentID = hasSignature ? (signatureDocumentIDInput.value || createDocumentID()) : "";
-      const fileName = hasSignature ? `eoi-health-notice-signature_${documentID}_${signedAt.replace(/[:.]/g, "-")}.png` : "";
+      if (!hasSignature) signatureStampID = "";
+      if (hasSignature && !signatureStampID) signatureStampID = createSignatureStampID();
+      const documentID = hasSignature ? signatureDocumentID : "";
+      const fileName = hasSignature ? `${signatureFileNamePrefix}_${documentID}_${signedAt.replace(/[:.]/g, "-")}.png` : "";
       const width = signatureCanvas?.clientWidth || 800;
       const height = signatureCanvas?.clientHeight || 198;
+      const auditHeight = 88;
+      const auditWidth = Math.max(width - 24, 1);
+      const printedName = `Printed Name: ${firstNameInput?.value || ""} | ${lastNameInput?.value || ""}`;
+      const signatureStamp = `${signatureStampID} | Signed: ${signedAt}`;
       signatureInput.value = hasSignature ? signature : "";
       signatureSignedAtInput.value = signedAt;
       signatureDocumentIDInput.value = documentID;
       signatureFileNameInput.value = fileName;
       signatureSvgInput.value = hasSignature
-        ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height + 34}"><rect width="100%" height="100%" fill="white"/><image href="${signature}" width="${width}" height="${height}"/><text x="12" y="${height + 22}" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000">${escapeXml(`Document ID: ${documentID} | Signed: ${signedAt}`)}</text></svg>`
+        ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height + auditHeight}"><rect width="100%" height="100%" fill="white"/><image href="${signature}" width="${width}" height="${height}"/><g font-family="Arial, Helvetica, sans-serif" fill="#000"><text x="12" y="${height + 18}" font-size="11">${escapeXml(printedName)}</text><text x="12" y="${height + 36}" font-size="11">MODE: DIGITAL SIGNATURE</text><text x="12" y="${height + 54}" font-size="11">${escapeXml(`Document ID: ${documentID}`)}</text><text x="12" y="${height + 72}" font-size="9" textLength="${auditWidth}" lengthAdjust="spacingAndGlyphs">${escapeXml(signatureStamp)}</text></g></svg>`
         : "";
     }
 
@@ -163,10 +195,11 @@ const { controller = true } = Astro.props;
         if (typedPreview) { typedPreview.hidden = false; typedPreview.textContent = ""; }
         return;
       }
+      updateSignatureInputs(null);
       typedPreview.hidden = false;
       typedPreview.textContent = name;
-      typedPreview.style.fontFamily = `"${selectedSignatureFont}", cursive`;
-      try { await document.fonts?.load(`58px "${selectedSignatureFont}"`); } catch {}
+      typedPreview.style.fontFamily = `"${selectedSignatureFont}", ${signatureFallbackForFont(selectedSignatureFont)}`;
+      try { await document.fonts?.load(`58px "${selectedSignatureFont}"`); } catch { return; }
       if (version !== renderVersion || signatureMode !== "typed") return;
       const width = Math.max(signatureCanvas?.parentElement?.clientWidth || signatureCanvas?.clientWidth || 800, 320);
       const height = signatureCanvas?.clientHeight || 198;
@@ -177,7 +210,7 @@ const { controller = true } = Astro.props;
       const context = canvas.getContext("2d");
       if (!context) return;
       context.scale(ratio, ratio);
-      context.font = `500 ${Math.min(64, Math.max(38, width / (Math.max(name.length, 8) * 0.55)))}px "${selectedSignatureFont}", cursive`;
+      context.font = `500 ${Math.min(64, Math.max(38, width / (Math.max(name.length, 8) * 0.55)))}px "${selectedSignatureFont}", ${signatureFallbackForFont(selectedSignatureFont)}`;
       context.fillStyle = "#111";
       context.textAlign = "center";
       context.textBaseline = "middle";
@@ -186,15 +219,29 @@ const { controller = true } = Astro.props;
     }
 
     function setSignatureMode(mode) {
-      signatureMode = mode;
-      const typed = mode === "typed";
-      modeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.signatureMode === mode)));
+      const nextMode = mode === "draw" || mode === "typed" ? mode : "";
+      signatureMode = nextMode;
+      root.dataset.signatureCurrentMode = signatureMode;
+      root.dataset.signatureValid = "false";
+      const typed = nextMode === "typed";
+      modeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.signatureMode === nextMode)));
+      if (signatureWorkspace) signatureWorkspace.hidden = !nextMode;
       fontOptions.hidden = !typed;
-      signatureCanvas.hidden = typed;
-      signatureCanvas.tabIndex = typed ? -1 : 0;
-      signatureCanvas.setAttribute("aria-hidden", String(typed));
-      if (typed) void renderTypedSignature();
-      else { renderVersion += 1; typedPreview.hidden = true; typedPreview.textContent = ""; window.dispatchEvent(new CustomEvent("gymfusion:signature-clear")); }
+      signatureCanvas.hidden = !nextMode || typed;
+      signatureCanvas.tabIndex = typed || !nextMode ? -1 : 0;
+      signatureCanvas.setAttribute("aria-hidden", String(!nextMode || typed));
+      if (clearSignatureButton) clearSignatureButton.hidden = !nextMode;
+      renderVersion += 1;
+      window.dispatchEvent(new CustomEvent("gymfusion:signature-clear"));
+      window.dispatchEvent(new CustomEvent("gymfusion:signature-mode-change", { detail: { mode: nextMode } }));
+      updateSignatureInputs(null);
+      if (typed) {
+        void renderTypedSignature();
+      } else {
+        renderVersion += 1;
+        typedPreview.hidden = true;
+        typedPreview.textContent = "";
+      }
     }
 
     const dateInput = get("#healthInformationDate");
@@ -202,15 +249,19 @@ const { controller = true } = Astro.props;
     setSignatureVisibility();
     window.addEventListener("gymfusion:signature-change", (event) => updateSignatureInputs(event.detail?.signature || null));
     modeButtons.forEach((button) => button.addEventListener("click", () => setSignatureMode(button.dataset.signatureMode)));
-    fontButtons.forEach((button) => button.addEventListener("click", () => {
-      selectedSignatureFont = button.dataset.signatureFont || "Dancing Script";
-      fontButtons.forEach((fontButton) => fontButton.setAttribute("aria-pressed", String(fontButton === button)));
-      if (signatureMode !== "typed") setSignatureMode("typed"); else void renderTypedSignature();
-    }));
-    [firstNameInput, lastNameInput].forEach((input) => input?.addEventListener("input", () => {
+      fontButtons.forEach((button) => button.addEventListener("click", () => {
+        selectedSignatureFont = button.dataset.signatureFont || "Pacifico";
+        fontButtons.forEach((fontButton) => fontButton.setAttribute("aria-pressed", String(fontButton === button)));
+        if (signatureMode !== "typed") setSignatureMode("typed"); else void renderTypedSignature();
+      }));
+    const nameInputs = [firstNameInput, lastNameInput].filter(Boolean);
+    nameInputs.forEach((input) => ["input", "change", "blur"].forEach((eventName) => input.addEventListener(eventName, () => {
+      sanitizeNameInput(input);
       setSignatureVisibility();
       if (signatureMode === "typed") void renderTypedSignature();
-    }));
+    })));
+    root.closest("form")?.addEventListener("submit", () => nameInputs.forEach(sanitizeNameInput));
+    nameInputs.forEach(sanitizeNameInput);
     consent.addEventListener("change", setSignatureVisibility);
     get("[data-clear-signature]")?.addEventListener("click", () => {
       window.dispatchEvent(new CustomEvent("gymfusion:signature-clear"));
@@ -221,6 +272,13 @@ const { controller = true } = Astro.props;
 </script>
 
 <style is:global>
+  @import url("https://fonts.googleapis.com/css2?family=Pacifico&display=swap");
+  @font-face { font-family: "GF Black William"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/signature-fonts/BlackWiliamStylishLettering-yY9AZ.otf") format("opentype"); font-style: normal; font-weight: 400; font-display: swap; }
+  @font-face { font-family: "GF Byron"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/signature-fonts/ByronTrial.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
+  @font-face { font-family: "GF Indian Dunes"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/signature-fonts/IndianDunes-MA4Br.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
+  @font-face { font-family: "GF Roustel"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/signature-fonts/Roustel.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
+  @font-face { font-family: "GF Signature"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/signature-fonts/Signature.otf") format("opentype"); font-style: normal; font-weight: 400; font-display: swap; }
+  @font-face { font-family: "GF Thornton"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/signature-fonts/Thornton-K7EAl.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
   .gf-visually-hidden {
     position: absolute !important;
     width: 1px !important;
@@ -236,9 +294,10 @@ const { controller = true } = Astro.props;
   .gf-health-notice .gf-section-title { margin: 0; }
   .gf-health-notice .gf-section-note { margin: 16px 0 26px; color: #4b4b4b; max-width: 760px; line-height: 1.62; font-size: 16px; }
   .gf-health-notice-card { gap: 16px; background: linear-gradient(180deg, #fcfcfc 0%, #f7f7f7 100%); }
-  .gf-health-notice-card h3 { margin: 8px 0 0; font-size: 18px; line-height: 1.25; }
+  .gf-health-notice-card h3 { margin: 13px 0 0; font-size: 18px; line-height: 1.25; }
+  .gf-health-notice .gf-signature-field > .gf-question { margin: 12px 0; font-size: 18px; line-height: 1.25; }
   .gf-health-notice-card > h3:last-of-type + .gf-signature-meta { margin-top: 8px; }
-  .gf-health-notice-card p { margin: 0; color: #333; line-height: 1.6; }
+  .gf-health-notice-card p { margin: 0; color: #333; font-size: 16px; line-height: 1.6; }
   .gf-health-notice .gf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
   .gf-health-notice .gf-signature-meta { position: relative; margin-bottom: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .gf-health-notice-card > .gf-acknowledgement-field { position: relative; top: -6px; margin-top: 0; }
@@ -250,16 +309,24 @@ const { controller = true } = Astro.props;
   .gf-health-notice .gf-choice input { width: 18px; height: 18px; flex: 0 0 auto; accent-color: #000; }
   .gf-health-notice .gf-signature-method { display: flex; flex-direction: column; gap: 12px; margin: 0 0 16px; border: 0; padding: 0; }
   .gf-health-notice .gf-signature-method legend, .gf-health-notice .gf-signature-font-label { color: #4b4b4b; font-size: 14px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+  .gf-health-notice .gf-signature-method legend { margin: 0 0 4px; }
   .gf-health-notice .gf-signature-method-options, .gf-health-notice .gf-signature-font-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .gf-health-notice .gf-signature-mode, .gf-health-notice .gf-signature-font { min-height: 52px; padding: 10px 16px; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 17px; background: #fff; color: #000; font: inherit; cursor: pointer; }
+  .gf-health-notice .gf-signature-mode { font-size: 15px; }
   .gf-health-notice .gf-signature-mode[aria-pressed="true"], .gf-health-notice .gf-signature-font[aria-pressed="true"] { background: #000; color: #fff; }
   .gf-health-notice .gf-signature-font-picker { display: flex; flex-direction: column; gap: 12px; margin-top: 2px; }
-  .gf-health-notice .gf-signature-font { min-height: 58px; font-size: 25px; line-height: 1; }
+  .gf-health-notice .gf-signature-font { min-height: 58px; font-size: 22px; line-height: 1; }
+  .gf-health-notice .gf-signature-font[data-signature-font="GF Byron"] { font-size: 28px; }
+  .gf-health-notice .gf-signature-font[data-signature-font="GF Indian Dunes"] { font-size: 28px; }
+  .gf-health-notice .gf-signature-font[data-signature-font="GF Black William"] { font-size: 28px; }
   .gf-health-notice .gf-signature-font-picker[hidden], .gf-health-notice [data-signature-field][hidden] { display: none; }
-  .gf-health-notice .gf-signature-font[data-signature-font="Dancing Script"] { font-family: "Dancing Script", cursive; }
-  .gf-health-notice .gf-signature-font[data-signature-font="Great Vibes"] { font-family: "Great Vibes", cursive; }
-  .gf-health-notice .gf-signature-font[data-signature-font="Caveat"] { font-family: "Caveat", cursive; }
-  .gf-health-notice .gf-signature-font[data-signature-font="Pacifico"] { font-family: "Pacifico", cursive; }
+  .gf-health-notice .gf-signature-font[data-signature-font="GF Black William"] { font-family: "GF Black William", "Pacifico", "Segoe Script", "Bradley Hand", "URW Chancery L", cursive; font-weight: 400; }
+  .gf-health-notice .gf-signature-font[data-signature-font="Pacifico"] { font-family: "Pacifico", "Segoe Script", "Bradley Hand", "URW Chancery L", cursive; }
+  .gf-health-notice .gf-signature-font[data-signature-font="GF Byron"] { font-family: "GF Byron", "Segoe Script", "Bradley Hand", "URW Chancery L", cursive; }
+  .gf-health-notice .gf-signature-font[data-signature-font="GF Indian Dunes"] { font-family: "GF Indian Dunes", "Segoe Script", "Bradley Hand", "URW Chancery L", cursive; }
+  .gf-health-notice .gf-signature-font[data-signature-font="GF Roustel"] { font-family: "GF Roustel", "Segoe Script", "Bradley Hand", "URW Chancery L", cursive; }
+  .gf-health-notice .gf-signature-font[data-signature-font="GF Signature"] { font-family: "GF Signature", "Segoe Script", "Bradley Hand", "URW Chancery L", cursive; }
+  .gf-health-notice .gf-signature-font[data-signature-font="GF Thornton"] { font-family: "GF Thornton", "Segoe Script", "Bradley Hand", "URW Chancery L", cursive; }
   .gf-health-notice .gf-signature-pad { min-height: 198px; overflow: hidden; border: 1.25px solid rgba(0, 0, 0, 0.16); border-radius: 20px; background: #fff; touch-action: none; }
   .gf-health-notice .gf-signature-pad canvas {
     display: block;

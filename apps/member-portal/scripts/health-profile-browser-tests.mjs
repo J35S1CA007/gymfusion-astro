@@ -1,28 +1,20 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
 import { createServer } from "node:http";
-import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import { startTestPreview, stopTestPreview } from "./test-preview-server.mjs";
 
-const baseURL = "http://127.0.0.1:4327";
-const authURL = "http://127.0.0.1:4321";
-const appRoot = fileURLToPath(new URL("..", import.meta.url));
+const testPort = Number(process.env.GYMFUSION_TEST_PORT || 4327);
+const baseURL = `http://127.0.0.1:${testPort}`;
+const authHost = "127.0.0.1";
+const requestedAuthPort = Number(process.env.GYMFUSION_AUTH_TEST_PORT || 0);
+let authURL = "";
 
 async function startPreview() {
-  const child = spawn("npm", ["run", "dev", "--", "--host", "127.0.0.1", "--port", "4327"], {
-    cwd: appRoot,
-    stdio: "ignore",
+  return startTestPreview({
+    port: testPort,
+    readinessPath: "/eoi/part-2",
     env: { ...process.env, MEMBER_LOGIN_SERVICE_URL: authURL },
   });
-  for (let attempt = 0; attempt < 50; attempt += 1) {
-    try {
-      const response = await fetch(`${baseURL}/eoi/part-2`);
-      if (response.status > 0) return child;
-    } catch {}
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  child.kill();
-  throw new Error("Astro preview server did not start");
 }
 
 async function drawSignature(page) {
@@ -49,7 +41,23 @@ try {
     response.writeHead(200, { "content-type": "application/json" });
     response.end(JSON.stringify({ authenticated: true, member: { displayName: "Synthetic Member" } }));
   });
-  await new Promise((resolveListen) => authServer.listen(4321, "127.0.0.1", resolveListen));
+  await new Promise((resolveListen, rejectListen) => {
+    const listenPort = Number.isInteger(requestedAuthPort) && requestedAuthPort >= 0 && requestedAuthPort <= 65535 ? requestedAuthPort : 0;
+    const handleError = (error) => {
+      authServer.off("listening", handleListening);
+      rejectListen(new Error(`Synthetic auth server failed to listen at ${authHost}:${listenPort || "ephemeral"} (listening=false): ${error.code || "unknown"} ${error.message}`));
+    };
+    const handleListening = () => {
+      authServer.off("error", handleError);
+      const address = authServer.address();
+      const port = typeof address === "object" && address ? address.port : listenPort;
+      authURL = `http://${authHost}:${port}`;
+      resolveListen();
+    };
+    authServer.once("error", handleError);
+    authServer.once("listening", handleListening);
+    authServer.listen(listenPort, authHost);
+  });
   preview = await startPreview();
   browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
@@ -62,7 +70,7 @@ try {
   const response = await page.goto(`${baseURL}/eoi/part-2`, { waitUntil: "domcontentloaded" });
   assert.equal(response?.status(), 200, "native health profile route must render");
   assert.equal(await page.locator("iframe").count(), 0, "Astro form must not use an iframe");
-  await page.locator("canvas[data-signature-pad]").waitFor();
+  await page.locator("canvas[data-signature-pad]").waitFor({ state: "attached" });
   assert.equal(
     await page.locator("[data-signature-provider='@shadix-ui/signature-pad']").count(),
     1,
@@ -105,6 +113,8 @@ try {
   assert.equal(await page.locator("#healthInformationDate").inputValue(), alternateDate);
 
   await page.locator("#healthInformationFirstName").fill("Jamie");
+  await page.locator("#healthInformationLastName").fill("Preview");
+  await page.locator('input[name="healthInformationConsent"]').check();
   await page.locator("#healthInformationFirstName").press("Enter");
   assert.equal(
     await page.locator(".gf-page.is-active").getAttribute("data-page"),
@@ -112,6 +122,7 @@ try {
     "Enter must not advance or submit the form",
   );
 
+  await page.getByRole("button", { name: "Draw signature" }).click();
   await drawSignature(page);
   const signatureInput = page.locator("#healthInformationSignature");
   await assert.doesNotReject(async () => {
@@ -124,35 +135,15 @@ try {
   assert.match(await page.locator("#healthInformationSignatureFileName").inputValue(), /\.png$/);
   assert.match(await page.locator("#healthInformationSignatureSvg").inputValue(), /data:image\/png;base64,/);
 
-  await page.evaluate(() => {
-    const NativeImage = window.Image;
-    window.__nativeImage = NativeImage;
-    window.__pendingSignatureImageLoads = [];
-    window.Image = function DelayedImage(...args) {
-      const image = new NativeImage(...args);
-      let delayedOnload = null;
-      Object.defineProperty(image, "onload", {
-        configurable: true,
-        get: () => delayedOnload,
-        set: (handler) => { delayedOnload = handler; },
-      });
-      image.addEventListener("load", () => {
-        window.__pendingSignatureImageLoads.push(() => delayedOnload?.call(image));
-      });
-      return image;
-    };
-    window.dispatchEvent(new Event("resize"));
-  });
-  await page.waitForFunction(() => window.__pendingSignatureImageLoads?.length === 1);
+  await page.setViewportSize({ width: 900, height: 1000 });
+  await page.waitForTimeout(100);
   await page.locator("[data-clear-signature]").click();
-  const signatureInkAfterDelayedRestore = await page.evaluate(() => {
-    window.__pendingSignatureImageLoads.shift()?.();
-    window.Image = window.__nativeImage;
+  const signatureInkAfterResizeClear = await page.evaluate(() => {
     const canvas = document.querySelector("canvas[data-signature-pad]");
     const context = canvas.getContext("2d");
     return context.getImageData(0, 0, canvas.width, canvas.height).data.some((channel, index) => index % 4 === 3 && channel !== 0);
   });
-  assert.equal(signatureInkAfterDelayedRestore, false, "clearing must cancel a pending signature redraw");
+  assert.equal(signatureInkAfterResizeClear, false, "clearing after resize must remove all signature ink");
   await page.waitForFunction(() => {
     const input = document.querySelector("#healthInformationSignature");
     return input instanceof HTMLInputElement && input.value === "";
@@ -173,21 +164,17 @@ try {
 
   await page.reload();
   await page.locator("[data-next]").click();
-  assert.equal(await page.locator(".gf-error.is-visible").count(), 4, "all missing Step 1 fields must show errors");
-  assert.equal(
-    await page.locator(".gf-signature-pad.gf-invalid").count(),
-    1,
-    "the visible signature pad must show its invalid state",
-  );
+  assert.equal(await page.locator(".gf-error.is-visible").count(), 3, "all visible missing Step 1 fields must show errors");
+  assert.equal(await page.locator("[data-signature-workspace]").isVisible(), false, "the signing workspace must remain hidden until a method is selected");
   const firstNameErrorId = await page.locator("#healthInformationFirstName").getAttribute("aria-describedby");
   assert.equal(await page.locator("#healthInformationFirstName").getAttribute("aria-invalid"), "true");
   assert.ok(firstNameErrorId, "invalid controls must reference their error message");
   assert.equal(await page.locator(`#${firstNameErrorId}`).count(), 1);
-  assert.equal(await page.locator("canvas[data-signature-pad]").getAttribute("aria-invalid"), "true");
 
   await page.locator("#healthInformationFirstName").fill("Jamie");
   await page.locator("#healthInformationLastName").fill("Nguyen");
   await page.locator("input[name='healthInformationConsent']").check();
+  await page.getByRole("button", { name: "Draw signature" }).click();
   await drawSignature(page);
   await page.locator("[data-next]").click();
   assert.equal(await page.locator(".gf-page.is-active").getAttribute("data-page"), "1");
@@ -258,6 +245,6 @@ try {
   console.log("health-profile browser tests passed");
 } finally {
   await browser?.close();
-  preview?.kill();
-  await new Promise((resolveClose) => authServer?.close(resolveClose));
+  await stopTestPreview(preview);
+  if (authServer?.listening) await new Promise((resolveClose) => authServer.close(resolveClose));
 }

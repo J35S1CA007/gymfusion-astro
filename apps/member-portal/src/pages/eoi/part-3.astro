@@ -44,7 +44,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       <form id="part3-form" novalidate>
         <section class="gf-page is-active">
           <div class="gf-stage is-stage-visible" data-part3-stage="0">
-            <HealthInformationNotice />
+            <HealthInformationNotice documentId="EOI-P3-ACCESSIBILITY-SUPPORT" fileNamePrefix="EOI-P3-HEALTH-NOTICE-SIGNATURE" />
           </div>
 
           <div class="gf-stage" data-part3-stage="1" hidden>
@@ -126,7 +126,6 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
 </body>
 </html>
 <style is:global>
-  @import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Dancing+Script:wght@500&family=Great+Vibes&family=Pacifico&display=swap");
   @font-face { font-family: "Gamuth"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
   @font-face { font-family: "Gamuth"; src: url("https://cdn.jsdelivr.net/gh/J35S1CA007/gymfusion-assets@main/Gamuth%20Font%20Family/GamuthSans-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
   * { box-sizing: border-box; }
@@ -163,6 +162,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
   .gf-card fieldset { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; border: 0; }
   .gf-card legend, .gf-card label { display: block; color: #000; line-height: 1.4; font-weight: 800; }
   .gf-card legend { font-size: 16px; }
+  .gf-required-indicator { margin-left: 2px; color: #b00020; }
   .gf-card .gf-help { margin-top: 8px; font-size: 13px; }
   .gf-choice-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 20px; }
   .gf-choice-row label:has(input[value="none"]) { grid-column: 1 / -1; }
@@ -237,6 +237,44 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
   const needsDetailsPanel = form?.querySelector<HTMLElement>('[data-details-panel="needs"]') ?? null;
   const healthNotice = form?.querySelector<HTMLElement>("[data-health-information-notice]") ?? null;
 
+  function clearSignatureValidationState() {
+    healthNotice?.querySelectorAll<HTMLElement>("[data-signature-mode], [data-signature-font], [data-signature-pad]").forEach((control) => {
+      control.removeAttribute("aria-invalid");
+      control.removeAttribute("aria-describedby");
+    });
+  }
+
+  window.addEventListener("gymfusion:signature-mode-change", () => {
+    clearSignatureValidationState();
+    if (error) {
+      error.hidden = true;
+      error.textContent = "";
+    }
+  });
+
+  function focusSignatureValidation() {
+    const mode = healthNotice?.dataset.signatureCurrentMode || "";
+    const target = mode === "draw"
+      ? healthNotice?.querySelector<HTMLElement>("[data-signature-pad]")
+      : mode === "typed"
+        ? healthNotice?.querySelector<HTMLElement>("[data-signature-font][aria-pressed='true']")
+        : healthNotice?.querySelector<HTMLElement>("[data-signature-mode]");
+    if (target && error) {
+      target.setAttribute("aria-invalid", "true");
+      target.setAttribute("aria-describedby", error.id);
+      target.focus({ preventScroll: true });
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
+  function hasCurrentSignature() {
+    const signature = healthNotice?.querySelector<HTMLInputElement>("#healthInformationSignature")?.value || "";
+    const mode = healthNotice?.dataset.signatureCurrentMode || "";
+    return healthNotice?.dataset.signatureValid === "true"
+      && (mode === "draw" || mode === "typed")
+      && signature.startsWith("data:image/png;base64,");
+  }
+
   function syncConditionalSelection(inputs: HTMLInputElement[], exclusiveValue: string, panel: HTMLElement | null, details: HTMLTextAreaElement | null, changedInput?: HTMLInputElement) {
     if (changedInput?.checked) {
       if (changedInput.value === exclusiveValue) {
@@ -301,6 +339,7 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       .filter((control) => !control.closest("[hidden]"));
     const firstInvalid = controls.find((control) => !control.checkValidity());
     if (firstInvalid) {
+      clearSignatureValidationState();
       if (error) {
         error.textContent = "Please complete the health information notice before continuing.";
         error.hidden = false;
@@ -308,6 +347,15 @@ if (session.kind === "unavailable") return new Response("Members Portal is tempo
       firstInvalid.reportValidity();
       return false;
     }
+    if (!hasCurrentSignature()) {
+      if (error) {
+        error.textContent = "Please complete the health information notice before continuing.";
+        error.hidden = false;
+      }
+      focusSignatureValidation();
+      return false;
+    }
+    clearSignatureValidationState();
     return true;
   }
 

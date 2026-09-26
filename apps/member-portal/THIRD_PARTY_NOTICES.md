@@ -8,6 +8,14 @@ The health-profile signature component is adapted from `@shadix-ui/signature-pad
 - Licence: MIT
 - Adaptations: GYMFUSION styling, pointer-event handling, resize preservation, external clear control, and form-event integration.
 
+## perfect-freehand
+
+GYMFUSION uses `perfect-freehand` v1.2.3 to generate smooth, pressure-sensitive freehand signature strokes.
+
+- Source: <https://github.com/steveruizok/perfect-freehand>
+- Author/copyright: Steve Ruiz
+- Licence: MIT
+
 ## Shadix UI DateTimePicker
 
 The health-information date control is adapted from `@shadix-ui/datetimepicker`, distributed through the Shadix UI shadcn registry.
