@@ -100,9 +100,14 @@ try {
   await page.goto(`${baseURL}/dev-preview/eoi`, { waitUntil: "networkidle" });
   assert.equal(await page.locator("#eoi-overview-heading").textContent(), "Where you are now");
   assert.equal(await page.locator("#dashboard-eoi-heading").count(), 1);
+  assert.equal(await page.locator("#dashboard-eoi-heading").textContent(), "Your Expression of Interest");
   assert.equal(await page.locator("[aria-label^='EOI - Part']").count(), 4);
-  assert.equal(await page.locator("[aria-label='EOI - Part 4, COMPLETE']").count(), 1);
-  console.log("dashboard preview tests passed: 9 states, dashboard tracker, detailed EOI grid, 4 widths");
+  assert.equal(await page.locator("[aria-label='EOI - Part 2, COMPLETE'] [aria-label='Complete']").count(), 1);
+  assert.equal(await page.locator("[aria-label='EOI - Part 3, READY TO BEGIN'] [aria-label='Ready to begin']").count(), 1);
+  assert.equal(await page.locator("[aria-label='EOI - Part 3, READY TO BEGIN'] a", { hasText: "Start form" }).count(), 1);
+  assert.equal(await page.locator("[aria-label='EOI - Part 4, INCOMPLETE, locked'] [aria-label='Locked']").count(), 1);
+  assert.equal(await page.locator("[aria-label='EOI - Part 4, INCOMPLETE, locked'] a").count(), 0);
+  console.log("dashboard preview tests passed: 9 states, dashboard tracker, mixed EOI progression grid, 4 widths");
 } finally {
   await browser?.close();
   preview?.kill();

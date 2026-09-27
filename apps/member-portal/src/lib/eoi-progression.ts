@@ -24,7 +24,7 @@ export type EoiPartProjection = {
   status: EoiStatus;
   availability: EoiAvailability;
   href: string;
-  actionLabel: string;
+  actionLabel: string | null;
 };
 
 export type EoiProgression = {
@@ -65,12 +65,12 @@ function availability(statusValue: EoiStatus, declaredAvailability: unknown): Eo
   return normalizedAvailability === "AVAILABLE" ? "AVAILABLE" : "LOCKED";
 }
 
-function projectPart(statusValue: EoiStatus, declaredAvailability: unknown, href: string, actionLabel: string): EoiPartProjection {
+function projectPart(statusValue: EoiStatus, declaredAvailability: unknown, href: string, actionLabel: string | null): EoiPartProjection {
   return { status: statusValue, availability: availability(statusValue, declaredAvailability), href, actionLabel };
 }
 
-function lockedPart(href: string): EoiPartProjection {
-  return projectPart("INCOMPLETE", "LOCKED", href, "Continue");
+function lockedPart(): EoiPartProjection {
+  return projectPart("INCOMPLETE", "LOCKED", "", null);
 }
 
 function currentTask(onboarding: EoiOnboardingRead, part1: EoiStatus | null, parts: EoiProgression["parts"]): EoiTask | undefined {
@@ -108,14 +108,14 @@ export function deriveEoiProgression(onboarding: EoiOnboardingRead | undefined):
   const part4Status = part3Status === "COMPLETE" ? status(onboarding.part4, onboarding.part4Availability) : null;
   const parts = {
     part2: part1 === "COMPLETE" && part2Status !== null
-      ? projectPart(part2Status, onboarding.part2Availability, "/eoi/part-2", part2Status === "COMPLETE" ? "Review" : "Continue")
-      : lockedPart("/eoi/part-2"),
+      ? projectPart(part2Status, onboarding.part2Availability, "/eoi/part-2", part2Status === "COMPLETE" ? "View submission" : "Start form")
+      : lockedPart(),
     part3: part2Status === "COMPLETE" && part3Status !== null
-      ? projectPart(part3Status, onboarding.part3Availability, "/eoi/part-3", part3Status === "COMPLETE" ? "Review" : "Continue")
-      : lockedPart("/eoi/part-3"),
+      ? projectPart(part3Status, onboarding.part3Availability, "/eoi/part-3", part3Status === "COMPLETE" ? "View submission" : "Start form")
+      : lockedPart(),
     part4: part3Status === "COMPLETE" && part4Status !== null
-      ? projectPart(part4Status, onboarding.part4Availability, "/eoi/part-4", part4Status === "COMPLETE" ? "Review" : "Continue")
-      : lockedPart("/eoi/part-4"),
+      ? projectPart(part4Status, onboarding.part4Availability, "/eoi/part-4", part4Status === "COMPLETE" ? "View submission" : "Start form")
+      : lockedPart(),
   };
   const allPartsComplete = part1 === "COMPLETE" && Object.values(parts).every((part) => part.status === "COMPLETE");
   const task = currentTask(onboarding, part1, parts);
