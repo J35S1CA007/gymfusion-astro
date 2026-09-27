@@ -14,6 +14,61 @@ const base = {
   part4Availability: "LOCKED",
 };
 
+function cardState(projection: ReturnType<typeof deriveEoiProgression>, part: "part2" | "part3" | "part4") {
+  const card = projection?.parts[part];
+  return card && {
+    status: card.status,
+    availability: card.availability,
+    actionLabel: card.actionLabel,
+  };
+}
+
+test("renders the locked sequential Part 2-4 progression states", () => {
+  const cases = [
+    {
+      input: base,
+      expected: {
+        part2: { status: "INCOMPLETE", availability: "AVAILABLE", actionLabel: "Start form" },
+        part3: { status: "INCOMPLETE", availability: "LOCKED", actionLabel: null },
+        part4: { status: "INCOMPLETE", availability: "LOCKED", actionLabel: null },
+      },
+    },
+    {
+      input: { ...base, part2: "COMPLETE", part3Availability: "AVAILABLE" },
+      expected: {
+        part2: { status: "COMPLETE", availability: "SUBMITTED", actionLabel: "View submission" },
+        part3: { status: "INCOMPLETE", availability: "AVAILABLE", actionLabel: "Start form" },
+        part4: { status: "INCOMPLETE", availability: "LOCKED", actionLabel: null },
+      },
+    },
+    {
+      input: { ...base, part2: "COMPLETE", part3: "COMPLETE", part3Availability: "AVAILABLE", part4Availability: "AVAILABLE" },
+      expected: {
+        part2: { status: "COMPLETE", availability: "SUBMITTED", actionLabel: "View submission" },
+        part3: { status: "COMPLETE", availability: "SUBMITTED", actionLabel: "View submission" },
+        part4: { status: "INCOMPLETE", availability: "AVAILABLE", actionLabel: "Start form" },
+      },
+    },
+    {
+      input: { ...base, part2: "COMPLETE", part3: "COMPLETE", part4: "COMPLETE", part3Availability: "AVAILABLE", part4Availability: "AVAILABLE" },
+      expected: {
+        part2: { status: "COMPLETE", availability: "SUBMITTED", actionLabel: "View submission" },
+        part3: { status: "COMPLETE", availability: "SUBMITTED", actionLabel: "View submission" },
+        part4: { status: "COMPLETE", availability: "SUBMITTED", actionLabel: "View submission" },
+      },
+    },
+  ] as const;
+
+  for (const { input, expected } of cases) {
+    const projection = deriveEoiProgression(input);
+    assert.deepEqual({
+      part2: cardState(projection, "part2"),
+      part3: cardState(projection, "part3"),
+      part4: cardState(projection, "part4"),
+    }, expected);
+  }
+});
+
 test("keeps future parts locked until the authoritative availability opens them", () => {
   const projection = deriveEoiProgression(base);
   assert.equal(projection?.parts.part2.availability, "AVAILABLE");
@@ -26,6 +81,37 @@ test("moves the task to Part 3 after Part 2 is complete and Part 3 is available"
   const projection = deriveEoiProgression({ ...base, part2: "COMPLETE", part2Availability: "AVAILABLE", part3Availability: "AVAILABLE" });
   assert.equal(projection?.parts.part3.availability, "AVAILABLE");
   assert.equal(projection?.task?.title, "Complete your Accessibility & Support Needs");
+});
+
+test("preserves the baseline Dashboard Current Tasks copy", () => {
+  const part1 = deriveEoiProgression({ ...base, part1: "INCOMPLETE" });
+  const part2 = deriveEoiProgression(base);
+  const part3 = deriveEoiProgression({ ...base, part2: "COMPLETE", part2Availability: "AVAILABLE", part3Availability: "AVAILABLE" });
+  const part4 = deriveEoiProgression({ ...base, part2: "COMPLETE", part2Availability: "AVAILABLE", part3: "COMPLETE", part3Availability: "AVAILABLE", part4Availability: "AVAILABLE" });
+  assert.deepEqual(part1?.task, {
+    title: "Complete your Expression of Interest",
+    description: "Finish Part 1 to continue your GYMFUSION journey.",
+    href: "https://eoi.gymfusion.com.au",
+    actionLabel: "Continue EOI",
+  });
+  assert.deepEqual(part2?.task, {
+    title: "Complete your Health Profile",
+    description: "Continue your EOI by completing Part 2.",
+    href: "/eoi/part-2",
+    actionLabel: "Continue Part 2",
+  });
+  assert.deepEqual(part3?.task, {
+    title: "Complete your Accessibility & Support Needs",
+    description: "Continue your EOI by completing Part 3.",
+    href: "/eoi/part-3",
+    actionLabel: "Continue Part 3",
+  });
+  assert.deepEqual(part4?.task, {
+    title: "Complete your Fitness Profile",
+    description: "Complete the final available part of your EOI.",
+    href: "/eoi/part-4",
+    actionLabel: "Continue Part 4",
+  });
 });
 
 test("keeps Part 4 locked while the authoritative read keeps Part 3 incomplete", () => {

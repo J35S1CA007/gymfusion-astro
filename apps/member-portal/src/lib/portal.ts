@@ -52,8 +52,8 @@ export const sectionCopy: Record<PortalSection, { title: string; description: st
     description: "Control your login, security, and privacy settings.",
   },
   eoi: {
-    title: "EOI Parts 2-4",
-    description: "Complete and review your EOI Parts 2-4 profiles.",
+    title: "Expression of Interest",
+    description: "Complete and review your Expression of Interest.",
   },
   help: {
     title: "Help & Support",

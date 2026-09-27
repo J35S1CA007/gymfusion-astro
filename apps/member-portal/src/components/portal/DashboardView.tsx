@@ -1,10 +1,10 @@
-import { ArrowRight, Check, LockKeyhole } from "lucide-react";
+import { ArrowRight, Check, LockKeyhole, Star } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import type { EoiProgression } from "../../lib/eoi-progression";
 import EoiOverviewCards from "./EoiOverviewCards";
 
-export type DashboardStatus = "COMPLETE" | "INCOMPLETE";
+export type DashboardStatus = "COMPLETE" | "READY TO BEGIN" | "INCOMPLETE";
 
 export type DashboardPart = EoiProgression["parts"][keyof EoiProgression["parts"]];
 export type DashboardProjection = EoiProgression;
@@ -20,30 +20,36 @@ function StatusBadge({ status }: { status: DashboardStatus }) {
   return <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold tracking-[0.08em]", status === "COMPLETE" ? "border-black bg-black text-white" : "border-black/20 bg-white text-black/70")}>{status}</span>;
 }
 
+function displayStatus(part: DashboardPart): DashboardStatus {
+  if (part.status === "COMPLETE") return "COMPLETE";
+  return part.availability === "AVAILABLE" ? "READY TO BEGIN" : "INCOMPLETE";
+}
+
 function ActionLink({ href, children }: { href: string; children: ReactNode }) {
   return <a href={href} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-black px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black">{children}<ArrowRight className="size-4" aria-hidden="true" /></a>;
 }
 
 function PartCard({ part, definition }: { part: DashboardPart; definition: (typeof partDetails)[keyof typeof partDetails] }) {
   const locked = part.availability === "LOCKED";
+  const primaryStatus = displayStatus(part);
   const content = <div className={cn("flex h-full flex-col gap-5 rounded-xl border p-5", locked ? "border-black/10 bg-[#f6f6f4]" : "border-black/15 bg-white")}>
     <div className="flex items-start justify-between gap-3">
       <div>
         <p className="text-sm font-bold uppercase tracking-[0.12em] text-black/50">{definition.label}</p>
         <h3 className="mt-2 font-heading text-xl font-bold leading-tight">{definition.title}</h3>
       </div>
-      {locked ? <LockKeyhole className="mt-1 size-5 shrink-0 text-black/55" aria-label="Locked" /> : <Check className="mt-1 size-5 shrink-0" aria-label="Available" />}
+      {locked ? <LockKeyhole className="mt-1 size-5 shrink-0 text-black/55" aria-label="Locked" /> : part.status === "COMPLETE" ? <Check className="mt-1 size-5 shrink-0" aria-label="Complete" /> : <Star className="mt-1 size-5 shrink-0" aria-label="Ready to begin" />}
     </div>
     <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-2">
-        <StatusBadge status={part.status} />
+        <StatusBadge status={primaryStatus} />
         <span className="text-xs font-semibold text-black/55">{locked ? "LOCKED" : part.availability === "SUBMITTED" ? "SUBMITTED" : "AVAILABLE"}</span>
       </div>
       {part.href && !locked ? <ActionLink href={part.href}>{part.actionLabel ?? "Open"}</ActionLink> : null}
     </div>
   </div>;
 
-  return <div aria-label={`${definition.label}, ${part.status}${locked ? ", locked" : ""}`}>{content}</div>;
+  return <div aria-label={`${definition.label}, ${primaryStatus}${locked ? ", locked" : ""}`}>{content}</div>;
 }
 
 function TasksCard({ projection }: { projection: DashboardProjection }) {
@@ -68,7 +74,7 @@ export function EoiProgress({ projection }: { projection: DashboardProjection })
     status: projection.part1,
     availability: projection.part1 === "COMPLETE" ? "SUBMITTED" : "AVAILABLE",
     href: projection.part1 === "COMPLETE" ? "/submissions" : "https://eoi.gymfusion.com.au",
-    actionLabel: projection.part1 === "COMPLETE" ? "View submission" : "Continue EOI",
+    actionLabel: projection.part1 === "COMPLETE" ? "View submission" : "Start form",
   };
   const parts = { part1, part2: projection.parts.part2, part3: projection.parts.part3, part4: projection.parts.part4 };
 
